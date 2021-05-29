@@ -2,14 +2,13 @@ using UnityEngine;
 
 namespace #NAMESPACE#
 {
-	/// <summary> Класс, описывающий хранилище игровых данных. Здесь добавляются все необходимые для спавна объекты
-	/// и параметры для чтения, которые должны быть доступны в любом месте игры.</summary>
+	/// <summary> Class for global game data storage. You can store any global parameters for your game there. Good for prototypes, but for production can be not the best solution.</summary>
 	[CreateAssetMenu(fileName = "Storage", menuName = "Storage")]
 	public class #SCRIPTNAME# : ScriptableObject
 	{
 		static Storage instance;
 		
-		/// <summary> Позволяет получить Storage из любого класса. Для работы этого метода ваш экземпляр Storage должен находиться в папке Resources/Data и быть назван Storage.</summary>
+		/// <summary> Allows to get storage from any class. To correct work Storage file should be placed into Resources/Data folder and named Storage.</summary>
 		public static Storage GetStorage()
 		{
 			if (!instance)

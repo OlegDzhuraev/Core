@@ -31,10 +31,10 @@ namespace InsaneOne.Core.Development
         [MenuItem (assetsPath + "Player Move Input Behaviour", false, -399)]
         static void CreateMoveInputTemplate() => CreateAnyFromTemplate("MoveInput");
         
-        [MenuItem (assetsPath + "ClickableIcon", false, -199)]
+        [MenuItem (assetsPath + "Clickable Icon", false, -199)]
         static void CreateClickableIconTemplate() => CreateAnyFromTemplate("ClickableIcon");
         
-        [MenuItem (assetsPath + "StateMachine", false, -99)]
+        [MenuItem (assetsPath + "State Machine", false, -99)]
         static void CreateStateMachineTemplate() => CreateAnyFromTemplate("StateMachine");
 
         static void CreateAnyFromTemplate(string templateName)
