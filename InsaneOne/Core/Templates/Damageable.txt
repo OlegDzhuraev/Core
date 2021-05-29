@@ -6,16 +6,11 @@ namespace #NAMESPACE#
 	/// <summary>Describes object which can receive damage.</summary>
 	public class #SCRIPTNAME# : MonoBehaviour, IDamageable
 	{
-		public event Action<float> DamageReceived;
+		public event Action<IDamage> DamageReceived;
 
-		public void TakeDamage(float value)
+		public void TakeDamage(IDamage damage)
 		{
-			DamageReceived?.Invoke(value);
-		}
-
-		public void Die()
-		{
-			
+			DamageReceived?.Invoke(damage);
 		}
 	}
 }

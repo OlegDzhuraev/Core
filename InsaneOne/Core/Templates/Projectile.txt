@@ -1,0 +1,23 @@
+using System;
+using UnityEngine;
+
+namespace #NAMESPACE#
+{
+	/// <summary>Describes projectile/bullet object which can fly and hit targets.</summary>
+	public class #SCRIPTNAME# : MonoBehaviour, IProjectile
+	{
+		[SerializeField] float speed = 3f;
+		
+		void Update() => Fly();
+		
+		public void Fly()
+		{
+			transform.position += transform.forward * (Time.deltaTime * speed);
+		}
+		
+		public void OnTriggerEnter(Collider collider)
+		{
+			// handle hit here
+		}
+	}
+}
