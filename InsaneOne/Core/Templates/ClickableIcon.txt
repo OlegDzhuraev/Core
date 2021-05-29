@@ -1,0 +1,32 @@
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
+
+namespace #NAMESPACE#
+{
+	/// <summary>This class describes an UI Image-button, which is not requires a Button component to work.</summary>
+	public class #SCRIPTNAME# : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
+	{
+		[SerializeField] Image icon;
+		
+		public void SetupWithData(Data someData)
+		{
+			icon.sprite = someData.icon;
+		}
+
+		public void OnPointerClick(PointerEventData eventData)
+		{
+			// Do something
+		}
+
+		public void OnPointerEnter(PointerEventData pointerEventData)
+		{
+			// Do something
+		}
+
+		public void OnPointerExit(PointerEventData pointerEventData)
+		{
+			/// Do something
+		}
+	}
+}

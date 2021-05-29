@@ -1,0 +1,33 @@
+using System;
+using UnityEngine;
+
+namespace #NAMESPACE#
+{
+    /// <summary>Describes object which have health and behaviours for handle health changes.</summary>
+    public class #SCRIPTNAME# : MonoBehaviour, IHealth
+    {
+        public event Action<float> HealthChanged;
+        public float Health { get; protected set; }
+        
+        [SerializeField] float maxHealth = 100;
+        
+        void Awake() => Health = maxHealth;
+
+        public float GetHealthPercents() => Health / maxHealth;
+
+        public void SetHealthPercents(float percents) => ChangeHealth(maxHealth * percents);
+        public void SetHealth(float value) => ChangeHealth(value);
+        
+        public void AddHealth(float value) => ChangeHealth(Health + value);
+        public void ReduceHealth(float value) => ChangeHealth(Health - value);
+
+        void ChangeHealth(float newValue)
+        {
+            Health = Mathf.Clamp(newValue, 0, maxHealth);
+            
+            HealthChanged?.Invoke(Health);
+        }
+
+        public float GetMaxHealth() => maxHealth;
+    }
+}

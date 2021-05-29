@@ -1,0 +1,30 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEditor;
+using UnityEditor.SceneManagement;
+
+namespace #NAMESPACE#
+{
+	[InitializeOnLoad]
+	public class #SCRIPTNAME#
+	{
+		static #SCRIPTNAME#()
+		{
+			EditorSceneManager.newSceneCreated += OnSceneCreated;
+		}
+
+		static void OnSceneCreated(Scene scene, NewSceneSetup newSceneSetup, NewSceneMode sceneMode)
+		{
+			// your custom scene initialization here
+			// be careful when using it for multi-scene architecture!
+			
+			// for example: 
+			// new GameObject("--- CORE ---");
+			// new GameObject("--- LEVEL ---");
+			//
+			// or another example:
+			// var environment = new GameObject("[Environment]");
+			// var dynamic = new GameObject("[Dynamic]");
+		}
+	}
+}

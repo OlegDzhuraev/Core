@@ -1,0 +1,22 @@
+using UnityEngine;
+
+namespace #NAMESPACE#
+{
+    /// <summary>Class to implement basic player input movement.</summary>
+    public class #SCRIPTNAME# : MonoBehaviour
+    {
+        [SerializeField] float moveSpeed = 2f;
+        
+        void Update()
+        {
+            var input = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+
+            if (input.sqrMagnitude > 0)
+            {
+                var direction = new Vector3(input.x, 0, input.y).normalized;
+
+                transform.Translate(direction * (Time.deltaTime * moveSpeed));
+            }
+        }
+    }
+}

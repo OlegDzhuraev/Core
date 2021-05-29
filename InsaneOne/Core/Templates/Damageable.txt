@@ -1,0 +1,21 @@
+using System;
+using UnityEngine;
+
+namespace #NAMESPACE#
+{
+	/// <summary>Describes object which can receive damage.</summary>
+	public class #SCRIPTNAME# : MonoBehaviour, IDamageable
+	{
+		public event Action<float> DamageReceived;
+
+		public void TakeDamage(float value)
+		{
+			DamageReceived?.Invoke(value);
+		}
+
+		public void Die()
+		{
+			
+		}
+	}
+}

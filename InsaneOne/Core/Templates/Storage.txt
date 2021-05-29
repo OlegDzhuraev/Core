@@ -1,0 +1,21 @@
+using UnityEngine;
+
+namespace #NAMESPACE#
+{
+	/// <summary> Класс, описывающий хранилище игровых данных. Здесь добавляются все необходимые для спавна объекты
+	/// и параметры для чтения, которые должны быть доступны в любом месте игры.</summary>
+	[CreateAssetMenu(fileName = "Storage", menuName = "Storage")]
+	public class #SCRIPTNAME# : ScriptableObject
+	{
+		static Storage instance;
+		
+		/// <summary> Позволяет получить Storage из любого класса. Для работы этого метода ваш экземпляр Storage должен находиться в папке Resources/Data и быть назван Storage.</summary>
+		public static Storage GetStorage()
+		{
+			if (!instance)
+				instance = Resources.Load("Data/Storage") as Storage;
+
+			return instance;
+		}
+	}
+}

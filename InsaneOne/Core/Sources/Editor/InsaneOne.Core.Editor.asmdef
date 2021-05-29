@@ -1,0 +1,18 @@
+{
+    "name": "InsaneOne.Core.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:8d1514f0407c35f4ab8ed47a444b5e60"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

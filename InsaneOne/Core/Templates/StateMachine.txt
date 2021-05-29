@@ -1,0 +1,59 @@
+using UnityEngine;
+
+namespace #NAMESPACE#
+{
+	public class #SCRIPTNAME# : MonoBehaviour
+	{
+		public enum State
+		{
+			State1,
+			State2,
+			State3
+		}
+
+		State state;
+
+		void Awake()
+		{
+			state = State.State1;
+		}
+
+		void Update()
+		{
+			switch (state)
+			{
+				case State.State1:
+					// do smth in loop
+					break;
+
+				case State.State2:
+					// do smth in loop
+					break;
+
+				case State.State3:
+					// do smth in loop
+					break;
+			}
+		}
+
+		public void SetState(State newState)
+		{
+			state = newState;
+
+			switch (state)
+			{
+				case State.State1:
+					// do smth
+					break;
+
+				case State.State2:
+					// do smth
+					break;
+
+				case State.State3:
+					// do smth
+					break;
+			}
+		}
+	}
+}
