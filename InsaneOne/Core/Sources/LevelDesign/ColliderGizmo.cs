@@ -2,8 +2,8 @@
 
 namespace InsaneOne.Core
 {
-	///<summary> Draws Wire cube with selected color using object collider. Useful to show primary objects in editor.</summary>
-	public class ObjectGizmoDrawer : MonoBehaviour
+	///<summary> Draws collider wire-gizmo with selected color using object collider parameters. Useful to show primary objects in editor when them isn't selected.</summary>
+	public class ColliderGizmo : MonoBehaviour
 	{
 		[SerializeField] Color gizmoColor = Color.red;
 
