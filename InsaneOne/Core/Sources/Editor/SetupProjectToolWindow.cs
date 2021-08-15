@@ -9,6 +9,8 @@ namespace InsaneOne.Core.Development
 {
     public class SetupProjectToolWindow : EditorWindow
     {
+        const string repoName = "OlegDzhuraev";
+        
         /// <summary> Resources folder name. Should be NOT Resources, any other naming. </summary>
         string contentFolder = "Resource";
 
@@ -19,9 +21,9 @@ namespace InsaneOne.Core.Development
         
         readonly Dictionary<string, string> gitPackages = new Dictionary<string, string>
         {
-            { "Signals", "https://github.com/InsaneOneHub/Signals.git" },
-            { "Tags", "https://github.com/InsaneOneHub/Tags.git" },
-            { "Perceids Pooling", "https://github.com/InsaneOneHub/PerseidsPooling.git" },
+            { "Signals", $"https://github.com/{repoName}/Signals.git" },
+            { "Tags", $"https://github.com/{repoName}/Tags.git" },
+            { "Perseids Pooling", $"https://github.com/{repoName}/PerseidsPooling.git" },
         };
         
         readonly Dictionary<string, string> unityPackages = new Dictionary<string, string>
@@ -51,7 +53,9 @@ namespace InsaneOne.Core.Development
             
             dimension = EditorGUILayout.Popup("Project dimensions", dimension, new[] {"3D", "2D"});
             foldersStyle = EditorGUILayout.Popup("Folders style", foldersStyle, new[] {"Feature-oriented", "Classic"});
-            contentFolder = EditorGUILayout.TextField("Content folder name", contentFolder);
+            
+            if (foldersStyle == 1)
+                contentFolder = EditorGUILayout.TextField("Content folder name", contentFolder);
 
             if (contentFolder == String.Empty || contentFolder == "Resources")
             {
@@ -67,7 +71,7 @@ namespace InsaneOne.Core.Development
                     GenereteProjectFolders(dimension == 0);
             }
 
-            DrawHeader("Common modules - add or update");
+            DrawHeader("Frequently used modules - add/update");
             
             var prevGUIEnabled = GUI.enabled;
             GUI.enabled = installRequest == null;
@@ -80,7 +84,7 @@ namespace InsaneOne.Core.Development
 
             GUILayout.EndHorizontal();
             
-            DrawHeader("Common assets - add or update");
+            DrawHeader("Frequently used assets - add/update");
             
             GUILayout.BeginHorizontal();
             
@@ -202,12 +206,13 @@ namespace InsaneOne.Core.Development
         
         void GenerateProjectFoldersFeatures(bool is3D)
         {
-            var featuresFolderPath = "Assets/Features/";
+            var featuresFolderName = "Features";
+            var featuresFolderPath = $"Assets/{featuresFolderName}/";
             var sharedFolderPath = $"{featuresFolderPath}/Shared";
             
             List<FolderData> foldersToCreate = new List<FolderData>
             {
-                new FolderData("Assets", "Game"),
+                new FolderData("Assets", featuresFolderName),
                 new FolderData(featuresFolderPath, "Shared"),
                 new FolderData(sharedFolderPath, "Prefabs"),
                 new FolderData(sharedFolderPath, "Sounds"),
