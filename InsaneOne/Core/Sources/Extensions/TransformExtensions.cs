@@ -25,7 +25,7 @@ namespace InsaneOne.Core
 			transform.position = vector3;
 		}
 
-		/// <summary> Rotates a 2D object in cursor direction, make it looking to the position. Warning: uses Camera.main, in old Unity versions is not optimized operation.</summary>
+		/// <summary> Rotates a 2D object in cursor direction, make it looking to the position. </summary>
 		public static void LookAtMouse2D(this Transform transform)
 		{
 			var mousePos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10f);

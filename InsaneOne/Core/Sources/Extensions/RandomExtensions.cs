@@ -6,17 +6,11 @@ namespace InsaneOne.Core
     public static class RandomExtensions
     {
         /// <summary>Gets random element from list of objects of any type.</summary>
-        public static T Random<T>(this List<T> list)
-        {
-            return list[UnityEngine.Random.Range(0, list.Count)];
-        }
-		
+        public static T Random<T>(this List<T> list) => list[UnityEngine.Random.Range(0, list.Count)];
+
         /// <summary>Gets random element from array of objects of any type.</summary>
-        public static T Random<T>(this T[] array)
-        {
-            return array[UnityEngine.Random.Range(0, array.Length)];
-        }
-		
+        public static T Random<T>(this T[] array) => array[UnityEngine.Random.Range(0, array.Length)];
+
         /// <summary>Randomly fills Vector3 values.</summary>
         public static void Randomize(this ref Vector3 vector3, float minValue, float maxValue)
         {

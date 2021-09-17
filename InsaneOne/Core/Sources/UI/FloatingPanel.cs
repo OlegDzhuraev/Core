@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using InsaneOne.Core;
+using UnityEngine;
 
 namespace InsaneSystems.Core.UI
 {
@@ -8,10 +9,6 @@ namespace InsaneSystems.Core.UI
         public RectTransform RectTransform;
         public Transform FollowTarget;
         public float VerticalOffset;
-
-        Camera mainCamera;
-
-        void Awake() => mainCamera = Camera.main;
 
         void Start()
         {
@@ -25,9 +22,9 @@ namespace InsaneSystems.Core.UI
                 return;
 
             var worldTargetPos = FollowTarget.transform.position;
-            var screenPos = mainCamera.WorldToScreenPoint(worldTargetPos + Vector3.up * VerticalOffset);
+            var screenPos = MainCamera.Cached.WorldToScreenPoint(worldTargetPos + Vector3.up * VerticalOffset);
 
-            RectTransform.anchoredPosition = screenPos * CanvasTransform.localScale.x;
+            RectTransform.anchoredPosition = screenPos / CanvasTransform.localScale.x;
         }
 
         public void Show() => gameObject.SetActive(true);

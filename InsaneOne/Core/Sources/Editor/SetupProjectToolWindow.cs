@@ -30,6 +30,7 @@ namespace InsaneOne.Core.Development
         {
             { "Cinemachine", "com.unity.cinemachine" },
             { "Post Effects", "com.unity.postprocessing" },
+            //{ "DOTween", "https://github.com/Demigiant/dotween.git" }, // can't be added - no package manifest included
         };
 
         Vector2 scroll;
@@ -69,12 +70,14 @@ namespace InsaneOne.Core.Development
                     GenerateProjectFoldersFeatures(dimension == 0);
                 else
                     GenereteProjectFolders(dimension == 0);
-            }
-
-            DrawHeader("Frequently used modules - add/update");
+            }    
             
             var prevGUIEnabled = GUI.enabled;
             GUI.enabled = installRequest == null;
+            
+            /* Maybe once them will be finished :)
+            DrawHeader("Frequently used modules - add/update");
+        
             
             GUILayout.BeginHorizontal();
             
@@ -83,6 +86,7 @@ namespace InsaneOne.Core.Development
                     AddPackage(package.Value);
 
             GUILayout.EndHorizontal();
+            */
             
             DrawHeader("Frequently used assets - add/update");
             
@@ -108,7 +112,6 @@ namespace InsaneOne.Core.Development
             
             GUILayout.EndHorizontal();
             */
-
             GUI.enabled = prevGUIEnabled;
             
             DrawHeader("Graphics settings");
