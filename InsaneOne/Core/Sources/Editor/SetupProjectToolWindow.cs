@@ -19,14 +19,14 @@ namespace InsaneOne.Core.Development
         int dimension;
         int foldersStyle;
         
-        readonly Dictionary<string, string> gitPackages = new Dictionary<string, string>
+        readonly Dictionary<string, string> gitPackages = new()
         {
-            { "Signals", $"https://github.com/{repoName}/Signals.git" },
-            { "Tags", $"https://github.com/{repoName}/Tags.git" },
+            //{ "Signals", $"https://github.com/{repoName}/Signals.git" }, // not finished
+            //{ "Tags", $"https://github.com/{repoName}/Tags.git" },
             { "Perseids Pooling", $"https://github.com/{repoName}/PerseidsPooling.git" },
         };
         
-        readonly Dictionary<string, string> unityPackages = new Dictionary<string, string>
+        readonly Dictionary<string, string> unityPackages = new ()
         {
             { "Cinemachine", "com.unity.cinemachine" },
             { "Post Effects", "com.unity.postprocessing" },
@@ -37,13 +37,27 @@ namespace InsaneOne.Core.Development
         
         string selectedNamespace = "Game";
         string companyName = "InsaneOne";
+
+        GUIStyle richText, partitionHeader;
         
         [MenuItem("Tools/Setup Project Tool")]
         public static void ShowWindow()
         {
             var window = GetWindow<SetupProjectToolWindow>(false, "Setup Project Tool", true);
-            window.minSize = new Vector2(512, 512);
-            window.maxSize = new Vector2(768, 512);
+            window.Init();
+        }
+
+        void Init()
+        {
+            minSize = new Vector2(512, 512);
+            maxSize = new Vector2(768, 768);
+            richText = new GUIStyle(EditorStyles.label) { richText = true };
+            partitionHeader = new GUIStyle(EditorStyles.boldLabel)
+            {
+                fontSize = 16, 
+                richText = true, 
+                alignment = TextAnchor.UpperCenter
+            };
         }
 
         void OnGUI()
@@ -60,7 +74,7 @@ namespace InsaneOne.Core.Development
 
             if (contentFolder == String.Empty || contentFolder == "Resources")
             {
-                GUILayout.Label("Wrong naming for content folder. Do not use Resources name etc.");
+                GUILayout.Label("Wrong naming for content folder. Do not recommended to use \"Resources\" name.");
                 GUI.enabled = false;
             }
 
@@ -75,9 +89,7 @@ namespace InsaneOne.Core.Development
             var prevGUIEnabled = GUI.enabled;
             GUI.enabled = installRequest == null;
             
-            /* Maybe once them will be finished :)
             DrawHeader("Frequently used modules - add/update");
-        
             
             GUILayout.BeginHorizontal();
             
@@ -86,8 +98,7 @@ namespace InsaneOne.Core.Development
                     AddPackage(package.Value);
 
             GUILayout.EndHorizontal();
-            */
-            
+
             DrawHeader("Frequently used assets - add/update");
             
             GUILayout.BeginHorizontal();
@@ -114,7 +125,8 @@ namespace InsaneOne.Core.Development
             */
             GUI.enabled = prevGUIEnabled;
             
-            DrawHeader("Graphics settings");
+            DrawPartitionHeader("Setup Checklist");
+            DrawHeader("Graphics settings", false);
 
             DrawFixColorSpace();
             DrawFixSpritePacker();
@@ -134,7 +146,7 @@ namespace InsaneOne.Core.Development
         {
             if (PlayerSettings.colorSpace == ColorSpace.Gamma)
             {
-                GUILayout.Label("Color space set to GAMMA. For PC Preferred is LINEAR.");
+                GUILayout.Label("Color space set to <b>Gamma</b>. For PC preferred is <b>Linear</b>.", richText);
 
                 if (GUILayout.Button("Set to Linear"))
                     PlayerSettings.colorSpace = ColorSpace.Linear;
@@ -169,19 +181,16 @@ namespace InsaneOne.Core.Development
 
         void DrawFixNamespace()
         {
-            if (EditorSettings.projectGenerationRootNamespace == String.Empty)
-            {
+            var actualNamespace = EditorSettings.projectGenerationRootNamespace;
+            if (actualNamespace == String.Empty)
                 GUILayout.Label("Project root namespace isn't set. Fix?");
-
-                selectedNamespace = EditorGUILayout.TextField("Namespace", selectedNamespace);
-
-                if (GUILayout.Button("Set"))
-                    EditorSettings.projectGenerationRootNamespace = selectedNamespace;
-            }
             else
-            {
-                GUILayout.Label("Project root namespace is set. It is preffered.");
-            }
+                GUILayout.Label($"Project root namespace is already set to {actualNamespace}.");
+            
+            selectedNamespace = EditorGUILayout.TextField("Namespace", selectedNamespace);
+
+            if (GUILayout.Button("Set"))
+                EditorSettings.projectGenerationRootNamespace = selectedNamespace;
         }
 
         void DrawFixCompanyName()
@@ -200,9 +209,18 @@ namespace InsaneOne.Core.Development
             }
         }
 
-        void DrawHeader(string text)
+        void DrawPartitionHeader(string text)
         {
-            EditorGUILayout.Space(15);
+            EditorGUILayout.Space(5);
+            GUILayout.Label(text, partitionHeader);
+            EditorGUILayout.Space(5);
+        }
+        
+        void DrawHeader(string text, bool addUpSpace = true)
+        {
+            if (addUpSpace)
+                EditorGUILayout.Space(15);
+            
             GUILayout.Label(text, EditorStyles.boldLabel);
             EditorGUILayout.Space(5);
         }
@@ -210,26 +228,29 @@ namespace InsaneOne.Core.Development
         void GenerateProjectFoldersFeatures(bool is3D)
         {
             var featuresFolderName = "Features";
-            var featuresFolderPath = $"Assets/{featuresFolderName}/";
+            var featuresFolderPath = $"Assets/{featuresFolderName}";
             var sharedFolderPath = $"{featuresFolderPath}/Shared";
             
-            List<FolderData> foldersToCreate = new List<FolderData>
+            var foldersToCreate = new List<FolderData>
             {
-                new FolderData("Assets", featuresFolderName),
-                new FolderData(featuresFolderPath, "Shared"),
-                new FolderData(sharedFolderPath, "Prefabs"),
-                new FolderData(sharedFolderPath, "Sounds"),
-                new FolderData(sharedFolderPath, "Materials"),
-                new FolderData(sharedFolderPath, "Animations"),
-                new FolderData(sharedFolderPath, "UI"),
-                new FolderData($"{sharedFolderPath}/UI", "Fonts"),
-                new FolderData($"{sharedFolderPath}/UI", "Sprites"),
-                new FolderData($"{sharedFolderPath}/UI", "Animations"),
-                new FolderData($"{sharedFolderPath}/UI", "Templates"),
-                new FolderData(sharedFolderPath, "Scenes"),
-                new FolderData(sharedFolderPath, "Sources"),
-                new FolderData(sharedFolderPath, "Resources"),
-                new FolderData($"{sharedFolderPath}/Resources", "Data")
+                new ("Assets", featuresFolderName),
+                new (featuresFolderPath, "ExampleFeature"),
+                new ($"{featuresFolderPath}/ExampleFeature", "Prefabs"),
+                new ($"{featuresFolderPath}/ExampleFeature", "Sources"),
+                new (featuresFolderPath, "Shared"),
+                new (sharedFolderPath, "Prefabs"),
+                new (sharedFolderPath, "Sounds"),
+                new (sharedFolderPath, "Materials"),
+                new (sharedFolderPath, "Animations"),
+                new (sharedFolderPath, "UI"),
+                new ($"{sharedFolderPath}/UI", "Fonts"),
+                new ($"{sharedFolderPath}/UI", "Sprites"),
+                new ($"{sharedFolderPath}/UI", "Animations"),
+                new ($"{sharedFolderPath}/UI", "Templates"),
+                new (sharedFolderPath, "Scenes"),
+                new (sharedFolderPath, "Sources"),
+                new (sharedFolderPath, "Resources"),
+                new ($"{sharedFolderPath}/Resources", "Data")
             };
             
             foreach (var folderData in foldersToCreate)
@@ -248,28 +269,28 @@ namespace InsaneOne.Core.Development
         
         void GenereteProjectFolders(bool is3D)
         {
-            var resourceFolderPath = "Assets/" + contentFolder;
+            var resourceFolderPath = $"Assets/{contentFolder}";
             
-            List<FolderData> foldersToCreate = new List<FolderData>
+            var foldersToCreate = new List<FolderData>
             {
-                new FolderData("Assets", "Resources"),
-                new FolderData("Assets/Resources", "Data"),
-                new FolderData("Assets", contentFolder),
-                new FolderData(resourceFolderPath, "Sounds"),
-                new FolderData(resourceFolderPath, "Materials"),
-                new FolderData(resourceFolderPath, "Animations"),
-                new FolderData($"{resourceFolderPath}/Animations", "UI"),
-                new FolderData(resourceFolderPath, "UI"),
-                new FolderData($"{resourceFolderPath}/UI", "Fonts"),
-                new FolderData(resourceFolderPath, "Scenes"),
-                new FolderData(resourceFolderPath, "Prefabs"),
-                new FolderData($"{resourceFolderPath}/Prefabs", "Effects"),
-                new FolderData($"{resourceFolderPath}/Prefabs", "Environment"),
-                new FolderData($"{resourceFolderPath}/Prefabs", "UITemplates"),
-                new FolderData(resourceFolderPath, "Sources"),
-                new FolderData($"{resourceFolderPath}/Sources", "UI"),
-                new FolderData($"{resourceFolderPath}/Sources", "Editor"),
-                new FolderData($"{resourceFolderPath}/Sources", "Storing"),
+                new ("Assets", "Resources"),
+                new ("Assets/Resources", "Data"),
+                new ("Assets", contentFolder),
+                new (resourceFolderPath, "Sounds"),
+                new (resourceFolderPath, "Materials"),
+                new (resourceFolderPath, "Animations"),
+                new ($"{resourceFolderPath}/Animations", "UI"),
+                new (resourceFolderPath, "UI"),
+                new ($"{resourceFolderPath}/UI", "Fonts"),
+                new (resourceFolderPath, "Scenes"),
+                new (resourceFolderPath, "Prefabs"),
+                new ($"{resourceFolderPath}/Prefabs", "Effects"),
+                new ($"{resourceFolderPath}/Prefabs", "Environment"),
+                new ($"{resourceFolderPath}/Prefabs", "UITemplates"),
+                new (resourceFolderPath, "Sources"),
+                new ($"{resourceFolderPath}/Sources", "UI"),
+                new ($"{resourceFolderPath}/Sources", "Editor"),
+                new ($"{resourceFolderPath}/Sources", "Storing"),
             };
             
             foreach (var folderData in foldersToCreate)
@@ -316,8 +337,8 @@ namespace InsaneOne.Core.Development
                 installRequest = null;
             }
         }
-        
-        class FolderData
+
+        readonly struct FolderData
         {
             public readonly string Path;
             public readonly string FolderName;
