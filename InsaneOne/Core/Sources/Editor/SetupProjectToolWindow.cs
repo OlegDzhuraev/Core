@@ -10,19 +10,19 @@ namespace InsaneOne.Core.Development
     public class SetupProjectToolWindow : EditorWindow
     {
         const string repoName = "OlegDzhuraev";
+        const string originPlacePrefName = "Create3DObject.PlaceAtWorldOrigin";
+        
+        static AddRequest installRequest;
+        
+        readonly Color checklistBadColor = Color.yellow;
         
         /// <summary> Resources folder name. Should be NOT Resources, any other naming. </summary>
         string contentFolder = "Resource";
 
-        static AddRequest installRequest;
-        
-        int dimension;
-        int foldersStyle;
-        
+        int dimension, foldersStyle;
+
         readonly Dictionary<string, string> gitPackages = new()
         {
-            //{ "Signals", $"https://github.com/{repoName}/Signals.git" }, // not finished
-            //{ "Tags", $"https://github.com/{repoName}/Tags.git" },
             { "Perseids Pooling", $"https://github.com/{repoName}/PerseidsPooling.git" },
         };
         
@@ -30,7 +30,7 @@ namespace InsaneOne.Core.Development
         {
             { "Cinemachine", "com.unity.cinemachine" },
             { "Post Effects", "com.unity.postprocessing" },
-            //{ "DOTween", "https://github.com/Demigiant/dotween.git" }, // can't be added - no package manifest included
+            { "Recorder", "com.unity.recorder" },
         };
 
         Vector2 scroll;
@@ -38,7 +38,7 @@ namespace InsaneOne.Core.Development
         string selectedNamespace = "Game";
         string companyName = "InsaneOne";
 
-        GUIStyle richText, partitionHeader;
+        GUIStyle richText, partitionHeader, blockStyle;
         
         [MenuItem("Tools/Setup Project Tool")]
         public static void ShowWindow()
@@ -52,6 +52,8 @@ namespace InsaneOne.Core.Development
             minSize = new Vector2(512, 512);
             maxSize = new Vector2(768, 768);
             richText = new GUIStyle(EditorStyles.label) { richText = true };
+            blockStyle = new GUIStyle(EditorStyles.helpBox);
+            
             partitionHeader = new GUIStyle(EditorStyles.boldLabel)
             {
                 fontSize = 16, 
@@ -63,8 +65,19 @@ namespace InsaneOne.Core.Development
         void OnGUI()
         {
             scroll = GUILayout.BeginScrollView(scroll);
+
+            DrawGenerateFolders();
+            DrawModulesInstall();
+            DrawChecklist();
             
-            DrawHeader("Project folders");
+            GUILayout.EndScrollView();
+        }
+
+        void DrawGenerateFolders()
+        {
+            GUILayout.BeginVertical(blockStyle);
+            
+            DrawHeader("Project folders", false);
             
             dimension = EditorGUILayout.Popup("Project dimensions", dimension, new[] {"3D", "2D"});
             foldersStyle = EditorGUILayout.Popup("Folders style", foldersStyle, new[] {"Feature-oriented", "Classic"});
@@ -86,10 +99,17 @@ namespace InsaneOne.Core.Development
                     GenereteProjectFolders(dimension == 0);
             }    
             
+            GUILayout.EndVertical();
+        }
+
+        void DrawModulesInstall()
+        {
             var prevGUIEnabled = GUI.enabled;
             GUI.enabled = installRequest == null;
             
-            DrawHeader("Frequently used modules - add/update");
+            GUILayout.BeginVertical(blockStyle);
+            
+            DrawHeader("Frequently used modules - add/update", false);
             
             GUILayout.BeginHorizontal();
             
@@ -98,8 +118,10 @@ namespace InsaneOne.Core.Development
                     AddPackage(package.Value);
 
             GUILayout.EndHorizontal();
-
-            DrawHeader("Frequently used assets - add/update");
+            GUILayout.EndVertical();
+            
+            GUILayout.BeginVertical(blockStyle);
+            DrawHeader("Frequently used assets - add/update", false);
             
             GUILayout.BeginHorizontal();
             
@@ -108,107 +130,150 @@ namespace InsaneOne.Core.Development
                     AddPackage(package.Value);
 
             GUILayout.EndHorizontal();
+            GUILayout.EndVertical();
             
             /* idk now how to load and install assets - no such api in documentation
-            GUILayout.BeginHorizontal();
-            
-            if (GUILayout.Button("Odin Inspector"))
-                Debug.Log("Not implemented");
-             
-            if (GUILayout.Button("ME Coroutines"))
-                Debug.Log("Not implemented");
-            
-            if (GUILayout.Button("Rainbow Hierarchy"))
-                Debug.Log("Not implemented");
-            
-            GUILayout.EndHorizontal();
+            "DOTween", "Odin Inspector", "ME Coroutines", "Rainbow Hierarchy"
             */
-            GUI.enabled = prevGUIEnabled;
             
+            GUI.enabled = prevGUIEnabled;
+        }
+        
+        void DrawChecklist()
+        {
             DrawPartitionHeader("Setup Checklist");
+            
             DrawHeader("Graphics settings", false);
-
+            
+            // todo unify things like this to remove a lot of duplicated code
             DrawFixColorSpace();
             DrawFixSpritePacker();
-
+            
             DrawHeader("Other settings");
             
             DrawFixNamespace();
-            
-            // todo change scene view - create at origin value using Editor Prefs
-
             DrawFixCompanyName();
-            
-            GUILayout.EndScrollView();
+            DrawFixCreateAtOrigin();
         }
 
         void DrawFixColorSpace()
         {
-            if (PlayerSettings.colorSpace == ColorSpace.Gamma)
-            {
-                GUILayout.Label("Color space set to <b>Gamma</b>. For PC preferred is <b>Linear</b>.", richText);
+            var isFine = PlayerSettings.colorSpace == ColorSpace.Linear;
 
-                if (GUILayout.Button("Set to Linear"))
-                    PlayerSettings.colorSpace = ColorSpace.Linear;
-            }
-            else
-            {
-                GUILayout.Label("Color space set to Linear. It is preffered. But you can reset to Gamma.");
-                
-                
-                if (GUILayout.Button("Set to Gamma"))
-                    PlayerSettings.colorSpace = ColorSpace.Gamma;
-            }
+            var buttonText = isFine ? "Set to Gamma" : "Set to Linear";
+            var neededResult = isFine ? ColorSpace.Gamma : ColorSpace.Linear;
+            var previousGuiColor = GUI.color;
+            
+            GUI.color = isFine ? previousGuiColor : checklistBadColor;
+            
+            GUILayout.BeginVertical(blockStyle);
+
+            GUILayout.Label(isFine
+                ? "Color space set to <b>Linear</b>. It is preffered. But you can reset to <b>Gamma</b>."
+                : "Color space set to <b>Gamma</b>. For PC preferred is <b>Linear</b>.",
+                richText);
+
+            if (GUILayout.Button(buttonText))
+                PlayerSettings.colorSpace = neededResult;
+            
+            GUILayout.EndVertical();
+
+            GUI.color = previousGuiColor;
         }
-
+        
         void DrawFixSpritePacker()
         {
-            if (EditorSettings.spritePackerMode == SpritePackerMode.Disabled)
-            {
-                GUILayout.Label("Sprite packer is disabled. Preffered is Enabled");
+            var isFine = EditorSettings.spritePackerMode == SpritePackerMode.AlwaysOnAtlas;
+            var buttonText = isFine ? "Disable" : "Enable";
+            var previousGuiColor = GUI.color;
+            var neededResult = isFine ? SpritePackerMode.Disabled : SpritePackerMode.AlwaysOnAtlas;
+            GUI.color = isFine ? previousGuiColor : checklistBadColor;
+            
+            GUILayout.BeginVertical(blockStyle);
 
-                if (GUILayout.Button("Enable"))
-                    EditorSettings.spritePackerMode = SpritePackerMode.AlwaysOnAtlas;
-            }
-            else
-            {
-                GUILayout.Label("Sprite packer is enabled. It is preffered. But you can disable.");
-                
-                if (GUILayout.Button("Disable"))
-                    EditorSettings.spritePackerMode = SpritePackerMode.Disabled;
-            }
+            GUILayout.Label(!isFine
+                ? "Sprite packer is disabled. Preffered is Enabled"
+                : "Sprite packer is enabled. It is preffered. But you can disable.");
+
+            if (GUILayout.Button(buttonText))
+                EditorSettings.spritePackerMode = neededResult;
+            
+            GUILayout.EndVertical();
+            
+            GUI.color = previousGuiColor;
         }
 
         void DrawFixNamespace()
         {
             var actualNamespace = EditorSettings.projectGenerationRootNamespace;
-            if (actualNamespace == String.Empty)
-                GUILayout.Label("Project root namespace isn't set. Fix?");
-            else
-                GUILayout.Label($"Project root namespace is already set to {actualNamespace}.");
+            var isFine = actualNamespace != String.Empty;
+            var previousGuiColor = GUI.color;
             
+            GUI.color = isFine ? previousGuiColor : checklistBadColor;
+
+            GUILayout.BeginVertical(blockStyle);
+
+            GUILayout.Label(isFine
+                ? $"Project root namespace is set. Current namespace is <b>{actualNamespace}</b>."
+                : "Project root namespace isn't set. Fix?",
+                richText);
+
             selectedNamespace = EditorGUILayout.TextField("Namespace", selectedNamespace);
 
             if (GUILayout.Button("Set"))
                 EditorSettings.projectGenerationRootNamespace = selectedNamespace;
+            
+            GUILayout.EndVertical();
+            
+            GUI.color = previousGuiColor;
         }
 
         void DrawFixCompanyName()
         {
-            if (PlayerSettings.companyName == "DefaultCompany")
-            {
-                GUILayout.Label($"Developer Company is not set. Set to value below ({companyName})?");
-                companyName = GUILayout.TextField(companyName);
+            var isFine = PlayerSettings.companyName != "DefaultCompany" && PlayerSettings.companyName != String.Empty;
+            var previousGuiColor = GUI.color;
+            
+            GUI.color = isFine ? previousGuiColor : checklistBadColor;
+            
+            GUILayout.BeginVertical(blockStyle);
+
+            GUILayout.Label(!isFine
+                ? $"Developer Company is not set. Set to value below ({companyName})?"
+                : $"Company name is set. Current company name is <b>{PlayerSettings.companyName}</b>",
+                richText);
+
+            companyName = GUILayout.TextField(companyName);
                 
-                if (GUILayout.Button("Ok"))
-                    PlayerSettings.companyName = companyName;
-            }
-            else
-            {
-                GUILayout.Label("Company name is set to " + PlayerSettings.companyName);
-            }
+            if (GUILayout.Button("Set"))
+                PlayerSettings.companyName = companyName;
+            
+            GUILayout.EndVertical();
+            
+            GUI.color = previousGuiColor;
         }
 
+        void DrawFixCreateAtOrigin()
+        {  
+            var isFine = EditorPrefs.GetBool(originPlacePrefName);
+            var previousGuiColor = GUI.color;
+            
+            GUI.color = isFine ? previousGuiColor : checklistBadColor;
+            
+            GUILayout.BeginVertical(blockStyle);
+            GUILayout.Label(!isFine
+                    ? $"Create objects at origin is <b>disabled</b>. It is recommended to <b>enable</b>."
+                    : $"Create objects at origin is <b>enabled</b>.",
+                richText);
+            
+            if (!isFine && GUILayout.Button("Fix"))
+                EditorPrefs.SetBool(originPlacePrefName, true);
+            
+            GUILayout.EndVertical();
+            
+            GUI.color = previousGuiColor;
+        }
+        
+        
         void DrawPartitionHeader(string text)
         {
             EditorGUILayout.Space(5);
@@ -329,7 +394,7 @@ namespace InsaneOne.Core.Development
             if (installRequest.IsCompleted)
             {
                 if (installRequest.Status == StatusCode.Success)
-                    Debug.Log("Installed: " + installRequest.Result.packageId);
+                    Debug.Log($"Installed: {installRequest.Result.packageId}");
                 else if (installRequest.Status >= StatusCode.Failure)
                     Debug.Log(installRequest.Error.message);
 
