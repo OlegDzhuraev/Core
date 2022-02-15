@@ -5,8 +5,14 @@ Repo was exposed to public only just because I want to import it easily with Pac
 
 List of the main included features you can read below. 
 
-## Setup Project Tool
-Can be found in the top menu. Tool allows to atuo-generate project folders structure and quckly tune most frequently needed for me Editor and Project settings.
+## Tools
+Tools can be found in the top menu, button named **Tools**.
+
+### Setup Project Tool
+Tool allows to atuo-generate project folders structure and quckly tune most frequently needed for me Editor and Project settings.
+
+### Level Design - Transform Randomize
+Allows to randomize rotation, scale and position of the scene-selected transforms.
 
 ## Extensions
 Contains some extensions for Transform, Color, Vectors, Random and other components. 
