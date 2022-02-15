@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Shared
+namespace InsaneOne.Core
 {
 	public static class Angle2dUtility
 	{

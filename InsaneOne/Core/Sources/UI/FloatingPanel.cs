@@ -1,7 +1,6 @@
-﻿using InsaneOne.Core;
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace InsaneSystems.Core.UI
+namespace InsaneOne.Core.UI
 {
     public class FloatingPanel : MonoBehaviour
     {

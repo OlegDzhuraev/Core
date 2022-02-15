@@ -1,4 +1,3 @@
-using InsaneOne.Core;
 using UnityEngine;
 
 namespace InsaneOne.Core
