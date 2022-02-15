@@ -28,8 +28,5 @@ Allows to destroy GameObject with attached component with time delay.
 ### MainCamera
 Most of projects use only one camera, which can be received by calling Camera.main. But in old Unity versions it is not cached and can cause performance issues. This utility helps to solve this problem by caching a Main Camera. 
 
-## Interfaces
-Includes inferfaces for some gamedev-specific things. Still do not sure that it is best realisation for this.
-
 ## License
 MIT License
