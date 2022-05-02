@@ -1,19 +1,55 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace InsaneOne.Core.UI
 {
-	/// <summary>You can derive from this class any modal window which can be shown and hidden.</summary>
-	public class Modal : MonoBehaviour, IHideable
+	/// <summary>You can add this component to any window which should be modal with possibility to be shown and hidden.</summary>
+	public sealed class Modal : MonoBehaviour, IHideable
 	{
-		[SerializeField] protected GameObject selfObject;
-
-		protected virtual void Awake()
+		public event Action WasShown, WasHidden;
+		
+		[SerializeField] GameObject selfObject;
+		[SerializeField] bool hideOnStart;
+		
+		public GameObject SelfObject => selfObject;
+		public bool IsShown { get; private set; }
+		
+		bool isInitialized;
+		
+		void Awake()
 		{
 			if (!selfObject)
 				selfObject = gameObject;
 		}
 
-		public virtual void Show() => selfObject.SetActive(true);
-		public virtual void Hide() => selfObject.SetActive(false);
+		void Start()
+		{
+			if (hideOnStart)
+				Hide();
+
+			isInitialized = true;
+		}
+
+		public void Show()
+		{
+			if (isInitialized && IsShown)
+				return;
+			
+			WasShown?.Invoke();
+			
+			IsShown = true;
+			selfObject.SetActive(true);
+		}
+
+		public void Hide()
+		{
+			if (isInitialized && !IsShown)
+				return;
+			
+			WasHidden?.Invoke();
+			
+			IsShown = false;
+			selfObject.SetActive(false);
+		}
 	}
 }

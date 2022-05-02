@@ -4,25 +4,24 @@ using UnityEngine;
 namespace InsaneOne.Core.UI
 {
 	/// <summary> This class allows to show panel with info near cursor. </summary>
-	public class Hint : MonoBehaviour, IHideable
+	public sealed class Hint : MonoBehaviour, IHideable
 	{
+		[SerializeField] Modal modal;
 		[SerializeField] Transform canvasTransform;
-		[SerializeField] GameObject selfObject;
 		[SerializeField] TMP_Text nameText;
 
 		RectTransform rectTransform;
-		bool isShown;
-		
+
 		void Awake()
 		{
-			rectTransform = selfObject.GetComponent<RectTransform>();
+			rectTransform = modal.SelfObject.GetComponent<RectTransform>();
 		}
 
 		void Start() => Hide();
 
 		void Update()
 		{ 
-			if (isShown)
+			if (modal.IsShown)
 				rectTransform.anchoredPosition = Input.mousePosition;
 		}
 
@@ -40,16 +39,7 @@ namespace InsaneOne.Core.UI
 			nameText.text = text;
 		}
 
-		public void Show()
-		{
-			selfObject.SetActive(true);
-			isShown = true;
-		}
-
-		public void Hide()
-		{
-			selfObject.SetActive(false);
-			isShown = false;
-		}
+		public void Show() => modal.Show();
+		public void Hide() => modal.Hide();
 	}
 }
