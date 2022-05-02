@@ -1,7 +1,7 @@
 # InsaneOne Core
-My tools and extensions for Unity engine, which I'm use in all my projects to speedup development. It allows to reduce count of code by implementing frequently needed functionality.
+My tools and extensions for Unity Engine, which I'm use in all my projects to speedup development. It allows to reduce amount of code - by implementing frequently used functionality. Mainly there stored some garbage tools, which is not enough big or good to move them in their own repo.
 
-Repo was exposed to public only just because I want to import it easily with Package Manager, but if you're interested, feel free to use it.
+This repo was exposed to public only just because I want to import it easily with Package Manager, but if you're interested, feel free to use it.
 
 List of the main included features you can read below. 
 
@@ -21,7 +21,7 @@ Contains some extensions for Transform, Color, Vectors, Random and other compone
 In Project Manager in context menu now exist a new partition InsaneOne/Templates, which includes some ready code file templates, which are frequently used by me in gamedev. 
 
 ## UI
-Unity UI is very raw for me, so I've added some new elements and templates. Now it still very simple, but I want to improve it in future.
+I've added some new elements and templates for UI, which is missing in Unity default package. Now it still very simple, but I want to improve it in future.
 
 ## Utility
 
