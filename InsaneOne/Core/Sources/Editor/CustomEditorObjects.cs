@@ -10,39 +10,19 @@ namespace InsaneOne.Core.Development
 
 		static Canvas sceneCanvas;
 
-		[MenuItem("GameObject/UI/Named Dropdown", priority = -199)]
-		static void SpawnNamedDropdown()
-		{
-			var namedDropdown = (GameObject)Resources.Load(pathToUI + "NamedDropdown", typeof(GameObject));
-			SpawnUIElement(namedDropdown);
-		}
-
-		[MenuItem("GameObject/UI/Named Slider", priority = -199)]
-		static void SpawnNamedSlider()
-		{
-			var namedSlider = (GameObject)Resources.Load(pathToUI + "NamedSlider", typeof(GameObject));
-			SpawnUIElement(namedSlider);
-		}
-		
 		[MenuItem("GameObject/UI/Floating Panel", priority = -199)]
-		static void SpawnFloatingPanel()
-		{
-			var floatingPanel = (GameObject)Resources.Load(pathToUI + "FloatingPanel", typeof(GameObject));
-			SpawnUIElement(floatingPanel);
-		}
-		
-		[MenuItem("GameObject/UI/Tab Control", priority = -199)]
-		static void SpawnTabControl()
-		{
-			var tabControl = (GameObject)Resources.Load(pathToUI + "TabControl", typeof(GameObject));
-			SpawnUIElement(tabControl);
-		}
+		static void SpawnFloatingPanel() => SpawnUIElement("FloatingPanel");
 
-		static void SpawnUIElement(GameObject uiObject)
+		[MenuItem("GameObject/UI/Tab Control", priority = -199)]
+		static void SpawnTabControl() => SpawnUIElement("TabControl");
+
+		static void SpawnUIElement(string elemName)
 		{
+			var prefab = (GameObject)Resources.Load(pathToUI + elemName, typeof(GameObject));
+			
 			SetupCanvas();
 			
-			var spawnedPrefab = (GameObject)PrefabUtility.InstantiatePrefab(uiObject);
+			var spawnedPrefab = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
 			PrefabUtility.UnpackPrefabInstance(spawnedPrefab, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
 			
 			spawnedPrefab.transform.SetParent(sceneCanvas.transform);
@@ -56,7 +36,7 @@ namespace InsaneOne.Core.Development
 			sceneCanvas = GameObject.FindObjectOfType<Canvas>();
 
 			if (!sceneCanvas)
-				sceneCanvas = new GameObject().AddComponent<Canvas>();
+				sceneCanvas = new GameObject("Canvas").AddComponent<Canvas>();
 		}
 	}
 }
