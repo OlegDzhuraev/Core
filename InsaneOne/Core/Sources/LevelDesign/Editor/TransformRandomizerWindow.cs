@@ -15,7 +15,7 @@ namespace InsaneOne.Core.LevelDesign
 		[MenuItem("Tools/Level Design/Transform Randomizer")]
 		static void Init()
 		{
-			var window = (TransformRandomizerWindow)GetWindow(typeof(TransformRandomizerWindow));
+			var window = (TransformRandomizerWindow)GetWindow(typeof(TransformRandomizerWindow), false, "Transform Randomizer", true);
 			window.Show();
 		}
 		
