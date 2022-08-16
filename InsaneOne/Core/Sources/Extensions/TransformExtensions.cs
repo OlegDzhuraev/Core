@@ -28,13 +28,11 @@ namespace InsaneOne.Core
 		/// <summary> Rotates a 2D object in cursor direction, make it looking to the position. </summary>
 		public static void LookAtMouse2D(this Transform transform)
 		{
-			var mousePos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10f);
-			var mousePosOnScreen = MainCamera.Cached.ScreenToWorldPoint(mousePos);
-			mousePosOnScreen.z = transform.position.z;
-
-			transform.LookAt2D(mousePosOnScreen);
+			var mouseWorldPos = InputExtensions.GetMouseWorldPos2D();
+			mouseWorldPos.z = transform.position.z;
+			transform.LookAt2D(mouseWorldPos);
 		}
-
+		
 		/// <summary> Rotates a 2D object, make it looking to the position. </summary>
 		public static void LookAt2D(this Transform transform, Vector3 position)
 		{
@@ -45,9 +43,9 @@ namespace InsaneOne.Core
 		public static void RotateTo2D(this Transform transform, Vector2 position, float angularSpeed)
 		{
 			var rotation = transform.GetLook2D(position);
-
-			transform.rotation =
-				Quaternion.RotateTowards(transform.rotation, rotation, angularSpeed * Time.smoothDeltaTime);
+			var delta = angularSpeed * Time.smoothDeltaTime;
+			
+			transform.rotation = Quaternion.RotateTowards(transform.rotation, rotation, delta);
 		}
 
 		/// <summary> Returns look to the position in 2D. </summary>

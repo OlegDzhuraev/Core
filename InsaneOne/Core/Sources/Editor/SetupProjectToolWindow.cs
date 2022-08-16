@@ -24,6 +24,7 @@ namespace InsaneOne.Core.Development
         readonly Dictionary<string, string> gitPackages = new()
         {
             { "Perseids Pooling", $"https://github.com/{repoName}/PerseidsPooling.git" },
+            { "NavMesh Avoidance", $"https://github.com/{repoName}/NavMeshAvoidance.git" },
         };
         
         readonly Dictionary<string, string> unityPackages = new ()
