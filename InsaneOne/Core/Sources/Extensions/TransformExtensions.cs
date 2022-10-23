@@ -4,6 +4,8 @@ namespace InsaneOne.Core
 {
 	public static class TransformExtensions
 	{
+		public static bool RightAxisIsForwardInTwoD;
+		
 		public static void SetPositionX(this Transform transform, float value)
 		{
 			var vector3 = transform.position;
@@ -52,7 +54,12 @@ namespace InsaneOne.Core
 		public static Quaternion GetLook2D(this Transform transform, Vector2 position)
 		{
 			var direction = ((Vector3) position - transform.position).normalized;
-			return Quaternion.LookRotation(Vector3.forward, direction);
+			var result = Quaternion.LookRotation(Vector3.forward, direction);
+			
+			if (RightAxisIsForwardInTwoD)
+				result *= Quaternion.Euler(new Vector3(0, 0, 90));
+			
+			return result;
 		}
 
 		/// <summary> Returns is transfrom looking on a target transform. </summary>
