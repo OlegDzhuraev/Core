@@ -15,7 +15,23 @@ Tool allows to atuo-generate project folders structure and quckly tune most freq
 Allows to randomize rotation, scale and position of the scene-selected transforms.
 
 ## Extensions
-Contains some extensions for Transform, Color, Vectors, Random and other components. 
+Contains some extensions for Transform, Color, Vectors, Random and other components. Some examples below.
+
+### Random extensions
+Get random element from list or array:
+```cs
+List<T> someList = new List<T>();
+
+void Start() 
+{
+  var randomedT = someList.Random();
+}
+```
+
+Randomize vector values:
+```cs
+Vector3 vec = RandomExtensions.GetRandomizedVector3(-5f, 5f);
+```
 
 ### Physics extensions
 You can quickly find objects of specific type T in sphere:
@@ -36,12 +52,36 @@ I've added some new elements and templates for UI, which is missing in Unity def
 
 ### Timer
 Deltatime-based timer to speedup any timer-based features creation.
+```cs
+Timer timer;
+void Start() 
+{
+  timer = new Timer(5f);
+}
+
+void Update() 
+{
+  timer.DoTick()
+  
+  if (timer.IsReady())
+  {
+    // do something
+  }
+}
+```
 
 ### DelayedDestruction
 Allows to destroy GameObject with attached component with time delay.
+```cs
+gameObject.DelayedDestroy(3f);
+```
 
 ### MainCamera
 Most of projects use only one camera, which can be received by calling Camera.main. But in old Unity versions it is not cached and can cause performance issues. This utility helps to solve this problem by caching a Main Camera. 
+
+```cs
+var cam = MainCamera.Cached;
+```
 
 ## License
 MIT License
