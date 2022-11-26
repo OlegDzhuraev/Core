@@ -17,6 +17,15 @@ Allows to randomize rotation, scale and position of the scene-selected transform
 ## Extensions
 Contains some extensions for Transform, Color, Vectors, Random and other components. 
 
+### Physics extensions
+You can quickly find objects of specific type T in sphere:
+```cs
+PhysicsExtensions.GetObjectsOfTypeInSphere<T>(pos, radius);
+
+// for 2d
+PhysicsExtensions.GetObjectsOfTypeIn2DCircle<T>(pos, radius);
+```
+
 ## Templates
 In Project Manager in context menu now exist a new partition InsaneOne/Templates, which includes some ready code file templates, which are frequently used by me in gamedev. 
 
