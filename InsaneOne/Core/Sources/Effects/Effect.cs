@@ -18,10 +18,10 @@ namespace InsaneOne.Core
             
             if (destructionDelay <= -1)
             {
-                var timedDestructorToRemove = vfx.GetComponent<DelayedDestruction>();
+                var delayedDestruction = vfx.GetComponent<DelayedDestruction>();
                 
-                if (timedDestructorToRemove)
-                    GameObject.Destroy(timedDestructorToRemove);
+                if (delayedDestruction)
+                    GameObject.Destroy(delayedDestruction);
             }
             else
             {

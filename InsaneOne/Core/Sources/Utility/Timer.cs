@@ -1,23 +1,22 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace InsaneOne.Core
 {
 	/// <summary>This class describes timer. Every time when you need to do some periodic action with delay using Time.deltaTime, but do not want to use coroutine, you can use this timer. </summary>
-	[System.Serializable]
+	[Serializable]
 	public class Timer
 	{
+		public event Action Finished;
+		
 		float fullTime, timeLeft;
-		TimerCallback timerCallback;
 
 		public delegate void TimerCallback();
 
-		public Timer(float timeValue, TimerCallback timerCallback = null)
+		public Timer(float timeValue)
 		{
 			SetFullTime(timeValue);
-			timeLeft = timeValue;
-
-			if (timerCallback != null)
-				SetTimerCallBack(timerCallback);
+			Restart();
 		}
 		
 		/// <summary> Simple tick timer. Will reset after reaches zero and start again. In reset frame method IsReady will return true. </summary>
@@ -29,8 +28,8 @@ namespace InsaneOne.Core
 			}
 			else
 			{
-				timeLeft = fullTime;
-				timerCallback?.Invoke();
+				Restart();
+				Finished?.Invoke();
 			}
 		}
 
@@ -47,11 +46,8 @@ namespace InsaneOne.Core
 		/// <summary>Sets time in seconds which timer will wait for next action.</summary>
 		public void SetFullTime(float timeValue) => fullTime = timeValue;
 
-		/// <summary>Sets callback which will be called every time timer ticks</summary>
-		public void SetTimerCallBack(TimerCallback callBackMethod) => timerCallback = callBackMethod;
-
 		/// <summary> Restore timer full time left. </summary>
-		public void Reset() => timeLeft = fullTime;
+		public void Restart() => timeLeft = fullTime;
 		
 		/// <summary> Get timer reload percents. </summary>
 		public float GetReloadPercents() => (fullTime - timeLeft) / fullTime;

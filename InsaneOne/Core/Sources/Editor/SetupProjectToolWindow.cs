@@ -25,13 +25,14 @@ namespace InsaneOne.Core.Development
         {
             { "Perseids Pooling", $"https://github.com/{repoName}/PerseidsPooling.git" },
             { "NavMesh Avoidance", $"https://github.com/{repoName}/NavMeshAvoidance.git" },
+            { "Tags", $"https://github.com/{repoName}/Tags.git" },
         };
         
         readonly Dictionary<string, string> unityPackages = new ()
         {
-            { "Cinemachine", "com.unity.cinemachine" },
             { "Post Effects", "com.unity.postprocessing" },
             { "Recorder", "com.unity.recorder" },
+            { "Cinemachine", "com.unity.cinemachine" },
         };
 
         Vector2 scroll;
