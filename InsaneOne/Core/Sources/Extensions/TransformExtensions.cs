@@ -27,6 +27,10 @@ namespace InsaneOne.Core
 			transform.position = vector3;
 		}
 
+		public static void Set2DRotation(this Transform transform, float value) => transform.localEulerAngles = new Vector3(0, 0, value);
+
+		public static float Get2DRotation(this Transform transform) => transform.localEulerAngles.z;
+
 		/// <summary> Rotates a 2D object in cursor direction, make it looking to the position. </summary>
 		public static void LookAtMouse2D(this Transform transform)
 		{
@@ -53,7 +57,13 @@ namespace InsaneOne.Core
 		/// <summary> Returns look to the position in 2D. </summary>
 		public static Quaternion GetLook2D(this Transform transform, Vector2 position)
 		{
-			var direction = ((Vector3) position - transform.position).normalized;
+			return GetLook2D(transform.position, position);
+		}
+		
+		/// <summary> Returns look to the position in 2D. </summary>
+		public static Quaternion GetLook2D(Vector2 positionA, Vector2 positionB)
+		{
+			var direction = (positionB - positionA).normalized;
 			var result = Quaternion.LookRotation(Vector3.forward, direction);
 			
 			if (RightAxisIsForwardInTwoD)
@@ -87,9 +97,16 @@ namespace InsaneOne.Core
 		/// <param name="threshold">Angle value of tolerance. </param>
 		public static bool IsLookingAt2D(this Transform self, Transform target, float threshold = 3f)
 		{
-			var targetDirection = (target.position - self.position).normalized;
-            
-			return Vector2.Angle(self.up, targetDirection) < threshold;
+			var forward = RightAxisIsForwardInTwoD ? self.right : self.up;
+			return IsLookingAt2D(self.position, forward, target.position, threshold);
+		}
+		
+		/// <summary> Returns is position a looking on a position b. Requires forawrd vector direction. For 2d it can be transform.up or transform.right.</summary>
+		/// <param name="threshold">Angle value of tolerance. </param>
+		public static bool IsLookingAt2D(Vector2 positionA, Vector2 forwardA, Vector2 positionB, float threshold = 3f)
+		{
+			var targetDirection = (positionB - positionA).normalized;
+			return Vector2.Angle(forwardA, targetDirection) < threshold;
 		}
 	}
 }

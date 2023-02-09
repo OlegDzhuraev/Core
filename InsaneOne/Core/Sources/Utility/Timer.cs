@@ -8,10 +8,11 @@ namespace InsaneOne.Core
 	public class Timer
 	{
 		public event Action Finished;
-		
-		float fullTime, timeLeft;
 
-		public delegate void TimerCallback();
+		public float FullTime => fullTime;
+		public float TimeLeft { get; private set; }
+
+		[SerializeField] float fullTime;
 
 		public Timer(float timeValue)
 		{
@@ -22,9 +23,9 @@ namespace InsaneOne.Core
 		/// <summary> Simple tick timer. Will reset after reaches zero and start again. In reset frame method IsReady will return true. </summary>
 		public void Tick()
 		{
-			if (timeLeft > 0)
+			if (TimeLeft > 0)
 			{
-				timeLeft -= Time.deltaTime;
+				TimeLeft -= Time.deltaTime;
 			}
 			else
 			{
@@ -41,15 +42,17 @@ namespace InsaneOne.Core
 		}
 
 		/// <summary> Checks is timer delay ended. It should be called in same frame and Update, which calls Tick method of this timer. </summary>
-		public bool IsReady() => timeLeft <= 0;
+		public bool IsReady() => TimeLeft <= 0;
 
 		/// <summary>Sets time in seconds which timer will wait for next action.</summary>
 		public void SetFullTime(float timeValue) => fullTime = timeValue;
 
 		/// <summary> Restore timer full time left. </summary>
-		public void Restart() => timeLeft = fullTime;
+		public void Restart() => TimeLeft = fullTime;
+		
+		public void SetReady() => TimeLeft = 0f;
 		
 		/// <summary> Get timer reload percents. </summary>
-		public float GetReloadPercents() => (fullTime - timeLeft) / fullTime;
+		public float GetReloadPercents() => (fullTime - TimeLeft) / fullTime;
 	}
 }
