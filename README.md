@@ -1,12 +1,12 @@
 # InsaneOne Core
-My tools and extensions for Unity Engine, which I'm use in all my projects to speedup development. It allows to reduce amount of code - by implementing frequently used functionality. Mainly there stored some garbage tools, which is not enough big or good to move them in their own repo.
+My tools and extensions for Unity Engine, which I'm use in all my projects to speedup development. It allows to reduce amount of code - by implementing frequently used functionality. Mainly there stored tools, which is not enough big or good to move them in their own repos.
 
 This repo was exposed to public only just because I want to import it easily with Package Manager, but if you're interested, feel free to use it.
 
 List of the main included features you can read below. 
 
 ## Tools
-Tools can be found in the top menu, button named **Tools**.
+Tools can be found in the top menu, the button named **Tools**.
 
 ### Setup Project Tool
 Tool allows to atuo-generate project folders structure and quckly tune most frequently needed for me Editor and Project settings.
@@ -18,7 +18,7 @@ Allows to randomize rotation, scale and position of the scene-selected transform
 Contains some extensions for Transform, Color, Vectors, Random and other components. Some examples below.
 
 ### Random extensions
-Get random element from list or array:
+Get random element from a list or array:
 ```cs
 List<T> someList = new List<T>();
 
@@ -47,6 +47,9 @@ In Project Manager in context menu now exist a new partition InsaneOne/Templates
 
 ## UI
 I've added some new elements and templates for UI, which is missing in Unity default package. Now it still very simple, but I want to improve it in future.
+
+## Localization
+Contains localization extension, which allows to read CSV-based localization and translate ingame texts for selected language.
 
 ## Utility
 
@@ -82,6 +85,9 @@ Most of projects use only one camera, which can be received by calling Camera.ma
 ```cs
 var cam = MainCamera.Cached;
 ```
+
+## Shaders
+This repo contains some PBR shaders, mainly for load textures from one mask (Metal-Roughness-AO, etc).
 
 ## License
 MIT License
