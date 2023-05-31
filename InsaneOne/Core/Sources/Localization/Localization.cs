@@ -21,6 +21,7 @@ namespace InsaneOne.Core.Locales
 		
 		public static readonly Dictionary<string, string> CachedTexts = new ();
 
+		/// <summary>Initializes localization. Call this at the game initialization. </summary>
 		public static void Initialize()
 		{
 			if (IsLoaded)
@@ -82,6 +83,7 @@ namespace InsaneOne.Core.Locales
 			ReloadLocalization();
 		}
 
+		/// <summary>Returns exist language id, even if wrong was passed as argument. </summary>
 		public static int GetSafeId(int originalId)
 		{
 			if (originalId < 0 || originalId >= Languages.Count)
@@ -111,6 +113,7 @@ namespace InsaneOne.Core.Locales
 			return false;
 		}
 
+		/// <summary> Call this on game closing. </summary>
 		public static void Unload()
 		{
 			Languages.Clear();

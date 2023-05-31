@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using System;
+using TMPro;
 using UnityEngine;
 
 namespace InsaneOne.Core.UI
@@ -6,6 +7,8 @@ namespace InsaneOne.Core.UI
 	/// <summary> This class allows to show panel with info near cursor. </summary>
 	public sealed class Hint : MonoBehaviour, IHideable
 	{
+		public event Action WasShown;
+		
 		[SerializeField] Modal modal;
 		[SerializeField] Transform canvasTransform;
 		[SerializeField] TMP_Text nameText;
@@ -39,7 +42,12 @@ namespace InsaneOne.Core.UI
 			nameText.text = text;
 		}
 
-		public void Show() => modal.Show();
+		public void Show()
+		{
+			modal.Show();
+			WasShown?.Invoke();
+		}
+
 		public void Hide() => modal.Hide();
 	}
 }

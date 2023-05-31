@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace InsaneOne.Core.Development
 {
     public class SetupProjectToolWindow : EditorWindow
     {
-        const string repoName = "OlegDzhuraev";
-        const string originPlacePrefName = "Create3DObject.PlaceAtWorldOrigin";
+        const string RepoName = "OlegDzhuraev";
+        const string OriginPlacePrefName = "Create3DObject.PlaceAtWorldOrigin";
         
         static AddRequest installRequest;
         
@@ -23,9 +25,10 @@ namespace InsaneOne.Core.Development
 
         readonly Dictionary<string, string> gitPackages = new()
         {
-            { "Perseids Pooling", $"https://github.com/{repoName}/PerseidsPooling.git" },
-            { "NavMesh Avoidance", $"https://github.com/{repoName}/NavMeshAvoidance.git" },
-            { "Tags", $"https://github.com/{repoName}/Tags.git" },
+            { "Modifiers", $"https://github.com/{RepoName}/Modifiers.git"},
+            { "Perseids Pooling", $"https://github.com/{RepoName}/PerseidsPooling.git" },
+            { "NavMesh Avoidance", $"https://github.com/{RepoName}/NavMeshAvoidance.git" },
+            { "Tags", $"https://github.com/{RepoName}/Tags.git" },
         };
         
         readonly Dictionary<string, string> unityPackages = new ()
@@ -33,6 +36,14 @@ namespace InsaneOne.Core.Development
             { "Post Effects", "com.unity.postprocessing" },
             { "Recorder", "com.unity.recorder" },
             { "Cinemachine", "com.unity.cinemachine" },
+        };
+        
+        readonly Dictionary<string, string> assetsUrls = new ()
+        {
+            { "DOTween", "https://assetstore.unity.com/packages/tools/animation/dotween-hotween-v2-27676" },
+            { "More Effective Coroutines", "https://assetstore.unity.com/packages/tools/animation/more-effective-coroutines-free-54975" },
+            { "ReWired", "https://assetstore.unity.com/packages/tools/utilities/rewired-21676" },
+            { "Odin Inspector", "https://assetstore.unity.com/packages/tools/utilities/odin-inspector-and-serializer-89041" },
         };
 
         Vector2 scroll;
@@ -109,6 +120,8 @@ namespace InsaneOne.Core.Development
             var prevGUIEnabled = GUI.enabled;
             GUI.enabled = installRequest == null;
             
+            GUILayout.Space(5);
+            
             GUILayout.BeginVertical(blockStyle);
             
             DrawHeader("Frequently used modules - add/update", false);
@@ -122,8 +135,10 @@ namespace InsaneOne.Core.Development
             GUILayout.EndHorizontal();
             GUILayout.EndVertical();
             
+            GUILayout.Space(5);
+            
             GUILayout.BeginVertical(blockStyle);
-            DrawHeader("Frequently used assets - add/update", false);
+            DrawHeader("Frequently used packages - add/update", false);
             
             GUILayout.BeginHorizontal();
             
@@ -134,12 +149,24 @@ namespace InsaneOne.Core.Development
             GUILayout.EndHorizontal();
             GUILayout.EndVertical();
             
-            /* idk now how to load and install assets - no such api in documentation
-            "DOTween", "Odin Inspector", "ME Coroutines", "Rainbow Hierarchy"
-            */
+            GUILayout.Space(5);
+            
+            GUILayout.BeginVertical(blockStyle);
+            DrawHeader("Frequently used assets - open in browser", false);
+            
+            GUILayout.BeginHorizontal();
+            
+            foreach (var asset in assetsUrls)
+                if (GUILayout.Button(asset.Key))
+                    OpenUrl(asset.Value);
+
+            GUILayout.EndHorizontal();
+            GUILayout.EndVertical();
             
             GUI.enabled = prevGUIEnabled;
         }
+
+        void OpenUrl(string url) => Process.Start(url);
         
         void DrawChecklist()
         {
@@ -256,7 +283,7 @@ namespace InsaneOne.Core.Development
 
         void DrawFixCreateAtOrigin()
         {  
-            var isFine = EditorPrefs.GetBool(originPlacePrefName);
+            var isFine = EditorPrefs.GetBool(OriginPlacePrefName);
             var previousGuiColor = GUI.color;
             
             GUI.color = isFine ? previousGuiColor : checklistBadColor;
@@ -268,7 +295,7 @@ namespace InsaneOne.Core.Development
                 richText);
             
             if (!isFine && GUILayout.Button("Fix"))
-                EditorPrefs.SetBool(originPlacePrefName, true);
+                EditorPrefs.SetBool(OriginPlacePrefName, true);
             
             GUILayout.EndVertical();
             

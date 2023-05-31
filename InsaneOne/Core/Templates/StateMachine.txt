@@ -15,7 +15,7 @@ namespace #NAMESPACE#
 
 		void Awake()
 		{
-			state = State.State1;
+			SetState(State.State1);
 		}
 
 		void Update()

@@ -7,7 +7,7 @@ namespace InsaneOne.Core.Components
 	public enum ClampAxes { X = 1, Y = 2, Z = 4 }
 
 	[DefaultExecutionOrder(100)]
-	public class ClampPosition : MonoBehaviour
+	public sealed class ClampPosition : MonoBehaviour
 	{
 		[SerializeField] ClampAxes clampAxes = ClampAxes.X;
 		[Tooltip("Should be clamp applied from transform coordinates instead of world zero?")]

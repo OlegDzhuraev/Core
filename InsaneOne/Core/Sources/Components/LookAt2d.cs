@@ -10,7 +10,7 @@ namespace InsaneOne.Core.Components
 		TransformTarget
 	}
 
-	public class LookAt2d : MonoBehaviour
+	public sealed class LookAt2d : MonoBehaviour
 	{
 		[SerializeField] LookType lookType;
 		[SerializeField] bool isInstant = true;

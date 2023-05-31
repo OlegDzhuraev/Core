@@ -3,7 +3,7 @@ using UnityEngine;
 namespace #NAMESPACE#
 {
     /// <summary>Class to implement basic player input movement.</summary>
-    public class #SCRIPTNAME# : MonoBehaviour
+    public sealed class #SCRIPTNAME# : MonoBehaviour
     {
         [SerializeField] float moveSpeed = 2f;
         

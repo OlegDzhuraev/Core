@@ -21,6 +21,20 @@ namespace InsaneOne.Core.Development
 			}
 		}
 		
+		/// <summary> Loads all assets, found in project by search filter, in List of type T. </summary>
+		public static void LoadAssetsToList<T>(List<T> listToAddIn) where T : Object
+		{
+			listToAddIn.Clear();
+            
+			var assets = AssetDatabase.FindAssets($"t:{typeof(T)}");
+
+			for (int i = 0; i < assets.Length; i++)
+			{
+				var asset = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(assets[i]), typeof(T)) as T;
+				listToAddIn.Add(asset);
+			}
+		}
+		
 		/// <summary> Creates 2D texture with selected size and color. Useful for editor gui styles. </summary>
 		public static Texture2D MakeTexture(int width, int height, Color color)
 		{

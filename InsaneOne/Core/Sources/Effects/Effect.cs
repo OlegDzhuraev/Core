@@ -2,6 +2,7 @@ using UnityEngine;
 
 namespace InsaneOne.Core
 {
+    // todo: this is not supposed to be special class for effects, I think. It should be more common.
     public static class Effect
     {
         const string effectsParentName = "[Effects]";

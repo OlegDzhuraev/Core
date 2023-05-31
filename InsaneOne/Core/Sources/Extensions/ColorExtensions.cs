@@ -20,7 +20,7 @@ namespace InsaneOne.Core
 
         public static string GetHexValue(this Color32 inputColor, bool isNeededAlpha = false)
         {
-            string result = "#";
+            var result = "#";
 
             result += inputColor.r.ToString("X2") + inputColor.g.ToString("X2") + inputColor.b.ToString("X2");
 

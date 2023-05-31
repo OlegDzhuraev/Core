@@ -4,7 +4,7 @@ using UnityEngine;
 namespace #NAMESPACE#
 {
 	/// <summary>Describes projectile/bullet object which can fly and hit targets.</summary>
-	public class #SCRIPTNAME# : MonoBehaviour, IProjectile
+	public sealed class #SCRIPTNAME# : MonoBehaviour, IProjectile
 	{
 		[SerializeField] float speed = 3f;
 		

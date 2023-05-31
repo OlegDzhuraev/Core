@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 namespace #NAMESPACE#
 {
 	/// <summary>This class describes an UI Image-button, which is not requires a Button component to work.</summary>
-	public class #SCRIPTNAME# : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
+	public sealed class #SCRIPTNAME# : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 	{
 		public void OnPointerClick(PointerEventData eventData)
 		{

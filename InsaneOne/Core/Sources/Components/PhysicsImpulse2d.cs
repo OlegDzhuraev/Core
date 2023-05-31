@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace InsaneOne.Core.Components
 {
-	public class PhysicsImpulse2d : MonoBehaviour
+	public sealed class PhysicsImpulse2d : MonoBehaviour
 	{
 		[SerializeField] bool applyOnStart = true;
 		[SerializeField] ForceMode2D type = ForceMode2D.Impulse;
