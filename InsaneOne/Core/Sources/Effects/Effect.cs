@@ -1,6 +1,7 @@
 using UnityEngine;
 #if PERSEIDS_POOLING
 using InsaneOne.PerseidsPooling;
+using InsaneOne.PerseidsPooling.Utils;
 #endif
 
 namespace InsaneOne.Core

@@ -29,7 +29,7 @@ namespace InsaneOne.Core
 #if PERSEIDS_POOLING
 			if (usePoolingIfPossible)
 			{
-				target.GetOrAddComponent<InsaneOne.PerseidsPooling.DelayedPoolDestruction>().SetDestructionTime(delay);
+				target.GetOrAddComponent<PerseidsPooling.Utils.DelayedPoolDestruction>().SetDestructionTime(delay);
 				return;
 			}
 #endif
