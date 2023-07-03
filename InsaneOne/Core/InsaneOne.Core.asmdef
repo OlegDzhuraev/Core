@@ -2,8 +2,8 @@
     "name": "InsaneOne.Core",
     "rootNamespace": "",
     "references": [
-        "GUID:4307f53044263cf4b835bd812fc161a4",
-        "GUID:6055be8ebefd69e48b49212b09b47b2f"
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:595e91ee7fe166e488721ef5b3d014ef"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
