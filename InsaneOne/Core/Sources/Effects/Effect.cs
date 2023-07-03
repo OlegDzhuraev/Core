@@ -39,7 +39,7 @@ namespace InsaneOne.Core
             }
             else
             {
-                vfx.DelayedDestroy(destructionDelay);
+                vfx.DelayedDestroy(destructionDelay, true);
             }
 
             return vfx;
