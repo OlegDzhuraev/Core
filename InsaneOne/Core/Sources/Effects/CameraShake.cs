@@ -1,37 +1,47 @@
+using System;
 using UnityEngine;
 
 namespace InsaneOne.Core.Effects
 {
-	/// <summary> Shakes camera in local coordinates. </summary>
+	/// <summary> Shakes camera in local coordinates. Requires camera to be child of some other transform.
+	/// <para>It is not static because you can want to use it with several cameras</para></summary>
 	public sealed class CameraShake
 	{
+		readonly Transform camTransform;
+		readonly Vector3 startPos;
+		
 		Timer shakeTimer, frequencyTimer;
 
 		bool isActive;
 
 		Vector2 direction;
-		Transform camTransform;
-
+		
 		Vector3 actualPos, targetPos;
-		readonly Vector3 startPos;
-
+		
 		ShakeImpulse impulse;
 
-		public CameraShake(Vector3 defaultCameraLocalPos)
+		public CameraShake(Transform cameraTransform)
 		{
-			startPos = defaultCameraLocalPos;
+			camTransform = cameraTransform;
+			startPos = cameraTransform.localPosition;
 		}
 		
 		public void Shake(ShakeImpulse withImpulse)
 		{
+			if (!camTransform)
+				throw new NullReferenceException("Camera Shake: no camera transform exist! Possibly, camera was destroyed. Cancelled shake.");
+			
+			if (camTransform.parent == null)
+			{
+				Debug.LogWarning("Camera Shake: requires camera to be child of some other transform. Actually it is not. Cancelled shake.");
+				return;
+			}
+			
 			impulse = withImpulse;
 			
 			frequencyTimer = new Timer(impulse.GetFrequency(0));
 			shakeTimer = new Timer(impulse.TimeLength);
-
 			direction = Vector2.zero;
-			camTransform = MainCamera.Cached.transform;
-
 			isActive = true;
 
 			CalculateNewPosition();
