@@ -2,7 +2,7 @@
 
 namespace InsaneOne.Core
 {
-	public class DelayedDestruction : MonoBehaviour
+	public sealed class DelayedDestruction : MonoBehaviour
 	{
 		[SerializeField] [Range(0f, 1000f)] float secondsToDestruction = 3f;
 		[SerializeField] bool detachChilds;
@@ -23,15 +23,26 @@ namespace InsaneOne.Core
 
 		public void SetDestructionTime(float newTime) => secondsToDestruction = newTime;
 
-		public static void ApplyTo(GameObject target, float delay = 3f)
+		/// <summary> Will destroy a object after time passed. Can be used with Perseids Pooling. </summary>
+		public static void ApplyTo(GameObject target, float delay = 3f, bool usePoolingIfPossible = false)
 		{
+#if PERSEIDS_POOLING
+			if (usePoolingIfPossible)
+			{
+				target.GetOrAddComponent<InsaneOne.PerseidsPooling.DelayedPoolDestruction>().SetDestructionTime(delay);
+				return;
+			}
+#endif
 			target.GetOrAddComponent<DelayedDestruction>().SetDestructionTime(delay);
 		}
 	}
 
 	public static class DelayedDestructionExtension
 	{
-		public static void DelayedDestroy(this GameObject gameObject, float delay = 3f) =>
-			DelayedDestruction.ApplyTo(gameObject, delay);
+		/// <summary> Will destroy a object after time passed. Can be used with Perseids Pooling. </summary>
+		public static void DelayedDestroy(this GameObject gameObject, float delay = 3f, bool usePoolingIfPossible = false)
+		{
+			DelayedDestruction.ApplyTo(gameObject, delay, usePoolingIfPossible);
+		}
 	}
 }

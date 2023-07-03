@@ -1,8 +1,11 @@
 using UnityEngine;
+#if PERSEIDS_POOLING
+using InsaneOne.PerseidsPooling;
+#endif
 
 namespace InsaneOne.Core
 {
-    // todo: this is not supposed to be special class for effects, I think. It should be more common.
+    /// <summary> VFX spawner class. Will use pooling system, if Perseids Pooling is added to the project. </summary>
     public static class Effect
     {
         const string effectsParentName = "[Effects]";
@@ -13,14 +16,23 @@ namespace InsaneOne.Core
         public static GameObject Create(GameObject vfxPrefab, Vector3 position,
             Quaternion rotation = default, Transform parent = null, float destructionDelay = 15f)
         {
+#if PERSEIDS_POOLING
+            var vfx = Pool.Spawn(vfxPrefab);
+            vfx.transform.position = position;
+            vfx.transform.rotation = rotation;
+#else 
             var vfx = GameObject.Instantiate(vfxPrefab, position, rotation);
+#endif
             
             vfx.transform.SetParent(parent != null ? parent : GetEffectsParent());
             
             if (destructionDelay <= -1)
             {
+#if PERSEIDS_POOLING
+                var delayedDestruction = vfx.GetComponent<DelayedPoolDestruction>();
+#else 
                 var delayedDestruction = vfx.GetComponent<DelayedDestruction>();
-                
+#endif
                 if (delayedDestruction)
                     GameObject.Destroy(delayedDestruction);
             }
