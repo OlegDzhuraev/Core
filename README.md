@@ -11,7 +11,10 @@ Tools can be found in the top menu, the button named **Tools**.
 ### Setup Project Tool
 Tool allows to atuo-generate project folders structure and quckly tune most frequently needed for me Editor and Project settings.
 
-### Level Design - Transform Randomize
+## Level Design Tools
+These tools also can be found in the top menu in **Tools** menu item.
+
+### Transform Randomize
 Allows to randomize rotation, scale and position of the scene-selected transforms.
 
 ## Extensions
@@ -43,7 +46,7 @@ PhysicsExtensions.GetObjectsOfTypeIn2DCircle<T>(pos, radius);
 ```
 
 ## Templates
-In Project Manager in context menu now exist a new partition InsaneOne/Templates, which includes some ready code file templates, which are frequently used by me in gamedev. 
+In the Project Manager window, in context menu now exist a new partition **InsaneOne/Templates**, which includes some ready code file templates, which are frequently used by me in gamedev. Possible, will be removed in future or reworked to smth better, actually not very useful.
 
 ## UI
 I've added some new elements and templates for UI, which is missing in Unity default package. Now it still very simple, but I want to improve it in future.
@@ -58,6 +61,37 @@ I've added some new elements and templates for UI, which is missing in Unity def
 
 ## Localization
 Contains localization extension, which allows to read CSV-based localization and translate ingame texts for selected language.
+
+```cs
+// firstly, you need to run this in some game initialization code:
+Localization.Initialize();
+
+// use SetLanguage to change game lang:
+Localization.SetLanguage("English"); // id of the lang
+
+// Get any localized text:
+var text = Localization.GetText("localeString");
+```
+
+Also, there exist useful component for localization without code - **LocalizedTMPText**. Add it to your text object and write localeId in its text field.
+
+Localization uses **StreamingAssets** to contain a localization file - to allow modify it without game rebuild or allow modding of localization for players.
+
+## Architect
+Some code architect ready-made things. Probably not the best ones :)
+
+### ServiceLocator
+Alternative to the Singleton.
+
+```cs
+// setup in the game initialization code:
+ServiceLocator.Register(new SomeClass());
+
+// ...
+
+// usage in any other class:
+var someClass = ServiceLocator.Get<SomeClass>();
+```
 
 ## Utility
 
@@ -86,6 +120,7 @@ class SomePauserObject : MonoBehaviour, IPauseAffector
 Deltatime-based timer to speedup any timer-based features creation.
 ```cs
 Timer timer;
+
 void Start() 
 {
   timer = new Timer(5f);
