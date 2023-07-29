@@ -48,10 +48,39 @@ In Project Manager in context menu now exist a new partition InsaneOne/Templates
 ## UI
 I've added some new elements and templates for UI, which is missing in Unity default package. Now it still very simple, but I want to improve it in future.
 
+**Floating panel** - allows to create floating in a 3d world (following some object) UI-panel with some info.
+
+**TabControl** - classic tab control element.
+
+**PopupWindow** - allows to create a popup window with any title, text and Apply/Cancel buttons with apply callback.
+
+**Fader** - commonly used in game project. Fades screen alpha into some color.
+
 ## Localization
 Contains localization extension, which allows to read CSV-based localization and translate ingame texts for selected language.
 
 ## Utility
+
+### Pause Utility
+Allows to pause game and use multiple pause affectors object. 
+So, for example, two differect objects wants to pause game. Next call of unpause will actually **not** unpause game until **both** affector objects call it. 
+
+```cs
+using InsaneOne.Core.Utility;
+
+class SomePauserObject : MonoBehaviour, IPauseAffector
+{
+  void SomeAction()
+  {
+    PauseUtility.Pause(this);
+  }
+
+  void SomeOtherAction()
+  {
+    PauseUtility.Unpause(this);
+  }
+}
+```
 
 ### Timer
 Deltatime-based timer to speedup any timer-based features creation.
