@@ -1,4 +1,4 @@
-# InsaneOne Core
+# Core
 My tools and extensions for Unity Engine, which I'm use in all my projects to speedup development. It allows to reduce amount of code - by implementing frequently used functionality. Mainly there stored tools, which is not enough big or good to move them in their own repos.
 
 This repo was exposed to public only just because I want to import it easily with Package Manager, but if you're interested, feel free to use it.
