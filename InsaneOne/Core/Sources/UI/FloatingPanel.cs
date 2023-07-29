@@ -3,7 +3,7 @@
 namespace InsaneOne.Core.UI
 {
     /// <summary> FloatingPanel Can be used for healthbars and some other informers, which should be drawn near 3D world object but in 2D space. </summary>
-    public sealed class FloatingPanel : MonoBehaviour, IHideable
+    public sealed class FloatingPanel : MonoBehaviour
     {
         public Transform CanvasTransform;
         public RectTransform RectTransform;

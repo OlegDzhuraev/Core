@@ -50,6 +50,7 @@ namespace InsaneOne.Core
 		/// <summary> Restore timer full time left. </summary>
 		public void Restart() => TimeLeft = fullTime;
 		
+		/// <summary> Set this timer complete. </summary>
 		public void SetReady() => TimeLeft = 0f;
 		
 		/// <summary> Get timer reload percents. </summary>

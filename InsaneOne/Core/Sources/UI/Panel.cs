@@ -4,7 +4,7 @@ using UnityEngine;
 namespace InsaneOne.Core.UI
 {
 	/// <summary>You can add this component to any window which should be modal with possibility to be shown and hidden.</summary>
-	public sealed class Modal : MonoBehaviour, IHideable
+	public sealed class Panel : MonoBehaviour
 	{
 		public event Action WasShown, WasHidden;
 		

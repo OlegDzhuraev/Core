@@ -1,15 +1,15 @@
-﻿using System;
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 
 namespace InsaneOne.Core.UI
 {
 	/// <summary> This class allows to show panel with info near cursor. </summary>
-	public sealed class Hint : MonoBehaviour, IHideable
+	[RequireComponent(typeof(Panel))]
+	public sealed class Hint : MonoBehaviour
 	{
-		public event Action WasShown;
+		public Panel SelfPanel => panel;
 		
-		[SerializeField] Modal modal;
+		[SerializeField] Panel panel;
 		[SerializeField] Transform canvasTransform;
 		[SerializeField] TMP_Text nameText;
 
@@ -17,14 +17,14 @@ namespace InsaneOne.Core.UI
 
 		void Awake()
 		{
-			rectTransform = modal.SelfObject.GetComponent<RectTransform>();
+			rectTransform = panel.SelfObject.GetComponent<RectTransform>();
 		}
 
 		void Start() => Hide();
 
 		void Update()
 		{ 
-			if (modal.IsShown)
+			if (panel.IsShown)
 				rectTransform.anchoredPosition = Input.mousePosition;
 		}
 
@@ -35,19 +35,13 @@ namespace InsaneOne.Core.UI
 		
 		public void Show(string text, Vector2 position)
 		{
-			Show();
+			SelfPanel.Show();
 
 			rectTransform.anchoredPosition = position * canvasTransform.localScale.x;
 
 			nameText.text = text;
 		}
 
-		public void Show()
-		{
-			modal.Show();
-			WasShown?.Invoke();
-		}
-
-		public void Hide() => modal.Hide();
+		public void Hide() => panel.Hide();
 	}
 }

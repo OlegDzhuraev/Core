@@ -15,6 +15,12 @@ namespace InsaneOne.Core.Development
 
 		[MenuItem("GameObject/UI/Tab Control", priority = -199)]
 		static void SpawnTabControl() => SpawnUIElement("TabControl");
+		
+		[MenuItem("GameObject/UI/Popup Window", priority = -199)]
+		static void SpawnPopupControl() => SpawnUIElement("PopupWindowTpl");
+		
+		[MenuItem("GameObject/UI/Fader", priority = -199)]
+		static void SpawnFaderControl() => SpawnUIElement("FaderTpl");
 
 		static void SpawnUIElement(string elemName)
 		{
