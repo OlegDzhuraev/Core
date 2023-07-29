@@ -54,7 +54,7 @@ I've added some new elements and templates for UI, which is missing in Unity def
 
 **PopupWindow** - allows to create a popup window with any title, text and Apply/Cancel buttons with apply callback.
 
-**Fader** - commonly used in game project. Fades screen alpha into some color.
+**Fader** - commonly used in a game projects. Fades screen alpha into some color. Requires DOTween.
 
 ## Localization
 Contains localization extension, which allows to read CSV-based localization and translate ingame texts for selected language.
