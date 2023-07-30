@@ -60,7 +60,7 @@ I've added some new elements and templates for UI, which is missing in Unity def
 **Fader** - commonly used in a game projects. Fades screen alpha into some color. Requires DOTween.
 
 ## Localization
-Contains localization extension, which allows to read CSV-based localization and translate ingame texts for selected language.
+Repo contains localization extension, which allows to read CSV-based localization and translate ingame texts for selected language.
 
 ```cs
 // firstly, you need to run this in some game initialization code:
@@ -138,20 +138,20 @@ void Update()
 ```
 
 ### DelayedDestruction
-Allows to destroy GameObject with attached component with time delay.
+Allows to destroy a GameObject with attached component with the time delay.
 ```cs
 gameObject.DelayedDestroy(3f);
 ```
 
 ### MainCamera
-Most of projects use only one camera, which can be received by calling Camera.main. But in old Unity versions it is not cached and can cause performance issues. This utility helps to solve this problem by caching a Main Camera. 
+Most of projects use only one camera, which can be received by calling Camera.main. But in the old Unity versions it is not cached and can cause performance issues. This utility helps to solve this problem by caching the Main Camera. 
 
 ```cs
 var cam = MainCamera.Cached;
 ```
 
 ## Shaders
-This repo contains some PBR shaders, mainly for load textures from one mask (Metal-Roughness-AO, etc).
+This repo contains some PBR shaders, mainly to allow load textures from one mask (Metal-Roughness-AO, etc).
 
 ## License
 MIT License
