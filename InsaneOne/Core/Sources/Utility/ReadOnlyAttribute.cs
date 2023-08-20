@@ -4,7 +4,7 @@ using UnityEditor;
 
 using UnityEngine;
 
-namespace InsaneOne.CoreNew
+namespace InsaneOne.Core
 {
 	public class ReadOnlyAttribute : PropertyAttribute { }
 
