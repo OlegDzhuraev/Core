@@ -108,5 +108,21 @@ namespace InsaneOne.Core
 			var targetDirection = (positionB - positionA).normalized;
 			return Vector2.Angle(forwardA, targetDirection) < threshold;
 		}
+		
+		/// <summary> Find child by name with recursive search in all children objects. </summary>
+		public static Transform RecursiveFind(this Transform parent, string childName)
+		{
+			foreach (Transform child in parent)
+			{
+				if (child.name == childName)
+					return child;
+
+				var found = RecursiveFind(child, childName);
+				if (found != null)
+					return found;
+			}
+
+			return null;
+		}
 	}
 }

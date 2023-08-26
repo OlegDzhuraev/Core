@@ -44,5 +44,31 @@ namespace InsaneOne.Core
 
             return new Vector2(x, y);
         }
+        
+        /// <summary> Get item from dictionary by weighted random. </summary>
+        /// <param name="items">Structure - key: item, value: its weight</param>
+        public static T GetWeightedItem<T>(this Dictionary<T, float> items)
+        {
+            float totalWeight = 0;
+
+            foreach (var (_, weight) in items)
+                totalWeight += weight;
+
+            var randomNumber = UnityEngine.Random.Range(0f, totalWeight);
+
+            T selectedItem = default;
+            foreach (var (item, weight) in items)
+            {
+                if (randomNumber < weight)
+                {
+                    selectedItem = item;
+                    break;
+                }
+
+                randomNumber -= weight;
+            }
+
+            return selectedItem;
+        }
     }
 }
