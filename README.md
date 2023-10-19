@@ -45,6 +45,63 @@ PhysicsExtensions.GetObjectsOfTypeInSphere<T>(pos, radius);
 PhysicsExtensions.GetObjectsOfTypeIn2DCircle<T>(pos, radius);
 ```
 
+## Audio
+Allows to play audio directly from code without setting up AudioSources in prefabs.
+
+Full initialization and usage example:
+```cs
+using InsaneOne.Core;
+using UnityEngine;
+
+public class TestAudio : MonoBehaviour
+{
+  [SerializeField] AudioClip clip;
+
+  void Start()
+  {
+    // Initializes Core Audio system
+    Audio.Init();
+
+    // Configurations for 3D and 2D sounds.
+    var data3DSound = new AudioGroupData()
+    {
+      Is3D = true,
+      MinDistance3D = 2f,
+      MaxDistance3D = 60f,
+      DopplerLevel = 0f
+    };
+      
+    var data2DSound = new AudioGroupData() { Is3D = false };
+
+    // Setting up some different audio layers, both for 3d and 2d sounds. Audio layers is useful to limiting specific type sounds amount,
+    // also audio layer stores audio settings, for example Min/Max distance or Audio Mixer Group (see code for more info).
+    Audio.UpdateLayer(AudioLayer.Interaction, data3DSound);
+    Audio.AddSourcesInLayer(AudioLayer.Interaction, 8);
+      
+    Audio.UpdateLayer(AudioLayer.Ambience, data3DSound);
+    Audio.AddSourcesInLayer(AudioLayer.Ambience, 3);
+      
+    Audio.UpdateLayer(AudioLayer.UI, data2DSound);
+    Audio.AddSourcesInLayer(AudioLayer.UI, 2);
+  }
+
+  void Update()
+  {
+    // Playing 3D audio (Interaction audio layer was setup as 3d earlier) in specified layer with 50% volume and 10% pitch randomization at transform position.
+    if (Input.GetMouseButtonDown(0))
+      Audio.Play(AudioLayer.Interaction, clip, transform.position, 0.5f, 0.1f);
+  }
+}
+
+// Used just to make more readable code
+public static class AudioLayer
+{
+  public const int Ambience = 10;
+  public const int Interaction = 20;
+  public const int UI = 100;
+}
+```
+
 ## Templates
 In the Project Manager window, in context menu now exist a new partition **InsaneOne/Templates**, which includes some ready code file templates, which are frequently used by me in gamedev. Possible, will be removed in future or reworked to smth better, actually not very useful.
 
