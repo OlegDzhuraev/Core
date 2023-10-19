@@ -8,7 +8,7 @@ using DG.Tweening;
 
 namespace InsaneOne.Core.Ui
 {
-    /// <summary> Ui screen fader. Requires DOTween to work. If you're had DOTween installed,add DOTWEEN compile symbol
+    /// <summary> Ui screen fader. Requires DOTween to work. If you're had DOTween installed, add DOTWEEN compile symbol
     /// to the Project Settings and check AsmDef InsaneOne.Core referenced to the DoTween. </summary>
     public sealed class Fader : MonoBehaviour
     {
@@ -71,7 +71,7 @@ namespace InsaneOne.Core.Ui
                 return false;
             }
 
-            var go = Instantiate(ServiceLocator.Get<CoreData>().UiFaderTpl);
+            var go = Instantiate(CoreData.Load().UiFaderTpl);
             DontDestroyOnLoad(go);
 
             instance = faderInstance = go.GetComponent<Fader>();

@@ -11,7 +11,6 @@ namespace InsaneOne.Core.Development
 {
     public class SetupProjectToolWindow : EditorWindow
     {
-        const string RepoName = "OlegDzhuraev";
         const string OriginPlacePrefName = "Create3DObject.PlaceAtWorldOrigin";
         
         static AddRequest installRequest;
@@ -22,36 +21,13 @@ namespace InsaneOne.Core.Development
         string contentFolder = "Resource";
 
         int dimension, foldersStyle;
-
-        readonly Dictionary<string, string> gitPackages = new()
-        {
-            { "Modifiers", $"https://github.com/{RepoName}/Modifiers.git"},
-            { "Perseids Pooling", $"https://github.com/{RepoName}/PerseidsPooling.git" },
-            { "NavMesh Avoidance", $"https://github.com/{RepoName}/NavMeshAvoidance.git" },
-            { "Tags", $"https://github.com/{RepoName}/Tags.git" },
-        };
         
-        readonly Dictionary<string, string> unityPackages = new ()
-        {
-            { "Post Effects", "com.unity.postprocessing" },
-            { "Recorder", "com.unity.recorder" },
-            { "Cinemachine", "com.unity.cinemachine" },
-        };
-        
-        readonly Dictionary<string, string> assetsUrls = new ()
-        {
-            { "DOTween", "https://assetstore.unity.com/packages/tools/animation/dotween-hotween-v2-27676" },
-            { "More Effective Coroutines", "https://assetstore.unity.com/packages/tools/animation/more-effective-coroutines-free-54975" },
-            { "ReWired", "https://assetstore.unity.com/packages/tools/utilities/rewired-21676" },
-            { "Odin Inspector", "https://assetstore.unity.com/packages/tools/utilities/odin-inspector-and-serializer-89041" },
-        };
-
         Vector2 scroll;
         
         string selectedNamespace = "Game";
         string companyName = "InsaneOne";
 
-        GUIStyle richText, partitionHeader, blockStyle;
+        GUIStyle richText, partitionHeader, blockStyle, bigBlockStyle;
         
         [MenuItem("Tools/Setup Project Tool")]
         public static void ShowWindow()
@@ -62,10 +38,13 @@ namespace InsaneOne.Core.Development
 
         void Init()
         {
-            minSize = new Vector2(512, 512);
-            maxSize = new Vector2(768, 768);
+            minSize = new Vector2(532, 532);
+            maxSize = new Vector2(798, 798);
             richText = new GUIStyle(EditorStyles.label) { richText = true };
             blockStyle = new GUIStyle(EditorStyles.helpBox);
+            bigBlockStyle = new GUIStyle(EditorStyles.helpBox);
+            bigBlockStyle.margin = new RectOffset(10, 10, 10, 10);
+            bigBlockStyle.padding = new RectOffset(10, 10, 10, 10);
             
             partitionHeader = new GUIStyle(EditorStyles.boldLabel)
             {
@@ -88,9 +67,9 @@ namespace InsaneOne.Core.Development
 
         void DrawGenerateFolders()
         {
-            GUILayout.BeginVertical(blockStyle);
+            GUILayout.BeginVertical(bigBlockStyle);
             
-            DrawHeader("Project folders", false);
+            DrawPartitionHeader("Project folders");
             
             dimension = EditorGUILayout.Popup("Project dimensions", dimension, new[] {"3D", "2D"});
             foldersStyle = EditorGUILayout.Popup("Folders style", foldersStyle, new[] {"Feature-oriented", "Classic"});
@@ -117,59 +96,58 @@ namespace InsaneOne.Core.Development
 
         void DrawModulesInstall()
         {
+            var coreData = CoreData.Load();
+            
             var prevGUIEnabled = GUI.enabled;
             GUI.enabled = installRequest == null;
             
-            GUILayout.Space(5);
+            GUILayout.BeginVertical(bigBlockStyle);
+            DrawPartitionHeader("Packages and Assets");
             
-            GUILayout.BeginVertical(blockStyle);
-            
-            DrawHeader("Frequently used modules - add/update", false);
-            
-            GUILayout.BeginHorizontal();
-            
-            foreach (var package in gitPackages)
-                if (GUILayout.Button(package.Key))
-                    AddPackage(package.Value);
-
-            GUILayout.EndHorizontal();
-            GUILayout.EndVertical();
-            
-            GUILayout.Space(5);
-            
-            GUILayout.BeginVertical(blockStyle);
-            DrawHeader("Frequently used packages - add/update", false);
-            
-            GUILayout.BeginHorizontal();
-            
-            foreach (var package in unityPackages)
-                if (GUILayout.Button(package.Key))
-                    AddPackage(package.Value);
-
-            GUILayout.EndHorizontal();
-            GUILayout.EndVertical();
-            
-            GUILayout.Space(5);
-            
-            GUILayout.BeginVertical(blockStyle);
-            DrawHeader("Frequently used assets - open in browser", false);
-            
-            GUILayout.BeginHorizontal();
-            
-            foreach (var asset in assetsUrls)
-                if (GUILayout.Button(asset.Key))
-                    OpenUrl(asset.Value);
-
-            GUILayout.EndHorizontal();
+            DrawAddModule("Frequently used modules - add/update", coreData.GitPackages);
+            DrawAddModule("Frequently used packages - add/update", coreData.Packages);
+            DrawAddModule("Frequently used assets - open in browser", coreData.AssetLinks, true);
             GUILayout.EndVertical();
             
             GUI.enabled = prevGUIEnabled;
+        }
+
+        void DrawAddModule(string blockTitle, List<LinkHolder> links, bool openUrl = false)
+        { 
+            GUILayout.Space(5);
+            
+            GUILayout.BeginVertical(blockStyle);
+            DrawHeader(blockTitle, false);
+            GUILayout.BeginHorizontal();
+            
+            for (var q = 0; q < links.Count; q++)
+            {
+                if (q % 4 == 0)
+                {
+                    GUILayout.EndHorizontal();
+                    GUILayout.BeginHorizontal();
+                }
+                
+                var assetOrPackage = links[q];
+                
+                if (GUILayout.Button(assetOrPackage.Name))
+                {
+                    if (openUrl)
+                        OpenUrl(assetOrPackage.Link);
+                    else
+                        AddPackage(assetOrPackage.Link);
+                }
+            }
+
+            GUILayout.EndHorizontal();
+            GUILayout.EndVertical();
         }
 
         void OpenUrl(string url) => Process.Start(url);
         
         void DrawChecklist()
         {
+            GUILayout.BeginVertical(bigBlockStyle);
             DrawPartitionHeader("Setup Checklist");
             
             DrawHeader("Graphics settings", false);
@@ -183,6 +161,8 @@ namespace InsaneOne.Core.Development
             DrawFixNamespace();
             DrawFixCompanyName();
             DrawFixCreateAtOrigin();
+            
+            GUILayout.EndVertical();
         }
 
         void DrawFixColorSpace()
@@ -305,7 +285,6 @@ namespace InsaneOne.Core.Development
         
         void DrawPartitionHeader(string text)
         {
-            EditorGUILayout.Space(5);
             GUILayout.Label(text, partitionHeader);
             EditorGUILayout.Space(5);
         }
