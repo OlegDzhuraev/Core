@@ -7,6 +7,17 @@ namespace InsaneOne.Core.Development
 	/// <summary> Common methods for editor scripts.</summary>
 	public static class EditorHelpers
 	{
+		public static GUIStyle GetBigBlockStyle()
+		{
+			var bigBlockStyle = new GUIStyle(EditorStyles.helpBox)
+			{
+				margin = new RectOffset(10, 10, 10, 10),
+				padding = new RectOffset(10, 10, 10, 10)
+			};
+
+			return bigBlockStyle;
+		}
+		
 		/// <summary> Loads all assets, found in project by search filter, in List of type T. </summary>
 		public static void LoadAssetsToList<T>(List<T> listToAddIn, string searchFilter) where T : Object
 		{

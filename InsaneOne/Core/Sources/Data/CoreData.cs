@@ -11,6 +11,7 @@ namespace InsaneOne.Core
         
         static CoreData instance;
         
+        [Tooltip("Place here used fader prefab.")]
         public GameObject UiFaderTpl;
 
         [Header("Setup Project Tool settings")]
@@ -27,6 +28,8 @@ namespace InsaneOne.Core
             new LinkHolder() { Name = "Post Effects", Link = "com.unity.postprocessing" },
             new LinkHolder() { Name = "Recorder", Link = "com.unity.recorder" },
             new LinkHolder() { Name = "Cinemachine", Link = "com.unity.cinemachine" },
+            new LinkHolder() { Name = "Animation Rigging", Link = "com.unity.animation.rigging" },
+            new LinkHolder() { Name = "Terrain Tools", Link = "com.unity.terrain-tools" },
         };
         
         public List<LinkHolder> AssetLinks = new List<LinkHolder>()
@@ -38,6 +41,7 @@ namespace InsaneOne.Core
             new LinkHolder() { Name = "FMOD", Link = "https://www.fmod.com/unity" },
             new LinkHolder() { Name = "MicroSplat Terrain", Link = "https://assetstore.unity.com/packages/tools/terrain/microsplat-96478" },
             new LinkHolder() { Name = "NG Soft Shadows", Link = "https://assetstore.unity.com/packages/vfx/shaders/next-gen-soft-shadows-137380" },
+            new LinkHolder() { Name = "Dynamic Decals", Link = "https://github.com/EricFreeman/DynamicDecals" },
         };
         
         [Header("Debugging")]

@@ -130,7 +130,20 @@ namespace InsaneOne.Core
 			return null;
 		}
 
-		static bool TryGetFreeSource(int layer, out AudioSource audioSource)
+		/// <summary> Plays sound with parameters, specified in the AudioData. </summary>
+		/// <returns>AudioSource, choosen to play. You can handle its changes manually by your code (stop after N seconds, for example, etc). </returns>
+		public static AudioSource Play(int layer, AudioData data, Vector3 position = default)
+		{
+			if (data.GetClipsVariationsAmount() == 0)
+			{
+				Debug.LogWarning("No audio clips set in the passed AudioData! Nothing will be played.");
+				return null;
+			}
+			
+			return Play(layer, data.GetRandomClip(), position, data.Volume, data.PitchRandom, data.Loop);
+		}
+
+		public static bool TryGetFreeSource(int layer, out AudioSource audioSource)
 		{
 			audioSource = default;
 			

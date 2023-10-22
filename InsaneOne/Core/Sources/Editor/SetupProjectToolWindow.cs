@@ -42,9 +42,7 @@ namespace InsaneOne.Core.Development
             maxSize = new Vector2(798, 798);
             richText = new GUIStyle(EditorStyles.label) { richText = true };
             blockStyle = new GUIStyle(EditorStyles.helpBox);
-            bigBlockStyle = new GUIStyle(EditorStyles.helpBox);
-            bigBlockStyle.margin = new RectOffset(10, 10, 10, 10);
-            bigBlockStyle.padding = new RectOffset(10, 10, 10, 10);
+            bigBlockStyle = EditorHelpers.GetBigBlockStyle();
             
             partitionHeader = new GUIStyle(EditorStyles.boldLabel)
             {
