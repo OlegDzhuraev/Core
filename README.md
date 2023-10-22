@@ -101,6 +101,58 @@ public static class AudioLayer
   public const int UI = 100;
 }
 ```
+### AudioData
+Extension for AudioClip. Allows to setup in inspector:
+- Sound variations
+- Volume
+- Pitch random
+- Loop toggle
+
+Can be used with Audio system, described above.
+
+```cs
+[SerializeField] AudioData data;
+
+// <...>
+Audio.Play(AudioLayer.Interaction, data, transform.position);
+```
+
+### SoundMixer
+Allows to mix several AudioSources, driven by some mix paramter. For example, changing sound by Engine RPM change.
+
+```cs
+using InsaneOne.Core;
+using UnityEngine;
+
+public class TestSoundMix : MonoBehaviour
+{
+  SoundMixer soundMixer;
+  
+  void Start()
+  {
+      // setup audio system before below code runs (see prev example), if you want to use this system
+
+      // getting audio from the Audio system of previous example. You can use AudioSources directly, if you dont need this system.
+      Audio.TryGetFreeSource(AudioLayer.Interaction, out var sourceA);
+      Audio.TryGetFreeSource(AudioLayer.Interaction, out var sourceB);
+
+      // initialization of the sound mixer (you can pass any audio sources amount)
+      soundMixer = new SoundMixer(sourceA, sourceB);
+  }
+
+  void Update()
+  {
+    // set any mix value from 0 to 1, and volume of specified sounds will be changed accordingly
+    if (Input.GetKeyDown(KeyCode.Alpha1)) 
+        soundMixer.UpdateMix(0.5f);
+
+    if (Input.GetKeyDown(KeyCode.Alpha2)) 
+        soundMixer.UpdateMix(Random.Range(0f, 1f));
+
+    // you also can tween your value and pass it to the UpdateMix method.
+  }
+}
+```
 
 ## Templates
 In the Project Manager window, in context menu now exist a new partition **InsaneOne/Templates**, which includes some ready code file templates, which are frequently used by me in gamedev. Possible, will be removed in future or reworked to smth better, actually not very useful.
