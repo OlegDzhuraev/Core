@@ -102,13 +102,14 @@ public static class AudioLayer
 }
 ```
 ### AudioData
-Extension for AudioClip. Allows to setup in inspector:
+Extension for AudioClip. Allows to setup more sound settings in the inspector:
 - Sound variations
 - Volume
 - Pitch random
 - Loop toggle
 
 Can be used with Audio system, described above.
+Main idea is to move sound setup from the prefab AudioSource settings to ScriptableObject or your own scripts. 
 
 ```cs
 [SerializeField] AudioData data;
