@@ -18,7 +18,7 @@ namespace InsaneOne.Core.Development
         readonly Color checklistBadColor = Color.yellow;
         
         /// <summary> Resources folder name. Should be NOT Resources, any other naming. </summary>
-        string contentFolder = "Resource";
+        string contentFolder = "Game";
 
         int dimension, foldersStyle;
         
@@ -28,6 +28,8 @@ namespace InsaneOne.Core.Development
         string companyName = "InsaneOne";
 
         GUIStyle richText, partitionHeader, blockStyle, bigBlockStyle;
+
+        bool separateUiInClassicStyle;
         
         [MenuItem("Tools/Setup Project Tool")]
         public static void ShowWindow()
@@ -40,7 +42,7 @@ namespace InsaneOne.Core.Development
         {
             minSize = new Vector2(532, 532);
             maxSize = new Vector2(798, 798);
-            richText = new GUIStyle(EditorStyles.label) { richText = true };
+            richText = new GUIStyle(EditorStyles.label) { richText = true, wordWrap = true};
             blockStyle = new GUIStyle(EditorStyles.helpBox);
             bigBlockStyle = EditorHelpers.GetBigBlockStyle();
             
@@ -71,9 +73,12 @@ namespace InsaneOne.Core.Development
             
             dimension = EditorGUILayout.Popup("Project dimensions", dimension, new[] {"3D", "2D"});
             foldersStyle = EditorGUILayout.Popup("Folders style", foldersStyle, new[] {"Feature-oriented", "Classic"});
-            
+
             if (foldersStyle == 1)
+            {
                 contentFolder = EditorGUILayout.TextField("Content folder name", contentFolder);
+                separateUiInClassicStyle = EditorGUILayout.Toggle("Separate UI folder", separateUiInClassicStyle);
+            }
 
             if (contentFolder == String.Empty || contentFolder == "Resources")
             {
@@ -340,41 +345,62 @@ namespace InsaneOne.Core.Development
         
         void GenereteProjectFolders(bool is3D)
         {
-            var resourceFolderPath = $"Assets/{contentFolder}";
-            
+            var contentPath = $"Assets/{contentFolder}";
+
             var foldersToCreate = new List<FolderData>
             {
                 new ("Assets", "Resources"),
                 new ("Assets/Resources", "Data"),
                 new ("Assets", contentFolder),
-                new (resourceFolderPath, "Sounds"),
-                new (resourceFolderPath, "Materials"),
-                new (resourceFolderPath, "Animations"),
-                new ($"{resourceFolderPath}/Animations", "UI"),
-                new (resourceFolderPath, "UI"),
-                new ($"{resourceFolderPath}/UI", "Fonts"),
-                new (resourceFolderPath, "Scenes"),
-                new (resourceFolderPath, "Prefabs"),
-                new ($"{resourceFolderPath}/Prefabs", "Effects"),
-                new ($"{resourceFolderPath}/Prefabs", "Environment"),
-                new ($"{resourceFolderPath}/Prefabs", "UITemplates"),
-                new (resourceFolderPath, "Sources"),
-                new ($"{resourceFolderPath}/Sources", "UI"),
-                new ($"{resourceFolderPath}/Sources", "Editor"),
-                new ($"{resourceFolderPath}/Sources", "Storing"),
-            };
+                new (contentPath, "Sounds"),
+                new (contentPath, "Materials"),
+                new (contentPath, "Animations"),
+                new (contentPath, "Scenes"),
+                new (contentPath, "Prefabs"),
+                new ($"{contentPath}/Prefabs", "Effects"),
+                new ($"{contentPath}/Prefabs", "Environment"),
             
+                new (contentPath, "Sources"),
+                new ($"{contentPath}/Sources", "Editor"),
+                new ($"{contentPath}/Sources", "Storing"),
+            };
+
+            if (separateUiInClassicStyle)
+            {
+                var uiPath = "Assets/UI";
+                foldersToCreate.AddRange(new List<FolderData>()
+                {
+                    new($"Assets", "UI"),
+                    new(uiPath, "Sources"),
+                    new(uiPath, "Prefabs"),
+                    new(uiPath, "Sprites"),
+                    new(uiPath, "Fonts"),
+                    new(uiPath, "Animations"),
+                });
+            }
+            else
+            {
+                foldersToCreate.AddRange(new List<FolderData>()
+                {
+                    new (contentPath, "UI"),
+                    new ($"{contentPath}/UI", "Fonts"),
+                    new ($"{contentPath}/Sources", "UI"),
+                    new ($"{contentPath}/Animations", "UI"),
+                    new ($"{contentPath}/Prefabs", "UITemplates"),
+                });
+            }
+
             foreach (var folderData in foldersToCreate)
                 CreateFolderIfNotExist(folderData.Path, folderData.FolderName);
 
             if (is3D)
             {
-                CreateFolderIfNotExist(resourceFolderPath, "Models");
-                CreateFolderIfNotExist(resourceFolderPath, "Textures");
+                CreateFolderIfNotExist(contentPath, "Models");
+                CreateFolderIfNotExist(contentPath, "Textures");
             }
             else
             {
-                CreateFolderIfNotExist(resourceFolderPath, "Sprites");
+                CreateFolderIfNotExist(contentPath, "Sprites");
             }
         }
 
