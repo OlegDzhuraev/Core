@@ -6,6 +6,7 @@ using UnityEngine.UI;
 
 namespace InsaneOne.Core.UI
 {
+	/// <summary> Can be used to make simple popup window with some apply/cancel buttons. </summary>
 	[RequireComponent(typeof(Panel))]
 	public sealed class PopupWindow : MonoBehaviour, IPauseAffector
 	{
@@ -17,15 +18,11 @@ namespace InsaneOne.Core.UI
 		[SerializeField] Button applyButton;
 		[SerializeField] Button cancelButton;
 		[SerializeField] bool pauseOnShow = true;
-		[SerializeField] bool hideOnStart = true;
 
 		Action callback;
 
 		void Start()
 		{
-			if (hideOnStart)
-				panel.Hide();
-			
 			panel.WasShown += OnShown;
 			panel.WasHidden += OnHidden;
 			

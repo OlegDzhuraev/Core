@@ -15,11 +15,7 @@ namespace InsaneOne.Core.UI
 
 		RectTransform rectTransform;
 
-		void Awake()
-		{
-			rectTransform = panel.SelfObject.GetComponent<RectTransform>();
-		}
-
+		void Awake() => rectTransform = panel.RectTransform;
 		void Start() => Hide();
 
 		void Update()

@@ -86,7 +86,7 @@ namespace InsaneOne.Core.Ui
 #else 
 namespace InsaneOne.Core.Ui
 {
-    /// <summary> Mock for prefab. Install DOTween. </summary>
+    /// <summary> Mock for prefab. Install DOTween to use it. </summary>
     public sealed class Fader : MonoBehaviour { }
 }
 #endif

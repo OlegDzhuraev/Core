@@ -4,6 +4,7 @@ using UnityEngine.UI;
 
 namespace InsaneOne.Core.UI
 {
+	/// <summary> Note that current version will work correctly only with mouse input. </summary>
 	public class SelectableIcon : MonoBehaviour, ISelectionReceiver, IPointerEnterHandler, IPointerExitHandler
 	{
 		[SerializeField] Image iconImage;

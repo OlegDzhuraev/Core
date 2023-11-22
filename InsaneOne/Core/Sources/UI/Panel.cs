@@ -12,38 +12,41 @@ namespace InsaneOne.Core.UI
 		[SerializeField] bool hideOnStart;
 		
 		public GameObject SelfObject => selfObject;
+		public RectTransform RectTransform { get; private set; }
 		public bool IsShown { get; private set; }
-		
-		bool isInitialized;
+
+		bool wasShown;
 		
 		void Awake()
 		{
 			if (!selfObject)
 				selfObject = gameObject;
+
+			RectTransform = selfObject.GetComponent<RectTransform>();
 		}
 
 		void Start()
 		{
-			if (hideOnStart)
-				Hide();
-
-			isInitialized = true;
+			if (hideOnStart && !wasShown)
+				Hide(true);
 		}
 
 		public void Show()
 		{
-			if (isInitialized && IsShown)
+			if (IsShown)
 				return;
 			
 			WasShown?.Invoke();
 			
+			wasShown = true;
 			IsShown = true;
+			
 			selfObject.SetActive(true);
 		}
 
-		public void Hide()
+		public void Hide(bool ignoreHiddenState = false)
 		{
-			if (isInitialized && !IsShown)
+			if (!IsShown && !ignoreHiddenState)
 				return;
 			
 			WasHidden?.Invoke();
