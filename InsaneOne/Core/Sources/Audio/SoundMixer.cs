@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace InsaneOne.Core
@@ -35,6 +36,33 @@ namespace InsaneOne.Core
 				var strength = finalMaxDist - Mathf.Abs(Mathf.Clamp(position - MixValue, -finalMaxDist, finalMaxDist));
 
 				mixedSources[q].volume = strength / finalMaxDist;
+			}
+		}
+
+		/// <summary> This method allows to mix directly two audio sources, ignoring others.
+		/// To work correctly, your actual mix value should be equal to passed here start value.
+		/// "start" and "target" - mix progress values (so, if there for example 3 Audio Sources - 0 for first source, 0.5 - second, 1 - third one)
+		/// Note: This method ignores OverMix value for now.</summary>
+		public void MixTwo(float start, float target, float progress)
+		{
+			const float threshold = 0.02f;
+
+			if (Math.Abs(start - target) <= threshold)
+				return;
+
+			MixValue = Mathf.Lerp(start, target, progress);
+			
+			for (var q = 0; q < mixedSources.Length; q++)
+			{
+				var position = q / calculationAmount;
+				var source = mixedSources[q];
+				
+				if (Mathf.Abs(position - start) <= threshold)
+					source.volume = Mathf.Lerp(1f, 0, progress);
+				else if (Math.Abs(position - target) <= threshold)
+					source.volume = Mathf.Lerp(0f, 1f, progress);
+				else
+					source.volume = 0;
 			}
 		}
 

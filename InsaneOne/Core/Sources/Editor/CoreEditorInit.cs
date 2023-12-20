@@ -12,16 +12,13 @@ namespace InsaneOne.Core.Development
 			if (!Resources.Load<CoreData>("InsaneOne/CoreData"))
 			{
 				var newData = ScriptableObject.CreateInstance<CoreData>();
-				if (!AssetDatabase.IsValidFolder("Assets/InsaneOne"))
-					AssetDatabase.CreateFolder("Assets", "InsaneOne");
+				if (!AssetDatabase.IsValidFolder("Assets/Resources"))
+					AssetDatabase.CreateFolder("Assets", "Resources");
+
+				if (!AssetDatabase.IsValidFolder("Assets/Resources/InsaneOne"))
+					AssetDatabase.CreateFolder("Assets/Resources", "InsaneOne"); 
 				
-				if (!AssetDatabase.IsValidFolder("Assets/InsaneOne/Resources"))
-					AssetDatabase.CreateFolder("Assets/InsaneOne", "Resources");
-				
-				if (!AssetDatabase.IsValidFolder("Assets/InsaneOne/Resources/InsaneOne"))
-					AssetDatabase.CreateFolder("Assets/InsaneOne/Resources", "InsaneOne");
-				
-				AssetDatabase.CreateAsset(newData, "Assets/InsaneOne/Resources/InsaneOne/CoreData.asset");
+				AssetDatabase.CreateAsset(newData, "Assets/Resources/InsaneOne/CoreData.asset");
 				
 				Log("<b>InsaneOne.Core:</b> new CoreData was <b><color=\"#55ff33\">created</color></b>.");
 			}
