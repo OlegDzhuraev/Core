@@ -18,6 +18,7 @@ namespace InsaneOne.Core.Locales
 
 		public static readonly List<string> Languages = new ();
 		public static bool IsLoaded;
+		public static bool IsLanguageSetAtLeastOnce { get; private set; }
 		
 		public static readonly Dictionary<string, string> CachedTexts = new ();
 
@@ -79,6 +80,8 @@ namespace InsaneOne.Core.Locales
 				
 				CachedTexts.Add(words[0], translatedWord);
 			}
+
+			IsLanguageSetAtLeastOnce = true;
 			
 			ReloadLocalization();
 		}
@@ -119,6 +122,7 @@ namespace InsaneOne.Core.Locales
 			Languages.Clear();
 			CachedTexts.Clear();
 			IsLoaded = false;
+			IsLanguageSetAtLeastOnce = false;
 		}
 		
 		/// <summary> Finds all objects of the desired type on the scene. It also returns objects from Resources. </summary>
