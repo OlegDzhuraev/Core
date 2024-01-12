@@ -190,6 +190,42 @@ Localization uses **StreamingAssets** to contain a localization file - to allow 
 ## Architect
 Some code architect ready-made things. Probably not the best ones :)
 
+### Context
+Context class allows you to semi-automatically provide some specific context data-class to any of your components.
+
+Initialization:
+```cs
+class GameBootstrap : MonoBehaviour
+{
+  void Awake()
+  {
+    var context = new YourContext(); // YourContext - it can be any your class with data, which should be shared.
+    // setup here your context class with required data
+    Context<YourContext>.Initialize(context); // will initialize all objects on scene, which have components, deriven from the ContextBehaviour<YourContext> by injecting your context.
+  }
+}
+```
+
+In order to provide context to a new spawned objects, use Context.Spawn() instead of GameObject.Instantiate():
+```cs
+Context<YourContext>.Spawn(prefab, new Vector3(15, 0, 25)); // you can pass position, rotation and parent like in the original GameObject.Instantiate
+```
+
+Context access in your component:
+```cs
+class YourClass : ContextBehaviour<YourContext>
+{
+  void Start()
+  {
+    Debug.Log(context.SomeVariable); // you can access any context variable now.
+  }
+}
+```
+
+**Note:** You need to initialize Context in **Awake** before any other components. Use **ScriptExecutionOrder** for this.
+
+Additional info: The **Context** class is implemented in this way to reduce the number of required actions on the developer's part. An alternative would be some kind of initialization of ContextBehaviour via Awake method of this abstract class, but I found it uneffective to override this method in your own classes every time.
+
 ### ServiceLocator
 Alternative to the Singleton.
 
