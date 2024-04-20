@@ -13,7 +13,14 @@ namespace InsaneOne.Core
 			searchColliders = new Collider[value];
 			searchColliders2D = new Collider2D[value];
 		}
-		
+
+		/// <summary> Casts a ray to mouse position from camera. </summary>
+		public static bool CastRayFromCamera(int layerMask, out RaycastHit hit, int distance = 1000)
+		{
+			var ray = MainCamera.Cached.ScreenPointToRay(Input.mousePosition);
+			return Physics.Raycast(ray.origin, ray.direction, out hit, distance, layerMask);
+		}
+
 		/// <summary>Gets components of type T from all physical objects in radius. Provide list to output results. Note that it will be overriden with new values.</summary>
 		public static void GetObjectsOfTypeInSphere<T>(Vector3 position, float radius, List<T> output)
 		{

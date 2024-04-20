@@ -3,14 +3,63 @@ using UnityEngine;
 
 namespace #NAMESPACE#
 {
-	/// <summary>Describes object which can receive damage.</summary>
-	public sealed class #SCRIPTNAME# : MonoBehaviour, IDamageable
+	/// <summary>Describes object which has health and can receive damage.</summary>
+	public class #SCRIPTNAME# : MonoBehaviour
 	{
-		public event Action<IDamage> DamageReceived;
+	    public event Action Died;
+	    public event Action<float> HealthChanged;
+		public event Action<float> DamageReceived;
 
-		public void TakeDamage(IDamage damage)
+        public float MaxHealth => maxHealth;
+        public float Health { get; protected set; }
+
+        public float HealthPercents => health / maxHealth;
+
+		[SerializeField] float startHealth = 100;
+		[SerializeField] float maxHealth = 100;
+
+		bool isDied;
+
+		void Awake()
 		{
+            SetHealth(startHealth);
+		}
+
+		public void TakeDamage(float damage)
+		{
+		    if (isDied)
+		        return;
+
 			DamageReceived?.Invoke(damage);
+
+			SetHealth(Health - damage);
+		}
+
+		public void AddHealth(float value)
+		{
+		    if (isDied)
+                return;
+
+			SetHealth(Health + value);
+		}
+
+		public void SetHealth(float value)
+		{
+		    if (isDied)
+                return;
+
+		    Health = Mathf.Clamp(value, 0, maxHealth);
+
+		    HealthChanged?.Invoke(Health);
+
+		    if (health <= 0)
+		        Die();
+		}
+
+		protected virtual void Die()
+		{
+		    isDied = true;
+		    Died?.Invoke();
 		}
 	}
 }

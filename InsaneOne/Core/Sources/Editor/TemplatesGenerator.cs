@@ -19,9 +19,6 @@ namespace InsaneOne.Core.Development
         [MenuItem (assetsPath + "Storage", false, -499)]
         static void CreateStorageTemplate() => CreateAnyFromTemplate("Storage");
 
-        [MenuItem (assetsPath + "Health Behaviour", false, -399)]
-        static void CreateHealthBehaviourTemplate() => CreateAnyFromTemplate("HealthBehaviour");
-        
         [MenuItem (assetsPath + "Damageable Behaviour", false, -399)]
         static void CreateDamageableTemplate() => CreateAnyFromTemplate("Damageable");
         
@@ -30,6 +27,9 @@ namespace InsaneOne.Core.Development
         
         [MenuItem (assetsPath + "Player Move Input Behaviour", false, -399)]
         static void CreateMoveInputTemplate() => CreateAnyFromTemplate("MoveInput");
+
+        [MenuItem (assetsPath + "Health Behaviour", false, -399)]
+        static void CreateHealthBehaviourTemplate() => CreateAnyFromTemplate("HealthBehaviour");
         
         [MenuItem (assetsPath + "Clickable Icon", false, -199)]
         static void CreateClickableIconTemplate() => CreateAnyFromTemplate("ClickableIcon");

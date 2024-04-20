@@ -3,8 +3,8 @@ using UnityEngine;
 
 namespace #NAMESPACE#
 {
-    /// <summary>Describes object which have health and behaviours for handle health changes.</summary>
-    public sealed class #SCRIPTNAME# : MonoBehaviour, IHealth
+    /// <summary>Describes object which have health and behaviours for handle health changes. Can be used, if by some reason you dont need health in Damageable-like class.</summary>
+    public class #SCRIPTNAME# : MonoBehaviour, IHealth
     {
         public event Action<float> HealthChanged;
         public float Health { get; protected set; }
