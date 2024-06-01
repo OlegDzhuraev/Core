@@ -19,5 +19,7 @@ namespace Game
 
 			teamBehaviour.ChangeTeam(newTeam);
 		}
+
+		public static bool IsInSameTeam(this GameObject go, GameObject other) => go.GetTeam() == other.GetTeam();
 	}
 }
