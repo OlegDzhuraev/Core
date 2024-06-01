@@ -239,6 +239,38 @@ ServiceLocator.Register(new SomeClass());
 var someClass = ServiceLocator.Get<SomeClass>();
 ```
 
+## Components
+This library contains some built-in components. You can check it in the Sources/Components folder.
+
+In this partition can be found info about some of these components.
+
+### Teams
+A lot of games have teams for game players and NPCs. There is implementation for this functionality.
+
+Currently, team is **int** value.
+
+**How to use:**
+```cs
+[SerializeField] GameObject enemy;
+
+void Start()
+{
+  gameObject.SetTeam(0); // setting this object team
+  enemy.SetTeam(1); // setting different team to the enemy object
+}
+
+void Update()
+{
+  var myTeam = gameObject.GetTeam(); // getting team of this object
+  var enemyTeam = enemy.GetTeam(); // getting Enemy object team.
+
+  if (myTeam != enemyTeam)
+    DoAttack(enemy); // proceed some action if teams are different
+}
+```
+
+Actually, this code works with custom **TeamBehaviour** component - adds it to any teamed objects, and stores actual object team in this component.
+
 ## Utility
 
 ### Pause Utility
