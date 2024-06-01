@@ -4,7 +4,7 @@ using UnityEngine;
 namespace #NAMESPACE#
 {
 	/// <summary>Describes projectile/bullet object which can fly and hit targets.</summary>
-	public sealed class #SCRIPTNAME# : MonoBehaviour, IProjectile
+	public sealed class #SCRIPTNAME# : MonoBehaviour
 	{
 		[SerializeField] float speed = 3f;
 		
@@ -15,7 +15,7 @@ namespace #NAMESPACE#
 			transform.position += transform.forward * (Time.deltaTime * speed);
 		}
 		
-		public void OnTriggerEnter(Collider collider)
+		public void OnTriggerEnter(Collider other)
 		{
 			// handle hit here
 		}

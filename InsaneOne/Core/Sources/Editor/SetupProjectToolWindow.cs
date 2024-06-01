@@ -195,17 +195,17 @@ namespace InsaneOne.Core.Development
         
         void DrawFixSpritePacker()
         {
-            var isFine = EditorSettings.spritePackerMode == SpritePackerMode.AlwaysOnAtlas;
+            var isFine = EditorSettings.spritePackerMode is SpritePackerMode.SpriteAtlasV2;
             var buttonText = isFine ? "Disable" : "Enable";
             var previousGuiColor = GUI.color;
-            var neededResult = isFine ? SpritePackerMode.Disabled : SpritePackerMode.AlwaysOnAtlas;
+            var neededResult = isFine ? SpritePackerMode.Disabled : SpritePackerMode.SpriteAtlasV2;
             GUI.color = isFine ? previousGuiColor : checklistBadColor;
             
             GUILayout.BeginVertical(blockStyle);
 
             GUILayout.Label(!isFine
-                ? "Sprite packer is disabled. Preffered is Enabled"
-                : "Sprite packer is enabled. It is preffered. But you can disable.");
+                ? "Sprite packer V2 is disabled. Preffered is Enabled"
+                : "Sprite packer V2 is enabled. It is preffered. But you can disable.");
 
             if (GUILayout.Button(buttonText))
                 EditorSettings.spritePackerMode = neededResult;

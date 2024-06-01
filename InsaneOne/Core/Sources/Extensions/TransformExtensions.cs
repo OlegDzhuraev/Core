@@ -72,6 +72,34 @@ namespace InsaneOne.Core
 			return result;
 		}
 
+		/// <summary> Returns look to the position in 2D. </summary>
+		public static float GetAngleLook2D(this Transform transform, Vector2 position)
+		{
+			return GetAngleLook2D(transform.position, position);
+		}
+
+		/// <summary> Returns look to the position in 2D. </summary>
+		public static float GetAngleLook2D(Vector2 positionA, Vector2 positionB)
+		{
+			var direction = (positionB - positionA).normalized;
+			var result = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+
+			if (!RightAxisIsForwardInTwoD)
+				result -= 90;
+
+			return result;
+		}
+
+		/// <summary> Returns direction from 2D angle. </summary>
+		public static Vector2 GetDirectionFromAngle2D(float angle)
+		{
+			if (!RightAxisIsForwardInTwoD)
+				angle += 90;
+
+			var angleInRadians = angle * Mathf.Deg2Rad;
+			return new Vector2(Mathf.Cos(angleInRadians), Mathf.Sin(angleInRadians));
+		}
+
 		/// <summary> Returns is transfrom looking on a target transform. </summary>
 		/// <param name="threshold">Angle value of tolerance. </param>
 		public static bool IsLookingAt(this Transform self, Transform target, float threshold = 3f, bool ignoreY = true)

@@ -1,32 +1,21 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 using System.Collections.Generic;
 
 namespace #NAMESPACE#
 {
-    /// <summary>Class to implement basic player input movement, using new Input System.</summary>
+    /// <summary>Class to implement basic player input movement, using legacy Input System.</summary>
     public sealed class #SCRIPTNAME# : MonoBehaviour
     {
         List<object> controlBlockers = new List<object>();
 
         [SerializeField] float moveSpeed = 2f;
-        [SerializeField] InputActionAsset inputActions;
-
-        InputAction moveAction;
-
-        void Start()
-        {
-            moveAction = inputActions.FindAction("Move");
-
-            inputActions.Enable();
-        }
-
+        
         void Update()
         {
             if (controlBlockers.Count > 0)
-        		return;
+                return;
 
-            var input = moveAction.ReadValue<Vector2>();
+            var input = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
 
             if (input.sqrMagnitude > 0)
             {

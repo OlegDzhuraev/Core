@@ -13,22 +13,28 @@ namespace InsaneOne.Core.Development
         const string assetsPath = "Assets/Create/InsaneOne/Templates/";
         const string coreNamespace = "InsaneOne.Core";
         
-        [MenuItem (assetsPath + "SceneInitialization", false, -599)]
+        [MenuItem (assetsPath + "Scene Initialization", false, -599)]
         static void CreateSceneInitializationTemplate() => CreateAnyFromTemplate("SceneInitialization");
         
         [MenuItem (assetsPath + "Storage", false, -499)]
         static void CreateStorageTemplate() => CreateAnyFromTemplate("Storage");
 
-        [MenuItem (assetsPath + "Damageable Behaviour", false, -399)]
+        [MenuItem (assetsPath + "Damageable", false, -399)]
         static void CreateDamageableTemplate() => CreateAnyFromTemplate("Damageable");
+
+        [MenuItem (assetsPath + "Attack", false, -399)]
+        static void CreateAttackTemplate() => CreateAnyFromTemplate("BaseAttack");
         
-        [MenuItem (assetsPath + "Projectile Behaviour", false, -399)]
+        [MenuItem (assetsPath + "Projectile", false, -399)]
         static void CreateProjectileBehaviourTemplate() => CreateAnyFromTemplate("Projectile");
-        
-        [MenuItem (assetsPath + "Player Move Input Behaviour", false, -399)]
+
+        [MenuItem (assetsPath + "Player Move Input", false, -399)]
         static void CreateMoveInputTemplate() => CreateAnyFromTemplate("MoveInput");
 
-        [MenuItem (assetsPath + "Health Behaviour", false, -399)]
+        [MenuItem (assetsPath + "Player Move Input (Legacy Input System)", false, -399)]
+        static void CreateMoveInputLegacyTemplate() => CreateAnyFromTemplate("MoveInputClassic");
+
+        [MenuItem (assetsPath + "Health", false, -399)]
         static void CreateHealthBehaviourTemplate() => CreateAnyFromTemplate("HealthBehaviour");
         
         [MenuItem (assetsPath + "Clickable Icon", false, -199)]
@@ -133,7 +139,7 @@ namespace InsaneOne.Core.Development
             var templates = new List<TextAsset>();
             EditorHelpers.LoadAssetsToList(templates, "l: InsaneTemplate");
 
-            var template = templates.Find(t => t && t.name.Contains(templateName));
+            var template = templates.Find(t => t && t.name == templateName);
 
             return template ? template.text : "No template found";
         }

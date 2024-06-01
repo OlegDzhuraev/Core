@@ -13,10 +13,11 @@ namespace #NAMESPACE#
         public float MaxHealth => maxHealth;
         public float Health { get; protected set; }
 
-        public float HealthPercents => health / maxHealth;
+        public float HealthPercents => Health / maxHealth;
 
 		[SerializeField] float startHealth = 100;
 		[SerializeField] float maxHealth = 100;
+		[SerializeField] bool destroyOnDie;
 
 		bool isDied;
 
@@ -52,7 +53,7 @@ namespace #NAMESPACE#
 
 		    HealthChanged?.Invoke(Health);
 
-		    if (health <= 0)
+		    if (Health <= 0)
 		        Die();
 		}
 
@@ -60,6 +61,9 @@ namespace #NAMESPACE#
 		{
 		    isDied = true;
 		    Died?.Invoke();
+
+		    if (destroyOnDie)
+		        Destroy(gameObject);
 		}
 	}
 }

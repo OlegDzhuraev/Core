@@ -1,0 +1,41 @@
+using System;
+using UnityEngine;
+
+namespace #NAMESPACE#
+{
+    /// <summary>Can be used for quick implementation of basic abstract attack with reload.</summary>
+	public abstract class #SCRIPTNAME# : MonoBehaviour
+	{
+		public Action<Vector3> Attacked;
+
+		public float ReloadTimeLeftPercents => reloadTimeLeft / reloadTime;
+
+		float reloadTime = 0.5f;
+		float reloadTimeLeft;
+
+		void Update()
+		{
+			if (reloadTimeLeft > 0)
+				reloadTimeLeft -= Time.deltaTime;
+
+			UpdateAction();
+		}
+
+		public void TryAttack(Vector3 direction)
+		{
+			if (reloadTimeLeft > 0)
+				return;
+
+			direction = direction.normalized;
+			DoAttack(direction);
+			Attacked?.Invoke(direction);
+
+			StartReload();
+		}
+
+		public void StartReload() => reloadTimeLeft = reloadTime;
+
+		protected virtual void UpdateAction() { }
+		protected abstract void DoAttack(Vector3 direction);
+	}
+}
