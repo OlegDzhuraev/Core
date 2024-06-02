@@ -10,12 +10,15 @@ namespace Game
 
 		[SerializeField, Min(0)] int startTeam;
 
-		public int Team { get; private set; }
+		public int Team { get; private set; } = -1;
 
-		void Start() => ChangeTeam(startTeam);
+		void Awake() => ChangeTeam(startTeam);
 
 		public void ChangeTeam(int newTeam)
 		{
+			if (newTeam == Team)
+				return;
+			
 			Team = newTeam;
 			ChangedTeam?.Invoke(Team);
 		}
