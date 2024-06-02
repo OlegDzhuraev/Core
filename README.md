@@ -271,6 +271,14 @@ void Update()
 
 Actually, this code works with custom **TeamBehaviour** component - adds it to any teamed objects, and stores actual object team in this component.
 
+You can also create TeamsSettings asset, and setup, which teams will be enemies to other. To create it, click **RMB** in **Project Window**, and in the context menu select **InsaneOne** -> **TeamsSettings**.
+
+To use your teams settings:
+
+```cs
+var isEnemies = gameObject.IsTeamEnemyTo(otherGameObject); // API can change
+```
+
 ## Utility
 
 ### Pause Utility
