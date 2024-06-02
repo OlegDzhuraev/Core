@@ -271,7 +271,9 @@ void Update()
 
 Actually, this code works with custom **TeamBehaviour** component - adds it to any teamed objects, and stores actual object team in this component.
 
-You can also create TeamsSettings asset, and setup, which teams will be enemies to other. To create it, click **RMB** in **Project Window**, and in the context menu select **InsaneOne** -> **TeamsSettings**.
+You can also create TeamsSettings asset, and setup, which teams will be enemies to others. To create it, click **RMB** in **Project Window**, and in the context menu select **InsaneOne** -> **TeamsSettings**.
+
+After creation, drag'n'drop it to the field **Teams Settings** of the **CoreData** asset (which is created automatically).
 
 To use your teams settings:
 
@@ -283,7 +285,7 @@ var isEnemies = gameObject.IsTeamEnemyTo(otherGameObject); // API can change
 
 ### Pause Utility
 Allows to pause game and use multiple pause affectors object. 
-So, for example, two differect objects wants to pause game. Next call of unpause will actually **not** unpause game until **both** affector objects call it. 
+So, for example, two different objects wants to pause game. Next call of unpause will actually **not** unpause game until **both** affector objects call it. 
 
 ```cs
 using InsaneOne.Core.Utility;
@@ -330,7 +332,7 @@ gameObject.DelayedDestroy(3f);
 ```
 
 ### MainCamera
-Most of projects use only one camera, which can be received by calling Camera.main. But in the old Unity versions it is not cached and can cause performance issues. This utility helps to solve this problem by caching the Main Camera. 
+Most of the projects use only one camera, which can be received by calling Camera.main. But in the old Unity versions it is not cached and can cause performance issues. This utility helps to solve this problem by caching the Main Camera. 
 
 ```cs
 var cam = MainCamera.Cached;

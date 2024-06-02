@@ -10,6 +10,9 @@ namespace InsaneOne.Core
         const string RepoName = "OlegDzhuraev";
         
         static CoreData instance;
+
+        [Header("Features settings")]
+        public TeamsSettings TeamsSettings;
         
         [Tooltip("Place here used fader prefab.")]
         public GameObject UiFaderTpl;

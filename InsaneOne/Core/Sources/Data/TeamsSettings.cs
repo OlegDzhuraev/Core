@@ -7,8 +7,6 @@ namespace InsaneOne.Core
 	[CreateAssetMenu(menuName = "InsaneOne/Teams Settings")]
 	public class TeamsSettings : ScriptableObject
 	{
-		static TeamsSettings instance;
-
 		[Tooltip("Setup ids of teams, which should recognize other team as enemy. Example: If you set teamA to 0, and teamB to 1, teams 0 and 1 will be enemies.")]
 		[SerializeField] TeamEnemyRule[] enemiesTeamsRules = Array.Empty<TeamEnemyRule>();
 
@@ -34,18 +32,9 @@ namespace InsaneOne.Core
 		/// <summary> Recommended to use it only for test purposes. </summary>
 		public TeamEnemyRule[] GetAllRulesInternal() => enemiesTeamsRules;
 
-		public static TeamsSettings Get()
-		{
-			if (!instance)
-			{
-				instance = Resources.Load<TeamsSettings>("TeamsSettings");
-
-				if (!instance)
-					throw new NullReferenceException("No TeamsSettings asset found! Create it in the Resources folder.");
-			}
-
-			return instance;
-		}
+		/// <summary> Gets TeamsSettings asset from the CoreData asset. </summary>
+		/// <returns></returns>
+		public static TeamsSettings Get() => CoreData.Load().TeamsSettings;
 	}
 
 	[Serializable]
