@@ -8,7 +8,7 @@ namespace Game
 	{
 		public event Action<int> ChangedTeam;
 
-		[SerializeField] int startTeam;
+		[SerializeField, Min(0)] int startTeam;
 
 		public int Team { get; private set; }
 

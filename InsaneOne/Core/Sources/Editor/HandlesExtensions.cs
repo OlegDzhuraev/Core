@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace InsaneOne.Core.Dev
+namespace InsaneOne.Core.Development
 {
 	public static class HandlesExtensions
 	{
