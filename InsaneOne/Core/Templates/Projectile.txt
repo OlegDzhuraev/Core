@@ -7,8 +7,20 @@ namespace #NAMESPACE#
 	public sealed class #SCRIPTNAME# : MonoBehaviour
 	{
 		[SerializeField] float speed = 3f;
+		[SerializeField] float lifeTime = 15f;
 		
-		void Update() => Fly();
+		void Update()
+		{
+		    lifeTime -= Time.deltaTime;
+
+		    if (lifeTime <= 0)
+		    {
+		        Kill();
+		        return;
+		    }
+
+		    Fly();
+		}
 		
 		public void Fly()
 		{
@@ -18,6 +30,13 @@ namespace #NAMESPACE#
 		public void OnTriggerEnter(Collider other)
 		{
 			// handle hit here
+
+			Kill();
+		}
+
+		void Kill()
+		{
+		    Destroy(gameObject);
 		}
 	}
 }
