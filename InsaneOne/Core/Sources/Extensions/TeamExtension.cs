@@ -1,7 +1,6 @@
-using InsaneOne.Core;
 using UnityEngine;
 
-namespace Game
+namespace InsaneOne.Core
 {
 	public static class TeamExtension
 	{
