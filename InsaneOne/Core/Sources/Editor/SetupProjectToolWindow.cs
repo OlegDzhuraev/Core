@@ -164,7 +164,9 @@ namespace InsaneOne.Core.Development
             DrawFixNamespace();
             DrawFixCompanyName();
             DrawFixCreateAtOrigin();
-            
+            DrawFixReloadDomain();
+            DrawFixNamings();
+
             GUILayout.EndVertical();
         }
 
@@ -284,7 +286,60 @@ namespace InsaneOne.Core.Development
             
             GUI.color = previousGuiColor;
         }
-        
+
+        void DrawFixReloadDomain()
+        {
+            var correctValue = EnterPlayModeOptions.DisableDomainReload | EnterPlayModeOptions.DisableSceneReload;
+            var isFine = EditorSettings.enterPlayModeOptionsEnabled && EditorSettings.enterPlayModeOptions == correctValue;
+
+
+            var previousGuiColor = GUI.color;
+
+            GUI.color = isFine ? previousGuiColor : checklistBadColor;
+
+            GUILayout.BeginVertical(blockStyle);
+            GUILayout.Label(!isFine
+                    ? $"Enter Play Mode options: Reload domain and scene is <b>enabled</b>. It slows down reload time after every recompile. Recommended is to <b>disable</b> these settings."
+                    : $"Enter Play Mode options: Reload domain settings are correct.",
+
+                richText);
+
+            if (!isFine && GUILayout.Button("Fix"))
+            {
+                EditorSettings.enterPlayModeOptionsEnabled = true;
+                EditorSettings.enterPlayModeOptions = correctValue;
+            }
+
+            GUILayout.EndVertical();
+
+            GUI.color = previousGuiColor;
+        }
+
+        void DrawFixNamings()
+        {
+            var isFine = EditorSettings.gameObjectNamingScheme == EditorSettings.NamingScheme.Underscore;
+            var previousGuiColor = GUI.color;
+
+            GUI.color = isFine ? previousGuiColor : checklistBadColor;
+
+            GUILayout.BeginVertical(blockStyle);
+            GUILayout.Label(!isFine
+                    ? $"Namings scheme is not set to <b>underscore</b> with 2 digits (Prefab_01). It is recommended to use <b>underscore</b> and several digits for better consistent naming."
+                    : $"Namings scheme is correct.",
+
+                richText);
+
+            if (!isFine && GUILayout.Button("Fix"))
+            {
+                EditorSettings.gameObjectNamingScheme = EditorSettings.NamingScheme.Underscore;
+                EditorSettings.gameObjectNamingDigits = 2;
+                EditorSettings.assetNamingUsesSpace = false;
+            }
+
+            GUILayout.EndVertical();
+
+            GUI.color = previousGuiColor;
+        }
         
         void DrawPartitionHeader(string text)
         {
