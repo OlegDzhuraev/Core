@@ -6,7 +6,7 @@ namespace InsaneOne.Core.Development
 	public class CoreEditorInit
 	{
 		[DidReloadScripts]
-		static void OnBeforeSceneLoadRuntimeMethod()
+		static void Initialize()
 		{
 			if (!CoreData.TryLoad(out _))
 				CoreInitEditorWindow.ShowWindow();
