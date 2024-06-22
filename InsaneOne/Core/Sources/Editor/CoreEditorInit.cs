@@ -1,11 +1,11 @@
 #if UNITY_EDITOR
-using UnityEditor;
+using UnityEditor.Callbacks;
 
 namespace InsaneOne.Core.Development
 {
 	public class CoreEditorInit
 	{
-		[InitializeOnLoadMethod]
+		[DidReloadScripts]
 		static void OnBeforeSceneLoadRuntimeMethod()
 		{
 			if (!CoreData.TryLoad(out _))
