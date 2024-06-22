@@ -33,8 +33,16 @@ namespace InsaneOne.Core
 		public TeamEnemyRule[] GetAllRulesInternal() => enemiesTeamsRules;
 
 		/// <summary> Gets TeamsSettings asset from the CoreData asset. </summary>
-		/// <returns></returns>
-		public static TeamsSettings Get() => CoreData.Load().TeamsSettings;
+		public static TeamsSettings Get()
+		{
+			var coreData = CoreData.Load();
+
+			if (coreData && coreData.TeamsSettings)
+				return coreData.TeamsSettings;
+
+			Debug.LogError("[InsaneOne.Core] No CoreData found! TeamsSettings not work correctly!");
+			return CreateInstance<TeamsSettings>();
+		}
 	}
 
 	[Serializable]

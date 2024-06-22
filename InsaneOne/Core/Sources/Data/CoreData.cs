@@ -53,15 +53,38 @@ namespace InsaneOne.Core
 
         public static CoreData Load()
         {
-            if (instance)
-                return instance;
-            
-            instance = Resources.Load<CoreData>("InsaneOne/CoreData");
+            var isLoaded = TryLoad(out var result);
 
-            if (!instance)
+            if (!isLoaded)
                 throw new NullReferenceException("Possible, InsaneOne.Core initialization was failed, no CoreData found!");
             
-            return instance;
+            return result;
+        }
+
+        public static bool TryLoad(out CoreData result)
+        {
+            if (!instance)
+                instance = Resources.Load<CoreData>("InsaneOne/CoreData");
+
+            if (!instance)
+            {
+                result = default;
+                return false;
+            }
+
+            result = instance;
+            return true;
+        }
+
+        /// <summary> For internal usage. </summary>
+        public static void Log(string text)
+        {
+            var coreData = Resources.Load<CoreData>("InsaneOne/CoreData");
+
+            if (coreData && coreData.SuppressLogs)
+                return;
+
+            Debug.Log("<b>InsaneOne.Core:</b> " + text);
         }
     }
 
