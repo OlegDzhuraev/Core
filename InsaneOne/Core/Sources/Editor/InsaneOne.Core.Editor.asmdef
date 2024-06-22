@@ -2,7 +2,7 @@
     "name": "InsaneOne.Core.Editor",
     "rootNamespace": "",
     "references": [
-        "GUID:8d1514f0407c35f4ab8ed47a444b5e60"
+        "InsaneOne.Core"
     ],
     "includePlatforms": [
         "Editor"

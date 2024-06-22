@@ -2,9 +2,9 @@
     "name": "InsaneOne.Core",
     "rootNamespace": "",
     "references": [
-        "GUID:6055be8ebefd69e48b49212b09b47b2f",
-        "GUID:595e91ee7fe166e488721ef5b3d014ef",
-        "GUID:7e0c38c74fe5dd64786053b23398d1dc"
+        "Unity.TextMeshPro",
+        "InsaneOne.PerseidsPooling",
+        "DOTween.Modules"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
