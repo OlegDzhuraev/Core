@@ -9,6 +9,7 @@ namespace InsaneOne.Core
 
 		void Update()
 		{
+
 			secondsToDestruction -= Time.deltaTime;
 
 			if (secondsToDestruction > 0)
@@ -23,7 +24,7 @@ namespace InsaneOne.Core
 
 		public void SetDestructionTime(float newTime) => secondsToDestruction = newTime;
 
-		/// <summary> Will destroy a object after time passed. Can be used with Perseids Pooling. </summary>
+		/// <summary> Will destroy an object after time passed. Can be used with Perseids Pooling. </summary>
 		public static void ApplyTo(GameObject target, float delay = 3f, bool usePoolingIfPossible = false)
 		{
 #if PERSEIDS_POOLING

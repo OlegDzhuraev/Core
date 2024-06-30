@@ -8,6 +8,7 @@ namespace #NAMESPACE#
 	{
 		[SerializeField] float speed = 3f;
 		[SerializeField] float lifeTime = 15f;
+		[SerializeField] GameObject destroyFx;
 		
 		void Update()
 		{
@@ -36,6 +37,7 @@ namespace #NAMESPACE#
 
 		void Kill()
 		{
+		    Effect.TryCreate(destroyFx);
 		    Destroy(gameObject);
 		}
 	}

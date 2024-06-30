@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace #NAMESPACE#
@@ -20,6 +21,7 @@ namespace #NAMESPACE#
 		[SerializeField] bool destroyOnDie;
 
 		bool isDied;
+		readonly List<object> damageReceiveBlockers = new List<object>();
 
 		void Awake()
 		{
@@ -55,6 +57,21 @@ namespace #NAMESPACE#
 
 		    if (Health <= 0)
 		        Die();
+		}
+
+        public bool CanReceiveDamage() => !isDied && damageReceiveBlockers.Count == 0;
+
+		public void AddDamageBlocker(object blocker)
+		{
+			if (damageReceiveBlockers.Contains(blocker))
+				return;
+
+			damageReceiveBlockers.Add(blocker);
+		}
+
+		public void RemoveDamageBlocker(object blocker)
+		{
+			damageReceiveBlockers.Remove(blocker);
 		}
 
 		protected virtual void Die()

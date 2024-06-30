@@ -36,12 +36,15 @@ namespace InsaneOne.Core.Development
 
         [MenuItem (assetsPath + "Health", false, -399)]
         static void CreateHealthBehaviourTemplate() => CreateAnyFromTemplate("HealthBehaviour");
-        
-        [MenuItem (assetsPath + "Clickable Icon", false, -199)]
-        static void CreateClickableIconTemplate() => CreateAnyFromTemplate("ClickableIcon");
-        
-        [MenuItem (assetsPath + "State Machine", false, -99)]
+
+        [MenuItem (assetsPath + "State Machine", false, -199)]
         static void CreateStateMachineTemplate() => CreateAnyFromTemplate("StateMachine");
+
+        [MenuItem (assetsPath + "Clickable Icon", false, -99)]
+        static void CreateClickableIconTemplate() => CreateAnyFromTemplate("ClickableIcon");
+
+        [MenuItem (assetsPath + "HUD Healthbar", false, -98)]
+        static void CreateHUDHealthbarTemplate() => CreateAnyFromTemplate("HUDHealthbar");
 
         static void CreateAnyFromTemplate(string templateName)
         {

@@ -1,0 +1,32 @@
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace #NAMESPACE#
+{
+    /// <summary>Basic HUD Healthbar behaviour. Requires some kind of Damageable class.</summary>
+    public class #SCRIPTNAME# : MonoBehaviour
+    {
+        [SerializeField] Image fillImage;
+
+        Damageable target;
+
+        void OnEnable()
+        {
+            // get there healthbar target with your way:
+            target = GameObject.FindWithTag("Player").GetComponent<Damageable>();
+
+            target.HealthChanged += OnHealthChanged;
+        }
+
+        void OnDisable()
+        {
+            if (target)
+                target.HealthChanged -= OnHealthChanged;
+        }
+
+        void OnHealthChanged(float _)
+        {
+            fillImage.fillAmount = target.HealthPercents;
+        }
+    }
+}

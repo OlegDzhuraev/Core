@@ -29,7 +29,7 @@ namespace InsaneOne.Core.Components
 
 		void Update()
 		{
-			if (!PhysicsExtensions.CastRayFromCamera(layerMask, out var hit))
+			if (!PhysicsExtensions.CastCameraToMouseRay(layerMask, out var hit))
 				return;
 
 			if (hit.distance > interactDistance)
