@@ -8,7 +8,7 @@ using DG.Tweening;
 
 namespace InsaneOne.Core.Ui
 {
-    /// <summary> Ui screen fader. Requires DOTween to work. If you're had DOTween installed, add DOTWEEN compile symbol
+    /// <summary> Ui screen fader. Requires DOTween to work. If you've DOTween installed, add DOTWEEN compile symbol
     /// to the Project Settings and check AsmDef InsaneOne.Core referenced to the DoTween. </summary>
     public sealed class Fader : MonoBehaviour
     {
@@ -52,7 +52,7 @@ namespace InsaneOne.Core.Ui
             fadeImage.color = new Color(c.r, c.g, c.b, 0f);
         }
         
-        public void Unfade(float duration)
+        public void Unfade(float duration = 0.5f)
         {
             fadeImage.DOKill();
             WasStartedUnfade?.Invoke();
@@ -63,7 +63,14 @@ namespace InsaneOne.Core.Ui
             seq.AppendCallback(() => WasEndedUnfade?.Invoke());
         }
 
+        /// <summary> This Init version uses CoreData Fader Tpl prefab as template (you can use other with your own prefab). After Init you also can use ServiceLocator Get method with Fader as T to get inited instance.</summary>
         public static bool Init(out Fader faderInstance)
+        {
+            return Init(CoreData.Load().UiFaderTpl, out faderInstance);
+        }
+
+        /// <summary> After Init you also can use ServiceLocator Get method with Fader as T to get inited instance.</summary>
+        public static bool Init(GameObject prefab, out Fader faderInstance)
         {
             if (instance)
             {
@@ -71,12 +78,12 @@ namespace InsaneOne.Core.Ui
                 return false;
             }
 
-            var go = Instantiate(CoreData.Load().UiFaderTpl);
+            var go = Instantiate(prefab);
             DontDestroyOnLoad(go);
 
             instance = faderInstance = go.GetComponent<Fader>();
             ServiceLocator.Register(faderInstance);
-            
+
             return true;
         }
         

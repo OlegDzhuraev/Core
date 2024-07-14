@@ -5,59 +5,49 @@ namespace InsaneOne.Core.Architect
 {
 	public static class ServiceLocator
 	{
-		// todo dict with registered type?
-		static readonly List<object> services = new List<object>();
+		static readonly Dictionary<Type, object> services = new Dictionary<Type, object>();
 
 		public static void Reset()
 		{
-			foreach (var service in services)
+			foreach (var (_, service) in services)
 				if (service is IDisposableService disposable)
 					disposable.Dispose();
 
 			services.Clear();
 		}
         
-		public static void Register<T>(T service)
+		public static bool Register<T>(T service)
 		{
-			if (TryGet<T>(out _) || services.Contains(service))
-				return;
-            
-			services.Add(service);
-            
-			if (service is IInitService initService)
+			var isAdded = services.TryAdd(typeof(T), service);
+
+			if (isAdded && service is IInitService initService)
 				initService.Init();
+
+			return isAdded;
 		}
 
 		public static void Unregister<T>()
 		{
-			if (TryGet<T>(out var service))
-				services.Remove(service);
+			services.Remove(typeof(T));
 		}
 
 		public static T Get<T>()
 		{
-			foreach (var service in services)
-			{
-				if (service is T typedService)
-					return typedService;
-			}
+			if (services.TryGetValue(typeof(T), out var value))
+				return (T)value;
 
 			throw new NullReferenceException("No such service registered");
 		}
         
 		public static bool TryGet<T>(out T result)
 		{
-			result = default;
-            
-			foreach (var service in services)
+			if (services.TryGetValue(typeof(T), out var value))
 			{
-				if (service is T typedService)
-				{
-					result = typedService;
-					return true;
-				}
+				result = (T) value;
+				return true;
 			}
 
+			result = default;
 			return false;
 		}
 	}
