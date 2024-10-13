@@ -14,6 +14,13 @@ namespace InsaneOne.Core
         static Transform effectsParent;
 
         /// <summary> Create VFX from GameObject prefab with specified position and rotation. You can set parent and auto-destroy time. Use -1 to infinite lifetime. </summary>
+        public static bool TryCreate(GameObject vfxPrefab, Vector3 position,
+            Quaternion rotation = default, Transform parent = null, float destructionDelay = 15f)
+        {
+            return TryCreate(vfxPrefab, position, out _, rotation, parent, destructionDelay);
+        }
+
+        /// <summary> Create VFX from GameObject prefab with specified position and rotation. You can set parent and auto-destroy time. Use -1 to infinite lifetime. </summary>
         public static bool TryCreate(GameObject vfxPrefab, Vector3 position, out GameObject effect,
             Quaternion rotation = default, Transform parent = null, float destructionDelay = 15f)
         {
