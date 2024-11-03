@@ -5,6 +5,7 @@ using UnityEngine;
 namespace #NAMESPACE#
 {
 	/// <summary>Describes object which has health and can receive damage.</summary>
+	[DisallowMultipleComponent]
 	public class #SCRIPTNAME# : MonoBehaviour
 	{
 	    public event Action Died;
@@ -33,9 +34,9 @@ namespace #NAMESPACE#
 		    if (isDied)
 		        return;
 
-			DamageReceived?.Invoke(damage);
-
 			SetHealth(Health - damage);
+
+			DamageReceived?.Invoke(damage);
 		}
 
 		public void AddHealth(float value)

@@ -3,18 +3,36 @@ using UnityEngine;
 namespace #NAMESPACE#
 {
 	/// <summary> Class for global game data storage. You can store any global parameters for your game there. Good for prototypes, but for production can be not the best solution.</summary>
-	[CreateAssetMenu(fileName = "Storage", menuName = "Storage")]
+	[CreateAssetMenu(fileName = "#SCRIPTNAME#", menuName = "#SCRIPTNAME#")]
 	public class #SCRIPTNAME# : ScriptableObject
 	{
-		static Storage instance;
+		static #SCRIPTNAME# instance;
 		
-		/// <summary> Allows to get storage from any class. To correct work Storage file should be placed into Resources/Data folder and named Storage.</summary>
-		public static Storage GetStorage()
+		/// <summary> Allows to get storage from any class. To correct work Storage file should be placed into Resources/Data folder and named #SCRIPTNAME#.</summary>
+		public static #SCRIPTNAME# Get()
 		{
 			if (!instance)
-				instance = Resources.Load("Data/Storage") as Storage;
+				instance = Resources.Load("Data/#SCRIPTNAME#") as #SCRIPTNAME#;
 
 			return instance;
 		}
+
+#if UNITY_EDITOR
+        /// <summary> Allows to get storage from any class. Works only in editor - for game code you need manually inject storage in all classes where it required.</summary>
+        public static #SCRIPTNAME# GetInEditor()
+        {
+        	var assets = UnityEditor.AssetDatabase.FindAssets("t: #SCRIPTNAME#");
+
+        	if (assets.Length > 0)
+        	{
+        		var assetPath = UnityEditor.AssetDatabase.GUIDToAssetPath(assets[0]);
+
+        		var result = UnityEditor.AssetDatabase.LoadAssetAtPath<#SCRIPTNAME#>(assetPath);
+        		return result;
+        	}
+
+        	throw new NullReferenceException("No Storage found!");
+        }
+#endif
 	}
 }
