@@ -14,7 +14,7 @@ namespace InsaneOne.Core
         [Header("Features settings")]
         public TeamsSettings TeamsSettings;
         
-        [Tooltip("Place here used fader prefab.")]
+        [Tooltip("Place here prefab, which will be used as UI fader.")]
         public GameObject UiFaderTpl;
 
         [Header("Setup Project Tool settings")]
@@ -24,6 +24,9 @@ namespace InsaneOne.Core
             new LinkHolder() { Name = "Perseids Pooling", Link = $"https://github.com/{RepoName}/PerseidsPooling.git" },
             new LinkHolder() { Name = "NavMesh Avoidance", Link = $"https://github.com/{RepoName}/NavMeshAvoidance.git" },
             new LinkHolder() { Name = "Tags", Link = $"https://github.com/{RepoName}/Tags.git" },
+            new LinkHolder() { Name = "Serialize Reference Drawer", Link = $"https://github.com/mackysoft/Unity-SerializeReferenceExtensions.git" },
+            new LinkHolder() { Name = "Toolbar Extender", Link = $"https://github.com/marijnz/unity-toolbar-extender.git" },
+            new LinkHolder() { Name = "Tri Inspector", Link = $"https://github.com/codewriter-packages/Tri-Inspector.git" },
         };
         
         public List<LinkHolder> Packages = new List<LinkHolder>()
@@ -33,6 +36,7 @@ namespace InsaneOne.Core
             new LinkHolder() { Name = "Cinemachine", Link = "com.unity.cinemachine" },
             new LinkHolder() { Name = "Animation Rigging", Link = "com.unity.animation.rigging" },
             new LinkHolder() { Name = "Terrain Tools", Link = "com.unity.terrain-tools" },
+            new LinkHolder() { Name = "Input System", Link = "com.unity.inputsystem" },
         };
         
         public List<LinkHolder> AssetLinks = new List<LinkHolder>()
@@ -41,10 +45,14 @@ namespace InsaneOne.Core
             new LinkHolder() { Name = "More Effective Coroutines", Link = "https://assetstore.unity.com/packages/tools/animation/more-effective-coroutines-free-54975" },
             new LinkHolder() { Name = "ReWired", Link = "https://assetstore.unity.com/packages/tools/utilities/rewired-21676" },
             new LinkHolder() { Name = "Odin Inspector", Link = "https://assetstore.unity.com/packages/tools/utilities/odin-inspector-and-serializer-89041" },
+            new LinkHolder() { Name = "vFolders 2", Link = "https://assetstore.unity.com/packages/tools/utilities/vfolders-2-255470" },
             new LinkHolder() { Name = "FMOD", Link = "https://www.fmod.com/unity" },
             new LinkHolder() { Name = "MicroSplat Terrain", Link = "https://assetstore.unity.com/packages/tools/terrain/microsplat-96478" },
             new LinkHolder() { Name = "NG Soft Shadows", Link = "https://assetstore.unity.com/packages/vfx/shaders/next-gen-soft-shadows-137380" },
             new LinkHolder() { Name = "Dynamic Decals", Link = "https://github.com/EricFreeman/DynamicDecals" },
+            new LinkHolder() { Name = "Prototype Materials", Link = "https://assetstore.unity.com/packages/2d/textures-materials/gridbox-prototype-materials-129127" },
+            new LinkHolder() { Name = "Lit Particles Materials", Link = "https://assetstore.unity.com/packages/vfx/shaders/particle-shaders-vol-1-35069" },
+            new LinkHolder() { Name = "Amplify Shader Editor", Link = "https://assetstore.unity.com/packages/tools/visual-scripting/amplify-shader-editor-68570" },
         };
         
         [Header("Debugging")]
