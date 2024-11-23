@@ -1,3 +1,4 @@
+using InsaneOne.Core.Architect;
 using UnityEngine;
 
 namespace InsaneOne.Core
@@ -6,15 +7,15 @@ namespace InsaneOne.Core
 	{
 		public static int GetTeam(this GameObject go)
 		{
-			if (!go.TryGetComponent<TeamBehaviour>(out var teamBehaviour))
+			if (!go.TryGetComponent<ITeamed>(out var teamBehaviour))
 				return -1;
 
-			return teamBehaviour.Team;
+			return teamBehaviour.GetTeam();
 		}
 
 		public static void SetTeam(this GameObject go, int newTeam)
 		{
-			if (!go.TryGetComponent<TeamBehaviour>(out var teamBehaviour))
+			if (!go.TryGetComponent<ITeamed>(out var teamBehaviour))
 				teamBehaviour = go.AddComponent<TeamBehaviour>();
 
 			teamBehaviour.ChangeTeam(newTeam);
