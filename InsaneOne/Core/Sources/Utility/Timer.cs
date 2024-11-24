@@ -14,6 +14,8 @@ namespace InsaneOne.Core
 
 		[SerializeField] float fullTime;
 
+		bool isFinished;
+
 		public Timer(float timeValue)
 		{
 			SetFullTime(timeValue);
@@ -26,11 +28,13 @@ namespace InsaneOne.Core
 			if (TimeLeft > 0)
 			{
 				TimeLeft -= Time.deltaTime;
+
+				if (TimeLeft <= 0) // required to check it here to work correct with TickIfNotReady method
+					Finished?.Invoke();
 			}
 			else
 			{
 				Restart();
-				Finished?.Invoke();
 			}
 		}
 
