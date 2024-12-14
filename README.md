@@ -159,7 +159,7 @@ public class TestSoundMix : MonoBehaviour
 In the Project Manager window, in context menu now exist a new partition **InsaneOne/Templates**, which includes some ready code file templates, which are frequently used by me in gamedev. Possible, will be removed in future or reworked to smth better, actually not very useful.
 
 ## UI
-I've added some new elements and templates for UI, which is missing in Unity default package. Now it still very simple, but I want to improve it in future.
+I've added some new elements and templates for UI, which is missing in Unity default package. Now it still very simple, but I want to improve it in the future.
 
 **Floating panel** - allows to create floating in a 3d world (following some object) UI-panel with some info.
 
@@ -247,10 +247,17 @@ In this partition can be found info about some of these components.
 ### Teams
 A lot of games have teams for game players and NPCs. There is implementation for this functionality.
 
-Currently, team is **int** value.
+Currently, team represented by **int** value.
 
 **How to use:**
+
+First of all, there is extension for Unity's GameObjects to make work with teams easier. But to enable them, you need to add scripting define symbol `INSANE_TEAMS_EXTENSION` into the **Player Settings**.
+After it's done, you can use this example code:
+
 ```cs
+using InsaneOne.Core;
+// <...>
+    
 [SerializeField] GameObject enemy;
 
 void Start()
@@ -305,18 +312,18 @@ class SomePauserObject : MonoBehaviour, IPauseAffector
 ```
 
 ### Timer
-Deltatime-based timer to speedup any timer-based features creation.
+Deltatime-based timer to speed up any timer-based features creation.
 ```cs
 Timer timer;
 
 void Start() 
 {
-  timer = new Timer(5f);
+  timer = new Timer(5f); // creating 5 secodns timer.
 }
 
 void Update() 
 {
-  timer.DoTick()
+  timer.DoTick(); // iterating timer in the update (for example, you can do it only with condition, to imitate some pause)
   
   if (timer.IsReady())
   {
