@@ -16,7 +16,7 @@ namespace InsaneOne.Core.Development
 		static readonly Vector3[] tempBoxVerts = new Vector3[8];
 		static readonly List<Vector3[]> tempBoxSides = new (6);
 
-		public static void DrawShpere(Vector3 point, float radius, int numSegments = 20, SphereViewMode mode = SphereViewMode.Flat)
+		public static void DrawSphere(Vector3 point, float radius, int numSegments = 20, SphereViewMode mode = SphereViewMode.Flat)
 		{
 			var faceColor = mode == SphereViewMode.Wireframe ? Color.clear : DefaultFullColor;
 			var outlineColor = mode == SphereViewMode.Flat ? Color.clear : DefaultFullColor;

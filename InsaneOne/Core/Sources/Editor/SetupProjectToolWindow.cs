@@ -12,7 +12,10 @@ namespace InsaneOne.Core.Development
     public class SetupProjectToolWindow : EditorWindow
     {
         const string OriginPlacePrefName = "Create3DObject.PlaceAtWorldOrigin";
-        
+
+        static readonly string[] foldersDisplayOptions = {"Classic", "Classic ECS", "Feature-oriented"};
+        static readonly string[] dimensionDisplayOptions = {"3D", "2D"};
+
         static AddRequest installRequest;
         
         readonly Color checklistBadColor = Color.yellow;
@@ -20,7 +23,8 @@ namespace InsaneOne.Core.Development
         /// <summary> Resources folder name. Should be NOT Resources, any other naming. </summary>
         string contentFolder = "Game";
 
-        int dimension, foldersStyle;
+        int dimension;
+        FoldersGenerationStyle foldersStyle;
         
         Vector2 scroll;
         
@@ -71,16 +75,16 @@ namespace InsaneOne.Core.Development
             
             DrawPartitionHeader("Project folders");
             
-            dimension = EditorGUILayout.Popup("Project dimensions", dimension, new[] {"3D", "2D"});
-            foldersStyle = EditorGUILayout.Popup("Folders style", foldersStyle, new[] {"Feature-oriented", "Classic"});
+            dimension = EditorGUILayout.Popup("Project dimensions", dimension, dimensionDisplayOptions);
+            foldersStyle = (FoldersGenerationStyle)EditorGUILayout.Popup("Folders style", (int)foldersStyle, foldersDisplayOptions);
 
-            if (foldersStyle == 1)
+            if (foldersStyle is FoldersGenerationStyle.Classic or FoldersGenerationStyle.ClassicECS)
             {
                 contentFolder = EditorGUILayout.TextField("Content folder name", contentFolder);
                 separateUiInClassicStyle = EditorGUILayout.Toggle("Separate UI folder", separateUiInClassicStyle);
             }
 
-            if (contentFolder == String.Empty || contentFolder == "Resources")
+            if (contentFolder is "" or "Resources")
             {
                 GUILayout.Label("Wrong naming for content folder. Do not recommended to use \"Resources\" name.");
                 GUI.enabled = false;
@@ -88,12 +92,12 @@ namespace InsaneOne.Core.Development
 
             if (GUILayout.Button("Generate project folders"))
             {
-                if (foldersStyle == 0)
+                if (foldersStyle == FoldersGenerationStyle.FeatureOriented)
                     GenerateProjectFoldersFeatures(dimension == 0);
-                else
-                    GenereteProjectFolders(dimension == 0);
-            }    
-            
+                else if (foldersStyle is FoldersGenerationStyle.Classic or FoldersGenerationStyle.ClassicECS)
+                    GenereteProjectFolders(dimension == 0, foldersStyle is FoldersGenerationStyle.ClassicECS);
+            }
+
             GUILayout.EndVertical();
         }
 
@@ -154,13 +158,11 @@ namespace InsaneOne.Core.Development
             DrawPartitionHeader("Setup Checklist");
             
             DrawHeader("Graphics settings", false);
-            
-            // todo unify things like this to remove a lot of duplicated code
             DrawFixColorSpace();
             DrawFixSpritePacker();
             
             DrawHeader("Other settings");
-            
+            DrawFixPhysicsTimeStep();
             DrawFixNamespace();
             DrawFixCompanyName();
             DrawFixCreateAtOrigin();
@@ -170,121 +172,103 @@ namespace InsaneOne.Core.Development
             GUILayout.EndVertical();
         }
 
+        void DrawChecklistToggle(bool isFine, string fineLabel, string wrongLabel, string fineButtonText, string wrongButtonText, Action fixAction, Action innerDraw = null)
+        {
+            var buttonText = isFine ? fineButtonText : wrongButtonText;
+            var previousGuiColor = GUI.color;
+
+            GUI.color = isFine ? previousGuiColor : checklistBadColor;
+            GUILayout.BeginVertical(blockStyle);
+            GUILayout.Label(isFine ? fineLabel : wrongLabel, richText);
+
+            innerDraw?.Invoke();
+
+            if (!string.IsNullOrEmpty(buttonText) && GUILayout.Button(buttonText))
+                fixAction.Invoke();
+
+            GUILayout.EndVertical();
+            GUI.color = previousGuiColor;
+        }
+
         void DrawFixColorSpace()
         {
             var isFine = PlayerSettings.colorSpace == ColorSpace.Linear;
 
-            var buttonText = isFine ? "Set to Gamma" : "Set to Linear";
-            var neededResult = isFine ? ColorSpace.Gamma : ColorSpace.Linear;
-            var previousGuiColor = GUI.color;
-            
-            GUI.color = isFine ? previousGuiColor : checklistBadColor;
-            
-            GUILayout.BeginVertical(blockStyle);
-
-            GUILayout.Label(isFine
-                ? "Color space set to <b>Linear</b>. It is preffered. But you can reset to <b>Gamma</b>."
-                : "Color space set to <b>Gamma</b>. For PC preferred is <b>Linear</b>.",
-                richText);
-
-            if (GUILayout.Button(buttonText))
-                PlayerSettings.colorSpace = neededResult;
-            
-            GUILayout.EndVertical();
-
-            GUI.color = previousGuiColor;
+            DrawChecklistToggle(isFine,
+                "Color space set to <b>Linear</b>. It is preferred. But you can reset to <b>Gamma</b>.",
+                "Color space set to <b>Gamma</b>. For PC preferred is <b>Linear</b>.",
+                "Set to Gamma",
+                "Set to Linear",
+                () => { PlayerSettings.colorSpace = isFine ? ColorSpace.Gamma : ColorSpace.Linear; });
         }
         
         void DrawFixSpritePacker()
         {
             var isFine = EditorSettings.spritePackerMode is SpritePackerMode.SpriteAtlasV2;
-            var buttonText = isFine ? "Disable" : "Enable";
-            var previousGuiColor = GUI.color;
             var neededResult = isFine ? SpritePackerMode.Disabled : SpritePackerMode.SpriteAtlasV2;
-            GUI.color = isFine ? previousGuiColor : checklistBadColor;
-            
-            GUILayout.BeginVertical(blockStyle);
 
-            GUILayout.Label(!isFine
-                ? "Sprite packer V2 is disabled. Preffered is Enabled"
-                : "Sprite packer V2 is enabled. It is preffered. But you can disable.");
+            DrawChecklistToggle(isFine,
+                "Sprite packer V2 is enabled. It is preferred. But you can disable.",
+                "Sprite packer V2 is disabled. Preferred is Enabled",
+                "Disable",
+                "Enable",
+                () => { EditorSettings.spritePackerMode = neededResult; });
+        }
 
-            if (GUILayout.Button(buttonText))
-                EditorSettings.spritePackerMode = neededResult;
-            
-            GUILayout.EndVertical();
-            
-            GUI.color = previousGuiColor;
+        void DrawFixPhysicsTimeStep()
+        {
+            /*
+            var timeManager = AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TimeManager.asset")[0];
+            var serializedObject = new SerializedObject(timeManager);
+            var property = serializedObject.FindProperty("Fixed Timestep"); // TODO: InsaneOne.Core not correct to access like this
+
+            DrawChecklistToggle(Mathf.Approximately(property.floatValue, 0.0167f),
+                "Physics fixed time step now being called 60 times per second",
+                "Physics fixed time step set to be called 50 times a second. It can cause laggy physics view, if no interpolation used. Setting to 60 frames can fix this.",
+                "",
+                "Set to 60 frames",
+                () =>
+                {
+                    property.floatValue = 0.0167f;
+                    serializedObject.ApplyModifiedProperties();
+                });
+                */
         }
 
         void DrawFixNamespace()
         {
             var actualNamespace = EditorSettings.projectGenerationRootNamespace;
-            var isFine = actualNamespace != String.Empty;
-            var previousGuiColor = GUI.color;
-            
-            GUI.color = isFine ? previousGuiColor : checklistBadColor;
 
-            GUILayout.BeginVertical(blockStyle);
-
-            GUILayout.Label(isFine
-                ? $"Project root namespace is set. Current namespace is <b>{actualNamespace}</b>."
-                : "Project root namespace isn't set. Fix?",
-                richText);
-
-            selectedNamespace = EditorGUILayout.TextField("Namespace", selectedNamespace);
-
-            if (GUILayout.Button("Set"))
-                EditorSettings.projectGenerationRootNamespace = selectedNamespace;
-            
-            GUILayout.EndVertical();
-            
-            GUI.color = previousGuiColor;
+            DrawChecklistToggle(actualNamespace != string.Empty,
+                $"Project root namespace is set. Current namespace is <b>{actualNamespace}</b>.",
+                "Project root namespace isn't set. Fix?",
+                "Set",
+                "Set",
+                () => { EditorSettings.projectGenerationRootNamespace = selectedNamespace; },
+                () => { selectedNamespace = EditorGUILayout.TextField("Namespace", selectedNamespace); });
         }
 
         void DrawFixCompanyName()
         {
             var isFine = PlayerSettings.companyName != "DefaultCompany" && PlayerSettings.companyName != String.Empty;
-            var previousGuiColor = GUI.color;
-            
-            GUI.color = isFine ? previousGuiColor : checklistBadColor;
-            
-            GUILayout.BeginVertical(blockStyle);
 
-            GUILayout.Label(!isFine
-                ? $"Developer Company is not set. Set to value below ({companyName})?"
-                : $"Company name is set. Current company name is <b>{PlayerSettings.companyName}</b>",
-                richText);
-
-            companyName = GUILayout.TextField(companyName);
-                
-            if (GUILayout.Button("Set"))
-                PlayerSettings.companyName = companyName;
-            
-            GUILayout.EndVertical();
-            
-            GUI.color = previousGuiColor;
+            DrawChecklistToggle(isFine,
+                $"Company name is set. Current company name is <b>{PlayerSettings.companyName}</b>",
+                $"Developer Company is not set. Set to value below ({companyName})?",
+                "Set",
+                "Set",
+                () => { PlayerSettings.companyName = companyName; },
+                () => { companyName = GUILayout.TextField(companyName); });
         }
 
         void DrawFixCreateAtOrigin()
-        {  
-            var isFine = EditorPrefs.GetBool(OriginPlacePrefName);
-            var previousGuiColor = GUI.color;
-            
-            GUI.color = isFine ? previousGuiColor : checklistBadColor;
-            
-            GUILayout.BeginVertical(blockStyle);
-            GUILayout.Label(!isFine
-                    ? $"Create objects at origin is <b>disabled</b>. It is recommended to <b>enable</b>."
-                    : $"Create objects at origin is <b>enabled</b>.",
-                richText);
-            
-            if (!isFine && GUILayout.Button("Fix"))
-                EditorPrefs.SetBool(OriginPlacePrefName, true);
-            
-            GUILayout.EndVertical();
-            
-            GUI.color = previousGuiColor;
+        {
+            DrawChecklistToggle(EditorPrefs.GetBool(OriginPlacePrefName),
+                "Create objects at origin is <b>enabled</b>.",
+                "Create objects at origin is <b>disabled</b>. It is recommended to <b>enable</b>.",
+                "",
+                "Fix",
+                () => { EditorPrefs.SetBool(OriginPlacePrefName, true); });
         }
 
         void DrawFixReloadDomain()
@@ -292,53 +276,33 @@ namespace InsaneOne.Core.Development
             var correctValue = EnterPlayModeOptions.DisableDomainReload | EnterPlayModeOptions.DisableSceneReload;
             var isFine = EditorSettings.enterPlayModeOptionsEnabled && EditorSettings.enterPlayModeOptions == correctValue;
 
-
-            var previousGuiColor = GUI.color;
-
-            GUI.color = isFine ? previousGuiColor : checklistBadColor;
-
-            GUILayout.BeginVertical(blockStyle);
-            GUILayout.Label(!isFine
-                    ? $"Enter Play Mode options: Reload domain and scene is <b>enabled</b>. It slows down reload time after every recompile. Recommended is to <b>disable</b> these settings."
-                    : $"Enter Play Mode options: Reload domain settings are correct.",
-
-                richText);
-
-            if (!isFine && GUILayout.Button("Fix"))
-            {
-                EditorSettings.enterPlayModeOptionsEnabled = true;
-                EditorSettings.enterPlayModeOptions = correctValue;
-            }
-
-            GUILayout.EndVertical();
-
-            GUI.color = previousGuiColor;
+            DrawChecklistToggle(isFine,
+                "Enter Play Mode options: Reload domain settings are correct.",
+                "Enter Play Mode options: Reload domain and scene is <b>enabled</b>. It slows down reload time after every recompile. Recommended is to <b>disable</b> these settings.",
+                "",
+                "Fix",
+                () =>
+                {
+                    EditorSettings.enterPlayModeOptionsEnabled = true;
+                    EditorSettings.enterPlayModeOptions = correctValue;
+                });
         }
 
         void DrawFixNamings()
         {
             var isFine = EditorSettings.gameObjectNamingScheme == EditorSettings.NamingScheme.Underscore;
-            var previousGuiColor = GUI.color;
 
-            GUI.color = isFine ? previousGuiColor : checklistBadColor;
-
-            GUILayout.BeginVertical(blockStyle);
-            GUILayout.Label(!isFine
-                    ? $"Namings scheme is not set to <b>underscore</b> with 2 digits (Prefab_01). It is recommended to use <b>underscore</b> and several digits for better consistent naming."
-                    : $"Namings scheme is correct.",
-
-                richText);
-
-            if (!isFine && GUILayout.Button("Fix"))
-            {
-                EditorSettings.gameObjectNamingScheme = EditorSettings.NamingScheme.Underscore;
-                EditorSettings.gameObjectNamingDigits = 2;
-                EditorSettings.assetNamingUsesSpace = false;
-            }
-
-            GUILayout.EndVertical();
-
-            GUI.color = previousGuiColor;
+            DrawChecklistToggle(isFine,
+                "Namings scheme is correct.",
+                "Namings scheme is not set to <b>underscore</b> with 2 digits (Prefab_01). It is recommended to use <b>underscore</b> and several digits for better consistent naming.",
+                "",
+                "Fix",
+                () =>
+                {
+                    EditorSettings.gameObjectNamingScheme = EditorSettings.NamingScheme.Underscore;
+                    EditorSettings.gameObjectNamingDigits = 2;
+                    EditorSettings.assetNamingUsesSpace = false;
+                });
         }
         
         void DrawPartitionHeader(string text)
@@ -398,7 +362,7 @@ namespace InsaneOne.Core.Development
             }
         }
         
-        void GenereteProjectFolders(bool is3D)
+        void GenereteProjectFolders(bool is3D, bool isEcs)
         {
             var contentPath = $"Assets/{contentFolder}";
 
@@ -417,8 +381,15 @@ namespace InsaneOne.Core.Development
             
                 new (contentPath, "Sources"),
                 new ($"{contentPath}/Sources", "Editor"),
-                new ($"{contentPath}/Sources", "Storing"),
+                new ($"{contentPath}/Sources", "Data"),
             };
+
+            if (isEcs)
+            {
+                foldersToCreate.Add(new FolderData($"{contentPath}/Sources", "Systems"));
+                foldersToCreate.Add(new FolderData($"{contentPath}/Sources", "Components"));
+                foldersToCreate.Add(new FolderData($"{contentPath}/Sources", "Services"));
+            }
 
             if (separateUiInClassicStyle)
             {
@@ -478,16 +449,16 @@ namespace InsaneOne.Core.Development
 
         static void InstallProgress()
         {
-            if (installRequest.IsCompleted)
-            {
-                if (installRequest.Status == StatusCode.Success)
-                    Debug.Log($"Installed: {installRequest.Result.packageId}");
-                else if (installRequest.Status >= StatusCode.Failure)
-                    Debug.Log(installRequest.Error.message);
+            if (!installRequest.IsCompleted)
+                return;
 
-                EditorApplication.update -= InstallProgress;
-                installRequest = null;
-            }
+            if (installRequest.Status == StatusCode.Success)
+                Debug.Log($"Installed: {installRequest.Result.packageId}");
+            else if (installRequest.Status >= StatusCode.Failure)
+                Debug.Log(installRequest.Error.message);
+
+            EditorApplication.update -= InstallProgress;
+            installRequest = null;
         }
 
         readonly struct FolderData
