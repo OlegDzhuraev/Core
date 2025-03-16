@@ -6,7 +6,7 @@ namespace #NAMESPACE#
     /// <summary>Class to implement basic player input movement, using legacy Input System.</summary>
     public sealed class #SCRIPTNAME# : MonoBehaviour
     {
-        List<object> controlBlockers = new List<object>();
+        readonly List<object> controlBlockers = new List<object>();
 
         [SerializeField] float moveSpeed = 2f;
         
