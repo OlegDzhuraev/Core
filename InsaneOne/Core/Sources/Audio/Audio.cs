@@ -6,7 +6,7 @@ using Random = UnityEngine.Random;
 namespace InsaneOne.Core
 {
 	/// <summary> Allows to play sound without using your own GameObjects with AudioSource,
-	/// you need to setup audio layer in this class and then just pass audioclip to Play method. </summary>
+	/// you need to set up audio layer in this class and then just pass AudioClip to Play method. </summary>
 	public static class Audio
 	{
 		const int MaxSourcesInLayer = 24;
@@ -31,52 +31,41 @@ namespace InsaneOne.Core
 		}
 
 		/// <summary> Call this at first to initialize new layer. You can use enum instead of int to make code easier to read.</summary>
-		public static void UpdateLayer(int layer, AudioGroupData data)
+		public static void AddLayer(int layer, AudioGroupData data, int capacity = 8)
 		{
-			if (!cachedSources.TryGetValue(layer, out var list))
+			if (cachedSources.ContainsKey(layer) || layerDatas.ContainsKey(layer))
 			{
-				list = new List<AudioSource>();
-				cachedSources.Add(layer, list);
+				Debug.Log($"Audio Layer {layer} already initialized.");
+				return;
 			}
-			
-			if (!layerDatas.ContainsKey(layer))
-			{
-				layerDatas.Add(layer, data);
-			}
-			else
-			{
-				layerDatas[layer] = data;
-				foreach (var source in list)
-					SetupAudioFromData(source, data);
-			}
-		}
 
-		/// <summary> To fully init layer, you need to cache some audio sources for this layer. Call this after UpdateLayer. </summary>
-		public static void AddSourcesInLayer(int layer, int amount)
-		{
-			if (!layerDatas.TryGetValue(layer, out var data))
-				throw new NullReferenceException("No audio data for this layer set! Call CreateLayer first.");
-			
-			if (!cachedSources.TryGetValue(layer, out var list))
-				throw new NullReferenceException("No audio list for this layer set! Call CreateLayer first.");
+			var list = new List<AudioSource>();
+			cachedSources.Add(layer, list);
+
+			layerDatas.Add(layer, data);
 
 			var soundsLeft = MaxSourcesInLayer - list.Count;
-			amount = Math.Min(amount, soundsLeft);
-			
-			for (int q = 0; q < amount; q++)
-			{
-				var go = new GameObject($"AudioInLayer_{layer}");
-				var source = go.AddComponent<AudioSource>();
+			capacity = Math.Min(capacity, soundsLeft);
 
-				go.transform.SetParent(parent.transform);
+			for (var q = 0; q < capacity; q++)
+				AddSourceToLayer(layer, data, list);
+		}
 
-				source.playOnAwake = false;
-				source.loop = false;
+		static AudioSource AddSourceToLayer(int layer, AudioGroupData data, List<AudioSource> layerSources)
+		{
+			var go = new GameObject($"AudioInLayer_{layer}");
+			var source = go.AddComponent<AudioSource>();
 
-				SetupAudioFromData(source, data);
+			go.transform.SetParent(parent.transform);
 
-				list.Add(source);
-			}
+			source.playOnAwake = false;
+			source.loop = false;
+
+			SetupAudioFromData(source, data);
+
+			layerSources.Add(source);
+
+			return source;
 		}
 
 		static void SetupAudioFromData(AudioSource source, AudioGroupData data)
@@ -90,44 +79,49 @@ namespace InsaneOne.Core
 			source.maxDistance = data.MaxDistance3D;
 		}
 
-		/// <summary> Destroys all cached audio sources in specified layer. </summary>
-		/// <param name="layer"></param>
-		public static void ClearLayer(int layer)
+		/// <summary> Removes layer. Destroys all cached audio sources in specified layer. After remove, you can re-create layer with new settings</summary>
+		public static void RemoveLayer(int layer)
 		{
-			if (!cachedSources.TryGetValue(layer, out var list)) 
+			if (!cachedSources.TryGetValue(layer, out var list))
 				return;
 			
 			foreach (var audioSource in list)
 				GameObject.Destroy(audioSource.gameObject);
-				
-			list.Clear();
+
+			cachedSources.Remove(layer);
+			layerDatas.Remove(layer);
 		}
-		
+
 		/// <summary> Plays sound with specified parameters. </summary>
-		/// <returns>AudioSource, choosen to play. You can handle its changes manually by your code (stop after N seconds, for example, etc). </returns>
-		public static AudioSource Play(int layer, AudioClip clip, Vector3 position = default, float volume = 1f, float pitchRandom = 0f, bool loop = false)
+		/// <returns>AudioSource, chosen to play. You can handle its changes manually by your code (stop after N seconds, for example, etc). </returns>
+		public static AudioSource Play(int layer, AudioClip clip, Vector3 position = default, float volume = 1f,
+			float pitchRandom = 0f, bool loop = false)
 		{
 			if (clip == null)
 			{
 				Debug.LogWarning("You passed empty clip in Play method - nothing will be played.");
 				return null;
 			}
-			
-			if (TryGetFreeSource(layer, out var source))
-			{
-				pitchRandom = Math.Clamp(pitchRandom, -1f, 1f);
-				
-				source.transform.position = position;
-				source.pitch = 1f + Random.Range(-pitchRandom, pitchRandom);
-				source.clip = clip;
-				source.volume = volume;
-				source.loop = loop;
-				source.Play();
 
-				return source;
+			if (!TryGetFreeSource(layer, out var source))
+			{
+				var list = cachedSources[layer];
+				var data = layerDatas[layer];
+				source = AddSourceToLayer(layer, data, list);
+
+				Debug.LogWarning($"No free sources in Audio Layer {layer}! Created new. Recommended to increase default capacity.");
 			}
 
-			return null;
+			pitchRandom = Math.Clamp(pitchRandom, -1f, 1f);
+
+			source.transform.position = position;
+			source.pitch = 1f + Random.Range(-pitchRandom, pitchRandom);
+			source.clip = clip;
+			source.volume = volume;
+			source.loop = loop;
+			source.Play();
+
+			return source;
 		}
 
 		/// <summary> Plays sound with parameters, specified in the AudioData. </summary>
@@ -148,7 +142,7 @@ namespace InsaneOne.Core
 			audioSource = default;
 			
 			if (!cachedSources.TryGetValue(layer, out var sources))
-				return false;
+				throw new NullReferenceException($"No audio sources in layer {layer}!");
 
 			foreach (var source in sources)
 			{

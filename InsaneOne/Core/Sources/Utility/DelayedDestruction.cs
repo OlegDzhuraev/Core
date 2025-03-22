@@ -1,11 +1,15 @@
 ﻿using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace InsaneOne.Core
 {
 	public sealed class DelayedDestruction : MonoBehaviour
 	{
+		public float SecondsToDestruction => secondsToDestruction;
+
 		[SerializeField] [Range(0f, 1000f)] float secondsToDestruction = 3f;
-		[SerializeField] bool detachChilds;
+		[FormerlySerializedAs("detachChilds")]
+		[SerializeField] bool detachChildren;
 
 		void Update()
 		{
@@ -15,7 +19,7 @@ namespace InsaneOne.Core
 			if (secondsToDestruction > 0)
 				return;
 			
-			if (detachChilds)
+			if (detachChildren)
 				for (int i = 0; i < transform.childCount; i++)
 					transform.GetChild(i).SetParent(null);
 

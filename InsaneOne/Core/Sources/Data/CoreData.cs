@@ -24,19 +24,19 @@ namespace InsaneOne.Core
             new LinkHolder() { Name = "Perseids Pooling", Link = $"https://github.com/{RepoName}/PerseidsPooling.git" },
             new LinkHolder() { Name = "NavMesh Avoidance", Link = $"https://github.com/{RepoName}/NavMeshAvoidance.git" },
             new LinkHolder() { Name = "Tags", Link = $"https://github.com/{RepoName}/Tags.git" },
-            new LinkHolder() { Name = "Serialize Reference Drawer", Link = $"https://github.com/mackysoft/Unity-SerializeReferenceExtensions.git" },
+            new LinkHolder() { Name = "Serialize Reference Drawer", Link = "https://github.com/mackysoft/Unity-SerializeReferenceExtensions.git?path=Assets/MackySoft/MackySoft.SerializeReferenceExtensions" },
             new LinkHolder() { Name = "Toolbar Extender", Link = $"https://github.com/marijnz/unity-toolbar-extender.git" },
             new LinkHolder() { Name = "Tri Inspector", Link = $"https://github.com/codewriter-packages/Tri-Inspector.git" },
         };
         
         public List<LinkHolder> Packages = new List<LinkHolder>()
         {
+            new LinkHolder() { Name = "Input System", Link = "com.unity.inputsystem" },
             new LinkHolder() { Name = "Post Effects", Link = "com.unity.postprocessing" },
             new LinkHolder() { Name = "Recorder", Link = "com.unity.recorder" },
             new LinkHolder() { Name = "Cinemachine", Link = "com.unity.cinemachine" },
             new LinkHolder() { Name = "Animation Rigging", Link = "com.unity.animation.rigging" },
             new LinkHolder() { Name = "Terrain Tools", Link = "com.unity.terrain-tools" },
-            new LinkHolder() { Name = "Input System", Link = "com.unity.inputsystem" },
         };
         
         public List<LinkHolder> AssetLinks = new List<LinkHolder>()
