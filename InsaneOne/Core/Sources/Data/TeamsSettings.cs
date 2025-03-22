@@ -40,7 +40,7 @@ namespace InsaneOne.Core
 			if (coreData && coreData.TeamsSettings)
 				return coreData.TeamsSettings;
 
-			Debug.LogError("[InsaneOne.Core] No CoreData found! TeamsSettings not work correctly!");
+			CoreData.LogError("No CoreData found! TeamsSettings not work correctly!");
 			return CreateInstance<TeamsSettings>();
 		}
 	}
@@ -53,12 +53,12 @@ namespace InsaneOne.Core
 
 		public bool IsSame(TeamEnemyRule otherRule) => IsSame(otherRule.teamA, otherRule.teamB);
 
-		public bool IsSame(int inputTeamA, int inputTeamB)
+		public bool IsSame(int inTeamA, int inTeamB)
 		{
-			if (teamA == inputTeamA && teamB == inputTeamB)
+			if (teamA == inTeamA && teamB == inTeamB)
 				return true;
 
-			if (teamB == inputTeamA && teamA == inputTeamB)
+			if (teamB == inTeamA && teamA == inTeamB)
 				return true;
 
 			return false;

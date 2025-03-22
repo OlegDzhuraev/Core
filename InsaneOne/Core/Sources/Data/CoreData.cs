@@ -95,6 +95,17 @@ namespace InsaneOne.Core
 
             Debug.Log("<b>[InsaneOne.Core]</b> " + text);
         }
+
+        /// <summary> For internal usage. </summary>
+        public static void LogError(string text)
+        {
+            var coreData = Resources.Load<CoreData>(ResourcesPath);
+
+            if (coreData && coreData.SuppressLogs)
+                return;
+
+            Debug.LogError("<b>[InsaneOne.Core]</b> " + text);
+        }
     }
 
     [Serializable]
