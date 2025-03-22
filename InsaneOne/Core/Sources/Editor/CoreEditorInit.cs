@@ -10,8 +10,6 @@ namespace InsaneOne.Core.Development
 		{
 			if (!CoreData.TryLoad(out _))
 				CoreInitEditorWindow.ShowWindow();
-			else
-				CoreData.Log("Initialized.");
 		}
 	}
 }

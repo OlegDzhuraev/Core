@@ -107,7 +107,7 @@ namespace InsaneOne.Core.Injection
 					}
 
 					if (input[i] == null)
-						throw new NullReferenceException($"[Injection] Not found required injection data of type {parameter.ParameterType}!");
+						CoreData.Log($"[Injection] Not found required injection data of type {parameter.ParameterType}!");
 				}
 
 				method.Invoke(target, input);

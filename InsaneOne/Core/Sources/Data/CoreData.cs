@@ -8,7 +8,8 @@ namespace InsaneOne.Core
     public sealed class CoreData : ScriptableObject
     {
         const string RepoName = "OlegDzhuraev";
-        
+        const string ResourcesPath = "InsaneOne/CoreData";
+
         static CoreData instance;
 
         [Header("Features settings")]
@@ -56,7 +57,7 @@ namespace InsaneOne.Core
         };
         
         [Header("Debugging")]
-        [Tooltip("If you don't want to see plugin logs, set this.")]
+        [Tooltip("If you don't want to see plugin logs, enable this.")]
         public bool SuppressLogs;
 
         public static CoreData Load()
@@ -72,7 +73,7 @@ namespace InsaneOne.Core
         public static bool TryLoad(out CoreData result)
         {
             if (!instance)
-                instance = Resources.Load<CoreData>("InsaneOne/CoreData");
+                instance = Resources.Load<CoreData>(ResourcesPath);
 
             if (!instance)
             {
@@ -87,12 +88,12 @@ namespace InsaneOne.Core
         /// <summary> For internal usage. </summary>
         public static void Log(string text)
         {
-            var coreData = Resources.Load<CoreData>("InsaneOne/CoreData");
+            var coreData = Resources.Load<CoreData>(ResourcesPath);
 
             if (coreData && coreData.SuppressLogs)
                 return;
 
-            Debug.Log("<b>InsaneOne.Core:</b> " + text);
+            Debug.Log("<b>[InsaneOne.Core]</b> " + text);
         }
     }
 

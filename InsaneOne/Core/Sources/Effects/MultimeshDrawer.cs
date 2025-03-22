@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using InsaneOne.Core.Architect;
 using UnityEngine;
 
-namespace InsaneOne.Core.Components
+namespace InsaneOne.Core.Effects
 {
 	/// <summary> Can be used to draw some prefab meshes without any other logics, useful for some holograms or object preview. </summary>
 	public class MultimeshDrawer : MonoBehaviour

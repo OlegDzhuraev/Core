@@ -10,40 +10,40 @@ namespace InsaneOne.Core.Development
 {
     public static class TemplatesGenerator
     {
-        const string assetsPath = "Assets/Create/InsaneOne/Templates/";
-        const string coreNamespace = "InsaneOne.Core";
+        const string AssetsPath = "Assets/Create/InsaneOne/Templates/";
+        const string CoreNamespace = "InsaneOne.Core";
         
-        [MenuItem (assetsPath + "Scene Initialization", false, -599)]
+        [MenuItem (AssetsPath + "Scene Initialization", false, -599)]
         static void CreateSceneInitializationTemplate() => CreateAnyFromTemplate("SceneInitialization");
         
-        [MenuItem (assetsPath + "Storage", false, -499)]
+        [MenuItem (AssetsPath + "Storage", false, -499)]
         static void CreateStorageTemplate() => CreateAnyFromTemplate("Storage");
 
-        [MenuItem (assetsPath + "Damageable", false, -399)]
+        [MenuItem (AssetsPath + "Damageable", false, -399)]
         static void CreateDamageableTemplate() => CreateAnyFromTemplate("Damageable");
 
-        [MenuItem (assetsPath + "Attack", false, -399)]
+        [MenuItem (AssetsPath + "Attack", false, -399)]
         static void CreateAttackTemplate() => CreateAnyFromTemplate("BaseAttack");
         
-        [MenuItem (assetsPath + "Projectile", false, -399)]
+        [MenuItem (AssetsPath + "Projectile", false, -399)]
         static void CreateProjectileBehaviourTemplate() => CreateAnyFromTemplate("Projectile");
 
-        [MenuItem (assetsPath + "Player Move Input", false, -399)]
+        [MenuItem (AssetsPath + "Player Move Input", false, -399)]
         static void CreateMoveInputTemplate() => CreateAnyFromTemplate("MoveInput");
 
-        [MenuItem (assetsPath + "Player Move Input (Legacy Input System)", false, -399)]
+        [MenuItem (AssetsPath + "Player Move Input (Legacy Input System)", false, -399)]
         static void CreateMoveInputLegacyTemplate() => CreateAnyFromTemplate("MoveInputClassic");
 
-        [MenuItem (assetsPath + "Health", false, -399)]
+        [MenuItem (AssetsPath + "Health", false, -399)]
         static void CreateHealthBehaviourTemplate() => CreateAnyFromTemplate("HealthBehaviour");
 
-        [MenuItem (assetsPath + "State Machine", false, -199)]
+        [MenuItem (AssetsPath + "State Machine", false, -199)]
         static void CreateStateMachineTemplate() => CreateAnyFromTemplate("StateMachine");
 
-        [MenuItem (assetsPath + "Clickable Icon", false, -99)]
+        [MenuItem (AssetsPath + "Clickable Icon", false, -99)]
         static void CreateClickableIconTemplate() => CreateAnyFromTemplate("ClickableIcon");
 
-        [MenuItem (assetsPath + "HUD Healthbar", false, -98)]
+        [MenuItem (AssetsPath + "HUD Healthbar", false, -98)]
         static void CreateHUDHealthbarTemplate() => CreateAnyFromTemplate("HUDHealthbar");
 
         static void CreateAnyFromTemplate(string templateName)
@@ -57,7 +57,7 @@ namespace InsaneOne.Core.Development
             if (string.IsNullOrEmpty(fileName)) 
                 return "Invalid filename";
 
-            template = $"using {coreNamespace};\n" + template;
+            template = $"using {CoreNamespace};\n" + template;
             
             var namespaceName = EditorSettings.projectGenerationRootNamespace.Trim();
             
