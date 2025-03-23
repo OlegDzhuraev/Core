@@ -9,7 +9,6 @@ namespace InsaneOne.Core.Development
 		Label infoLabel;
 		Button setupButton;
 
-		[MenuItem("Test/Test")]
 		public static void ShowWindow()
 		{
 			var wnd = GetWindow<CoreInitEditorWindow>();
@@ -25,14 +24,19 @@ namespace InsaneOne.Core.Development
 			infoLabel = new Label("Looks like InsaneOne.Core was not setup before\n(No CoreData asset found).");
 			root.Add(infoLabel);
 
-			setupButton = new Button();
-			setupButton.name = "setup_button";
-			setupButton.text = "Setup InsaneOne.Core";
-			setupButton.style.backgroundColor = new StyleColor(new Color(0.2f, 0.4f, 0.2f));
+			setupButton = new Button
+			{
+				name = "setup_button",
+				text = "Setup InsaneOne.Core",
+				style =
+				{
+					backgroundColor = new StyleColor(new Color(0.2f, 0.4f, 0.2f)),
+				},
+			};
+
 			root.Add(setupButton);
 
 			TryShowSetupComplete();
-
 			SetupButtonHandler();
 		}
 
