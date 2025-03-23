@@ -309,9 +309,9 @@ Dependency receiver (target) class example:
 ```cs
 class SomeTarget()
 {
-[Inject] SomeService service;
+  [Inject] SomeService service;
 
-// your logic here
+  // your logic here
 }
 ```
 
