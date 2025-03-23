@@ -75,14 +75,9 @@ public class TestAudio : MonoBehaviour
 
     // Setting up some different audio layers, both for 3d and 2d sounds. Audio layers is useful to limiting specific type sounds amount,
     // also audio layer stores audio settings, for example Min/Max distance or Audio Mixer Group (see code for more info).
-    Audio.UpdateLayer(AudioLayer.Interaction, data3DSound);
-    Audio.AddSourcesInLayer(AudioLayer.Interaction, 8);
-      
-    Audio.UpdateLayer(AudioLayer.Ambience, data3DSound);
-    Audio.AddSourcesInLayer(AudioLayer.Ambience, 3);
-      
-    Audio.UpdateLayer(AudioLayer.UI, data2DSound);
-    Audio.AddSourcesInLayer(AudioLayer.UI, 2);
+    Audio.AddLayer(AudioLayer.Interaction, data3DSound, 8);
+    Audio.AddLayer(AudioLayer.Ambience, data3DSound, 3);
+    Audio.AddLayer(AudioLayer.UI, data2DSound, 2);
   }
 
   void Update()
