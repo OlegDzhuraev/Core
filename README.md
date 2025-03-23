@@ -133,7 +133,7 @@ public class TestSoundMix : MonoBehaviour
   {
       // setup audio system before below code runs (see prev example), if you want to use this system
 
-      // getting audio from the Audio system of previous example. You can use AudioSources directly, if you dont need this system.
+      // get audio from the Audio system of previous example. You can use AudioSources directly, if you dont need this system
       Audio.TryGetFreeSource(AudioLayer.Interaction, out var sourceA);
       Audio.TryGetFreeSource(AudioLayer.Interaction, out var sourceB);
 
@@ -150,7 +150,7 @@ public class TestSoundMix : MonoBehaviour
     if (Input.GetKeyDown(KeyCode.Alpha2)) 
         soundMixer.UpdateMix(Random.Range(0f, 1f));
 
-    // you also can tween your value and pass it to the UpdateMix method.
+    // you also can tween your value and pass it to the UpdateMix method
   }
 }
 ```
@@ -177,7 +177,7 @@ Repo contains localization extension, which allows to read CSV-based localizatio
 Localization.Initialize();
 
 // use SetLanguage to change game lang:
-Localization.SetLanguage("English"); // id of the lang
+Localization.SetLanguage("English"); // id of the language
 
 // Get any localized text:
 var text = Localization.GetText("localeString");
@@ -199,9 +199,9 @@ class GameBootstrap : MonoBehaviour
 {
   void Awake()
   {
-    var context = new YourContext(); // YourContext - it can be any your class with data, which should be shared.
+    var context = new YourContext(); // YourContext - it can be any your class with data, which should be shared
     // setup here your context class with required data
-    Context<YourContext>.Initialize(context); // will initialize all objects on scene, which have components, deriven from the ContextBehaviour<YourContext> by injecting your context.
+    Context<YourContext>.Initialize(context); // will initialize all objects on scene, which have components, deriven from the ContextBehaviour<YourContext> by injecting your context
   }
 }
 ```
@@ -217,7 +217,7 @@ class YourClass : ContextBehaviour<YourContext>
 {
   void Start()
   {
-    Debug.Log(context.SomeVariable); // you can access any context variable now.
+    Debug.Log(context.SomeVariable); // you can access any context variable now
   }
 }
 ```
@@ -262,14 +262,14 @@ using InsaneOne.Core;
 
 void Start()
 {
-  gameObject.SetTeam(0); // setting this object team
-  enemy.SetTeam(1); // setting different team to the enemy object
+  gameObject.SetTeam(0); // set this object team
+  enemy.SetTeam(1); // set different team to the enemy object
 }
 
 void Update()
 {
-  var myTeam = gameObject.GetTeam(); // getting team of this object
-  var enemyTeam = enemy.GetTeam(); // getting Enemy object team.
+  var myTeam = gameObject.GetTeam(); // get team of this object
+  var enemyTeam = enemy.GetTeam(); // get Enemy object team
 
   if (myTeam != enemyTeam)
     DoAttack(enemy); // proceed some action if teams are different
@@ -286,6 +286,33 @@ To use your teams settings:
 
 ```cs
 var isEnemies = gameObject.IsTeamEnemyTo(otherGameObject); // API can change
+```
+
+## Dependency Injection
+There are some tools to implement basic dependency injection. All dependencies will be injected in fields of the same type as dependency (or interface) and with `[Inject]` attribute in the dependency-receiver classes.
+
+```cs
+var service = new SomeService(); // this is an example dependency
+var diTarget = new SomeTarget(); // this is an example class, which will receive dependencies
+
+var diContainer = new Container(InjectionType.All);
+diContainer.AddAsDependency(service); // collecting dependencies
+// you can add any number of dependencies
+
+injectContainer.AddAsTarget(diTarget); // adding dependencies receivers (targets)
+// you can add any number of targets
+
+injectContainer.Resolve(); // pushing all dependencies to all receivers (targets)
+```
+
+Dependency receiver (target) class example:
+```cs
+class SomeTarget()
+{
+[Inject] SomeService service;
+
+// your logic here
+}
 ```
 
 ## Utility
