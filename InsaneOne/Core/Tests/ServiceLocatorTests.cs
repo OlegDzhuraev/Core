@@ -4,6 +4,7 @@ using NUnit.Framework;
 
 namespace InsaneOne.Core.Tests
 {
+	[TestFixture]
 	public class ServiceLocatorTests
 	{
 		class TestServiceA {}

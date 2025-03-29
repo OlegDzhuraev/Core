@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace InsaneOne.Core.Tests
 {
+    [TestFixture]
     public class TransformExtensionsTests
     {
         void Prepare2D(out Vector2 lookPosition, out Transform transform)

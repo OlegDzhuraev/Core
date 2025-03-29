@@ -39,7 +39,7 @@ namespace InsaneOne.Core.Development
 			if (sceneCanvas)
 				return;
 			
-			sceneCanvas = GameObject.FindObjectOfType<Canvas>();
+			sceneCanvas = GameObject.FindFirstObjectByType<Canvas>();
 
 			if (!sceneCanvas)
 				sceneCanvas = new GameObject("Canvas").AddComponent<Canvas>();

@@ -3,8 +3,8 @@
     "author": "Oleg Dzhuraev (InsaneOne)",
     "displayName": "InsaneOne Core",
     "description": "My tools and extensions for Unity engine, which I'm use in all my projects to speedup development. MIT License.",
-    "unity": "2021.3",
-    "version": "0.7.1",
+    "unity": "2022.1",
+    "version": "0.7.2",
     "keywords": [
         "insaneone",
         "insaneone core",
