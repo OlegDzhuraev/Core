@@ -1,0 +1,6 @@
+.group-box {
+    background-color: rgba(40, 40, 40, 1);
+    border-radius: 5px;
+    padding: 10px;
+    margin: 5px;
+}
