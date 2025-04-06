@@ -10,13 +10,17 @@ namespace InsaneOne.Core.Architect
 	/// all classes, using ContextBehaviour with the same context type.</para></summary>
 	public static class Context<T> where T : class
 	{
-		static readonly List<ContextBehaviour<T>> receivers = new List<ContextBehaviour<T>>(1024);
+		static List<IContext<T>> receivers;
+
 		static T context;
-		
-		/// <summary> Used to first initialize on loaded scene. Needed to be called once on level load (support multiscenes, but should be called after all of them are loaded). </summary>
-		public static void Initialize(T newContext)
+
+		/// <summary> Used to first initialize on loaded scene. Needed to be called once on level load (support multi-scenes, but should be called after all of them are loaded). </summary>
+		public static void Initialize(T newContext, int capacity = 1024)
 		{
-			receivers.Clear();
+			if (context != null)
+				return;
+
+			receivers = new List<IContext<T>>(capacity);
 			context = newContext;
 
 			for (var q = 0; q < SceneManager.sceneCount; q++)
@@ -28,14 +32,29 @@ namespace InsaneOne.Core.Architect
 			}
 		}
 
+		/// <summary> Call on game stop </summary>
+		public static void Dispose()
+		{
+			if (context == null)
+				return;
+
+			context = null;
+			receivers.Clear();
+		}
+
 		/// <summary> Gets and initializes all context receivers from GameObject. </summary>
 		static void CollectReceivers(GameObject go)
 		{
-			var newReceivers = go.GetComponentsInChildren<ContextBehaviour<T>>(true);
-			receivers.AddRange(newReceivers);
-					
-			foreach (var receiver in newReceivers)
-				receiver.ReloadContext(context);
+			var newReceivers = go.GetComponentsInChildren<IContext<T>>(true);
+
+			foreach (var newReceiver in newReceivers)
+			{
+				if (receivers.Contains(newReceiver)) // todo InsaneOne.Core: can consume a lot of resources when there a lot of objects. Optimize?
+					continue;
+
+				receivers.Add(newReceiver);
+				newReceiver.ReloadContext(context);
+			}
 		}
 		
 		/// <summary> Use when need to change context on the scene for actual context receivers. </summary>
@@ -57,11 +76,7 @@ namespace InsaneOne.Core.Architect
 			}
 		}
 
-		/// <summary> Use this method instead of Instantiate, it provides context to the spawned object. </summary>
-		public static void Spawn(GameObject prefab, Vector3 position = default, Quaternion rotation = default, Transform parent = null)
-		{
-			var go = GameObject.Instantiate(prefab, position, rotation, parent);
-			CollectReceivers(go);
-		} 
+		/// <summary> Adds GameObject to context and applies context to all receivers on this GO. </summary>
+		public static void Add(GameObject sceneObject) => CollectReceivers(sceneObject);
 	}
 }
