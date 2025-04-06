@@ -7,6 +7,9 @@ namespace InsaneOne.Core.Effects
 	/// <para>It is not static because you can want to use it with several cameras</para></summary>
 	public sealed class CameraShake
 	{
+		/// <summary> Set false to disable all camera shakes in game. </summary>
+		public static bool IsGlobalEnabled = true;
+
 		readonly Transform camTransform;
 		readonly Vector3 startPos;
 		
@@ -28,6 +31,9 @@ namespace InsaneOne.Core.Effects
 		
 		public void Shake(ShakeImpulse withImpulse)
 		{
+			if (!IsGlobalEnabled)
+				return;
+
 			if (!camTransform)
 				throw new NullReferenceException("Camera Shake: no camera transform exist! Possibly, camera was destroyed. Cancelled shake.");
 			

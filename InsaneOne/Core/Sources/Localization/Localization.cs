@@ -7,63 +7,65 @@ using UnityEngine;
 
 namespace InsaneOne.Core.Locales
 {
+	/// <summary> Use to localize game text with .csv-file. Supports fallback to original language. </summary>
 	public static class Localization
 	{
+		const char SplitSymbol = ';';
+
 		public static string Language { get; private set; } = "English";
-		public static string Filename { get; set; } = "Localization.csv";
 
 		public static event Action WasInitialized;
-		
-		static string[] loadedLocalizationTexts;
 
-		public static readonly List<string> Languages = new ();
-		public static bool IsLoaded;
+		public static List<string> Languages = new ();
+		public static bool IsLoaded { get; private set; }
 		public static bool IsLanguageSetAtLeastOnce { get; private set; }
 		
 		public static readonly Dictionary<string, string> CachedTexts = new ();
 
-		/// <summary>Initializes localization. Call this at the game initialization. </summary>
-		public static void Initialize()
+		static string LanguagesRow => loadedLocalizationTexts[0];
+
+		static string[] loadedLocalizationTexts;
+
+		/// <summary>Initializes localization. Call this once at the game initialization. </summary>
+		public static void Initialize(string fileName = "Localization.csv")
 		{
 			if (IsLoaded)
+			{
+				Debug.LogWarning("Localization already loaded - don't needed to call initialize method again.");
 				return;
+			}
 			
-			var path = $"{Application.streamingAssetsPath}/{Filename}";
+			var path = Path.Combine(Application.streamingAssetsPath, fileName);
 
 			if (!File.Exists(path))
-				return;
-			
-			loadedLocalizationTexts = File.ReadAllLines(path, Encoding.UTF8);
+				throw new Exception("Localization file not found at Streaming Assets folder!");
 
 			CachedTexts.Clear();
-			
-			var langs = loadedLocalizationTexts[0].Split(";", StringSplitOptions.RemoveEmptyEntries);
-			
-			for (var i = 1; i < langs.Length; i++)
-				Languages.Add(langs[i]);
+
+			loadedLocalizationTexts = File.ReadAllLines(path, Encoding.UTF8);
+			var languages = LanguagesRow.Split(SplitSymbol, StringSplitOptions.RemoveEmptyEntries);
+
+			Languages = languages.TakeLast(languages.Length - 1).ToList();
 			
 			IsLoaded = true;
-			
 			WasInitialized?.Invoke();
 		}
 
 		public static void SetLanguage(string lang)
 		{
 			if (!IsLoaded)
-				return;
+				throw new Exception("Localization was not initialized!");
 			
 			CachedTexts.Clear();
 			
 			Language = lang;
-			
-			var langs = loadedLocalizationTexts[0].Split(";", StringSplitOptions.RemoveEmptyEntries);
-			
-			int columnId = 1;
-			
-			for (var i = 1; i < langs.Length; i++)
-				if (langs[i] == lang)
+
+			var columnId = 1;
+
+			for (var i = 0; i < Languages.Count; i++)
+				if (Languages[i] == lang)
 				{
-					columnId = i;
+					columnId = i + 1; // + 1 because Languages list doesn't contain first column
 					break;
 				}
 
@@ -74,15 +76,16 @@ namespace InsaneOne.Core.Locales
 				if (str is "" or "\n")
 					continue;
 				
-				var words = str.Split(";", StringSplitOptions.RemoveEmptyEntries);
+				var elements = str.Split(SplitSymbol, StringSplitOptions.RemoveEmptyEntries);
 
-				var translatedWord = words.Length - 1 >= columnId ? words[columnId] : words[1];
-				
-				CachedTexts.Add(words[0], translatedWord);
+				if (elements.Length is 0 || string.IsNullOrWhiteSpace(elements[0]))
+					continue;
+
+				var translatedWord = elements.Length - 1 >= columnId ? elements[columnId] : elements[1]; // fallback to first language
+				CachedTexts.Add(elements[0], translatedWord);
 			}
 
 			IsLanguageSetAtLeastOnce = true;
-			
 			ReloadLocalization();
 		}
 
@@ -104,15 +107,14 @@ namespace InsaneOne.Core.Locales
 				locText.ReloadLocalization();
 		}
 
-		public static string GetText(string id) => CachedTexts.TryGetValue(id, out var result) ? result : "No text";
+		public static string GetText(string id) => CachedTexts.GetValueOrDefault(id, "No localization");
 		
 		public static bool TryGetText(string id, out string result)
 		{
 			if (CachedTexts.TryGetValue(id, out result))
 				return true;
 
-			result = "No text";
-
+			result = "No localization";
 			return false;
 		}
 
