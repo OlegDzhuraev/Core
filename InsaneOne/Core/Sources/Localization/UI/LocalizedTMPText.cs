@@ -28,10 +28,18 @@ namespace InsaneOne.Core.Locales
 
             var locale = localizationId.Localize();
             
-            if (locale.ToLower() != "no text")
+            if (locale != Localization.NoLocalizationText)
                 text.text = localizationId.Localize();
 
             text.parseCtrlCharacters = true;
+        }
+
+        public void SetCustomId(string id, bool reload = false)
+        {
+            localizationId = id;
+
+            if (reload)
+                ReloadLocalization();
         }
     }
 }

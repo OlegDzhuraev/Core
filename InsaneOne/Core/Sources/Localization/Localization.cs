@@ -10,6 +10,7 @@ namespace InsaneOne.Core.Locales
 	/// <summary> Use to localize game text with .csv-file. Supports fallback to original language. </summary>
 	public static class Localization
 	{
+		public const string NoLocalizationText = "No localization";
 		const char SplitSymbol = ';';
 
 		public static string Language { get; private set; } = "English";
@@ -107,7 +108,7 @@ namespace InsaneOne.Core.Locales
 				locText.ReloadLocalization();
 		}
 
-		public static string GetText(string id) => CachedTexts.GetValueOrDefault(id, "No localization");
+		public static string GetText(string id) => CachedTexts.GetValueOrDefault(id, NoLocalizationText);
 		
 		public static bool TryGetText(string id, out string result)
 		{
