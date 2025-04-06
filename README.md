@@ -371,6 +371,3 @@ var cam = MainCamera.Cached;
 
 ## Shaders
 This repo contains some PBR shaders, mainly to allow load textures from one mask (Metal-Roughness-AO, etc).
-
-## License
-MIT License
