@@ -217,6 +217,26 @@ class YourClass : ContextBehaviour<YourContext>
     Debug.Log(context.SomeVariable); // you can access any context variable now
   }
 }
+
+// or you can do this, if you have several contexts:
+class YourClass : MonoBehaviour, IContext<YourContextA>, IContext<YourContextB> //, etc...
+{
+  public void OnContextReload(YourContextA contextA)
+  {
+   Debug.Log(contextA.SomeVariable); // you can access any context variable now and you can cache context in your class
+  }
+
+  public void OnContextReload(YourContextB contextB)
+  {
+   // do smth
+  }
+
+  void Start()
+  {
+    Debug.Log(cachedContextA.SomeVariable); // if you're cached context in OnContextReload, you can access it in Start method too
+  }
+}
+
 ```
 
 **Note:** You need to initialize Context in **Awake** before any other components. Use **ScriptExecutionOrder** for this.
