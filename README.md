@@ -1,7 +1,7 @@
 ![GitHub License](https://img.shields.io/github/license/OlegDzhuraev/Core) ![Static Badge](https://img.shields.io/badge/unity%20version-2022%2B-blue) ![GitHub last commit](https://img.shields.io/github/last-commit/OlegDzhuraev/Core) ![GitHub package.json version](https://img.shields.io/github/package-json/v/OlegDzhuraev/Core)
 
 <p align="center">
-    <img src="https://dzhuraev.com/GithubData/CoreLogoWide3.png" width="1024" height="294" alt="Core">
+    <img src="https://dzhuraev.com/GithubData/CoreLogoWide3.png" alt="Core">
 </p>
 
 # Core
