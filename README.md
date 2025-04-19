@@ -1,5 +1,9 @@
 ![GitHub License](https://img.shields.io/github/license/OlegDzhuraev/Core) ![Static Badge](https://img.shields.io/badge/unity%20version-2022%2B-blue) ![GitHub last commit](https://img.shields.io/github/last-commit/OlegDzhuraev/Core) ![GitHub package.json version](https://img.shields.io/github/package-json/v/OlegDzhuraev/Core)
 
+<p align="center">
+    <img src="https://dzhuraev.com/GithubData/CoreLogoWide3.png" width="1024" height="294" alt="Core">
+</p>
+
 # Core
 My tools and extensions for Unity Engine, which I'm use in all my projects to speedup development. It allows to reduce amount of code - by implementing frequently used functionality. Mainly there stored tools, which is not enough big or good to move them in their own repos.
 
