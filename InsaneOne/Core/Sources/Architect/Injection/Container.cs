@@ -9,12 +9,13 @@ namespace InsaneOne.Core.Injection
 	{
 		Method,
 		Field,
-		All = Method | Field
+		All = Method | Field,
 	}
 
 	public class Container
 	{
 		const int StartPoolSize = 5;
+		const BindingFlags BindingAttribute = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
 		/// <summary> Used to prevent GC alloc on every injection. </summary>
 		readonly Dictionary<int, object[]> arraysPool = new ();
@@ -22,28 +23,38 @@ namespace InsaneOne.Core.Injection
 		readonly List<object> targets = new ();
 		readonly List<InjectData> dependenciesData = new ();
 
-		readonly BindingFlags bindingAttribute = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 		readonly Type injectAttributeType = typeof(InjectAttribute);
-
 		readonly InjectionType injectionType;
 
-		public Container(InjectionType injectionType)
+		readonly ILogger logger;
+
+		public Container(InjectionType injectionType, ILogger logger = null)
 		{
 			this.injectionType = injectionType;
+			this.logger = logger;
 
-			for (int i = 1; i < StartPoolSize; i++)
+			for (var i = 1; i < StartPoolSize; i++)
 				arraysPool.Add(i, new object[i]);
 		}
 
-		public InjectData AddAsDependency(object data)
+		public InjectData AddDependency(object data)
 		{
+			// todo disallow multiple additions
 			var result = new InjectData(data);
 			dependenciesData.Add(result);
-
 			return result;
 		}
 
-		public void AddAsTarget(object target)
+		public InjectData AddDependencyAs<T>(T data) => AddDependencyAs(data, typeof(T));
+
+		public InjectData AddDependencyAs(object data, Type type)
+		{
+			var result = new InjectData(data, type);
+			dependenciesData.Add(result);
+			return result;
+		}
+
+		public void AddTarget(object target)
 		{
 			if (!targets.Contains(targets))
 				targets.Add(target);
@@ -55,7 +66,6 @@ namespace InsaneOne.Core.Injection
 			foreach (var target in targets)
 				InjectDirectly(target);
 		}
-
 
 		/// <summary> Can be used in runtime for any target.
 		/// Currently, this method is not optimized to use at runtime, so be careful. </summary>
@@ -73,7 +83,7 @@ namespace InsaneOne.Core.Injection
 		{
 			var systemType = target.GetType();
 
-			foreach (var method in systemType.GetMethods(bindingAttribute))
+			foreach (var method in systemType.GetMethods(BindingAttribute))
 			{
 				if (method.IsStatic || !Attribute.IsDefined(method, injectAttributeType))
 					continue;
@@ -97,7 +107,7 @@ namespace InsaneOne.Core.Injection
 						if (injectData.BindToIds.Count > 0 && !injectData.BindToIds.Contains(injectAttribute.Id)) // if binds only to specific attribute ids and attribute has no this id, skipping
 							continue;
 
-						var injectType = injectData.Data.GetType();
+						var injectType = injectData.GetInjectType();
 
 						if (parameter.ParameterType.IsAssignableFrom(injectType))
 						{
@@ -107,7 +117,7 @@ namespace InsaneOne.Core.Injection
 					}
 
 					if (input[i] == null)
-						CoreData.Log($"[Injection] Not found required injection data of type {parameter.ParameterType}!");
+						logger?.Log($"[Injection] Not found required injection data of type {parameter.ParameterType}!");
 				}
 
 				method.Invoke(target, input);
@@ -118,10 +128,10 @@ namespace InsaneOne.Core.Injection
 
 		void InjectToField(object system, InjectData injectionData)
 		{
-			var dataType = injectionData.Data.GetType();
+			var dataType = injectionData.GetInjectType();
 			var systemType = system.GetType();
 
-			foreach (var field in systemType.GetFields(bindingAttribute))
+			foreach (var field in systemType.GetFields(BindingAttribute))
 			{
 				if (field.IsStatic || !Attribute.IsDefined(field, injectAttributeType))
 					continue;

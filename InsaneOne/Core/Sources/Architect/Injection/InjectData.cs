@@ -7,11 +7,25 @@ namespace InsaneOne.Core.Injection
 	public class InjectData
 	{
 		public object Data;
-		public List<string> BindToIds = new List<string>();
+		public Type AsType;
+		public List<string> BindToIds;
+		bool isCustomType;
 
 		public InjectData(object data)
 		{
 			Data = data;
+			BindToIds = new List<string>();
+
+			AsType = null;
+			isCustomType = false;
+		}
+
+		public InjectData(object data, Type asType)
+		{
+			Data = data;
+			BindToIds = new List<string>();
+			AsType = asType;
+			isCustomType = true;
 		}
 
 		public InjectData Bind(string id)
@@ -19,5 +33,7 @@ namespace InsaneOne.Core.Injection
 			BindToIds.Add(id);
 			return this;
 		}
+
+		public Type GetInjectType() => isCustomType ? AsType : Data.GetType();
 	}
 }
