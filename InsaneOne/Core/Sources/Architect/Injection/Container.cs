@@ -39,6 +39,9 @@ namespace InsaneOne.Core.Injection
 
 		public InjectData AddDependency(object data)
 		{
+			if (data == null)
+				throw new NullReferenceException("Data can't be null!");
+
 			// todo disallow multiple additions
 			var result = new InjectData(data);
 			dependenciesData.Add(result);
@@ -49,6 +52,9 @@ namespace InsaneOne.Core.Injection
 
 		public InjectData AddDependencyAs(object data, Type type)
 		{
+			if (data == null)
+				throw new NullReferenceException("Data can't be null!");
+
 			var result = new InjectData(data, type);
 			dependenciesData.Add(result);
 			return result;
