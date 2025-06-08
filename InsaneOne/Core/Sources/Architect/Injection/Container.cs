@@ -56,7 +56,7 @@ namespace InsaneOne.Core.Injection
 
 		public void AddTarget(object target)
 		{
-			if (!targets.Contains(targets))
+			if (!targets.Contains(target))
 				targets.Add(target);
 		}
 
