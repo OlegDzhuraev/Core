@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Audio;
 using Random = UnityEngine.Random;
 
 namespace InsaneOne.Core
@@ -11,8 +12,8 @@ namespace InsaneOne.Core
 	{
 		const int MaxSourcesInLayer = 24;
 		
-		static readonly Dictionary<int, List<AudioSource>> cachedSources = new Dictionary<int, List<AudioSource>>();
-		static readonly Dictionary<int, AudioGroupData> layerDatas = new Dictionary<int, AudioGroupData>();
+		static readonly Dictionary<int, List<AudioSource>> cachedSources = new ();
+		static readonly Dictionary<int, AudioGroupData> layerDatas = new ();
 		
 		/// <summary> All cached sounds parent. </summary>
 		static GameObject parent;
@@ -176,6 +177,11 @@ namespace InsaneOne.Core
 					return true;
 
 			return false;
+		}
+
+		public static void SetLogMixerValue(AudioMixer mixer, string exposedParam, float linearValue)
+		{
+			mixer.SetFloat(exposedParam, Mathf.Log(linearValue) * 20);
 		}
 	}
 }
