@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine;
 
 namespace InsaneOne.Core
 {
@@ -12,7 +11,10 @@ namespace InsaneOne.Core
 		public float FullTime => fullTime;
 		public float TimeLeft { get; private set; }
 
-		[SerializeField] float fullTime;
+#if UNITY_5_3_OR_NEWER
+		[UnityEngine.SerializeField]
+#endif
+		float fullTime;
 
 		bool isFinished;
 
@@ -23,11 +25,11 @@ namespace InsaneOne.Core
 		}
 		
 		/// <summary> Simple tick timer. Will reset after reaches zero and start again. In reset frame method IsReady will return true. </summary>
-		public void Tick()
+		public void Tick(float dTime)
 		{
 			if (TimeLeft > 0)
 			{
-				TimeLeft -= Time.deltaTime;
+				TimeLeft -= dTime;
 
 				if (TimeLeft <= 0) // required to check it here to work correct with TickIfNotReady method
 					Finished?.Invoke();
@@ -39,17 +41,23 @@ namespace InsaneOne.Core
 		}
 
 		/// <summary> Tick only if not finished. It requires manual timer reset. Can be used for some mechanics like skills reload, which need to be reloaded without stable period. </summary>
-		public void TickIfNotReady()
+		public void TickIfNotReady(float dTime)
 		{
 			if (!IsReady())
-				Tick();
+				Tick(dTime);
 		}
 
 		/// <summary> Checks is timer delay ended. It should be called in same frame and Update, which calls Tick method of this timer. </summary>
 		public bool IsReady() => TimeLeft <= 0;
 
 		/// <summary>Sets time in seconds which timer will wait for next action.</summary>
-		public void SetFullTime(float timeValue) => fullTime = timeValue;
+		public void SetFullTime(float timeValue, bool restart = false)
+		{
+			fullTime = timeValue;
+
+			if (restart)
+				Restart();
+		}
 
 		/// <summary> Restore timer full time left. </summary>
 		public void Restart() => TimeLeft = fullTime;
