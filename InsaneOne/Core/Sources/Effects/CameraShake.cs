@@ -59,6 +59,8 @@ namespace InsaneOne.Core.Effects
 			if (!isActive || Time.timeScale == 0)
 				return;
 
+			var dTime = Time.deltaTime;
+
 			if (!shakeTimer.IsReady())
 			{
 				if (frequencyTimer.IsReady())
@@ -71,8 +73,8 @@ namespace InsaneOne.Core.Effects
 				
 				camTransform.localPosition = Vector3.Lerp(actualPos, targetPos, GetFrequencyProgress());
 				
-				shakeTimer.TickIfNotReady();
-				frequencyTimer.TickIfNotReady();
+				shakeTimer.TickIfNotReady(dTime);
+				frequencyTimer.TickIfNotReady(dTime);
 				
 				return;
 			}
@@ -81,7 +83,7 @@ namespace InsaneOne.Core.Effects
 			{
 				camTransform.localPosition = Vector3.Lerp(actualPos, startPos, GetFrequencyProgress());
 				
-				frequencyTimer.TickIfNotReady();
+				frequencyTimer.TickIfNotReady(dTime);
 				return;
 			}
 			
