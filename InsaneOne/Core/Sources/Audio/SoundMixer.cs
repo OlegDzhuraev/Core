@@ -9,6 +9,7 @@ namespace InsaneOne.Core
 		/// <summary> How strong will be mixed two audiosources, if MixValue is centered between them. 1 will give 50% volume, 0 will give 0%. </summary>
 		public float OverMix { get; private set; }
 		public float MixValue { get; private set; }
+		public float MaxVolume { get; set; } = 1f;
 
 		readonly AudioSource[] mixedSources;
 		readonly float maxDist;
@@ -35,7 +36,7 @@ namespace InsaneOne.Core
 				var position = q / calculationAmount;
 				var strength = finalMaxDist - Mathf.Abs(Mathf.Clamp(position - MixValue, -finalMaxDist, finalMaxDist));
 
-				mixedSources[q].volume = strength / finalMaxDist;
+				mixedSources[q].volume = strength / finalMaxDist * MaxVolume;
 			}
 		}
 
