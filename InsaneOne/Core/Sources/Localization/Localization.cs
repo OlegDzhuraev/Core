@@ -10,13 +10,12 @@ namespace InsaneOne.Core.Locales
 	/// <summary> Use to localize game text with .csv-file. Supports fallback to original language. </summary>
 	public static class Localization
 	{
-		public const string NoLocalizationText = "No localization";
 		const char SplitSymbol = ';';
-
-		public static string Language { get; private set; } = "English";
+		static readonly Encoding TextEncoding = Encoding.UTF8;
 
 		public static event Action WasInitialized;
 
+		public static string Language { get; private set; } = "English";
 		public static List<string> Languages = new ();
 		public static bool IsLoaded { get; private set; }
 		public static bool IsLanguageSetAtLeastOnce { get; private set; }
@@ -43,7 +42,7 @@ namespace InsaneOne.Core.Locales
 
 			CachedTexts.Clear();
 
-			loadedLocalizationTexts = File.ReadAllLines(path, Encoding.UTF8);
+			loadedLocalizationTexts = File.ReadAllLines(path, TextEncoding);
 			var languages = LanguagesRow.Split(SplitSymbol, StringSplitOptions.RemoveEmptyEntries);
 
 			Languages = languages.TakeLast(languages.Length - 1).ToList();
@@ -108,14 +107,14 @@ namespace InsaneOne.Core.Locales
 				locText.ReloadLocalization();
 		}
 
-		public static string GetText(string id) => CachedTexts.GetValueOrDefault(id, NoLocalizationText);
+		public static string GetText(string id) => CachedTexts.GetValueOrDefault(id, id);
 		
 		public static bool TryGetText(string id, out string result)
 		{
 			if (CachedTexts.TryGetValue(id, out result))
 				return true;
 
-			result = "No localization";
+			result = id;
 			return false;
 		}
 

@@ -1,3 +1,5 @@
+#if INSANE_TEAMS_EXTENSION
+
 using NUnit.Framework;
 using UnityEngine;
 
@@ -62,3 +64,5 @@ namespace InsaneOne.Core.Tests
 		}
 	}
 }
+
+#endif
