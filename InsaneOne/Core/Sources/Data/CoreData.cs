@@ -9,6 +9,7 @@ namespace InsaneOne.Core
     {
         const string RepoName = "OlegDzhuraev";
         const string ResourcesPath = "InsaneOne/CoreData";
+        const string LogPrefix = "<b>[InsaneOne.Core]</b> ";
 
         static CoreData instance;
 
@@ -19,18 +20,20 @@ namespace InsaneOne.Core
         public GameObject UiFaderTpl;
 
         [Header("Setup Project Tool settings")]
-        public List<LinkHolder> GitPackages = new List<LinkHolder>()
+        public List<LinkHolder> GitPackages = new ()
         {
             new LinkHolder() { Name = "Modifiers", Link = $"https://github.com/{RepoName}/Modifiers.git" },
             new LinkHolder() { Name = "Perseids Pooling", Link = $"https://github.com/{RepoName}/PerseidsPooling.git" },
             new LinkHolder() { Name = "NavMesh Avoidance", Link = $"https://github.com/{RepoName}/NavMeshAvoidance.git" },
             new LinkHolder() { Name = "Tags", Link = $"https://github.com/{RepoName}/Tags.git" },
             new LinkHolder() { Name = "Serialize Reference Drawer", Link = "https://github.com/mackysoft/Unity-SerializeReferenceExtensions.git?path=Assets/MackySoft/MackySoft.SerializeReferenceExtensions" },
-            new LinkHolder() { Name = "Toolbar Extender", Link = $"https://github.com/marijnz/unity-toolbar-extender.git" },
-            new LinkHolder() { Name = "Tri Inspector", Link = $"https://github.com/codewriter-packages/Tri-Inspector.git" },
+            new LinkHolder() { Name = "Toolbar Extender", Link = "https://github.com/marijnz/unity-toolbar-extender.git" },
+            new LinkHolder() { Name = "Type reference", Link = "https://github.com/SolidAlloy/ClassTypeReference-for-Unity.git" },
+            new LinkHolder() { Name = "Scene reference", Link = "https://github.com/starikcetin/Eflatun.SceneReference.git" },
+            new LinkHolder() { Name = "Tri Inspector", Link = "https://github.com/codewriter-packages/Tri-Inspector.git" },
         };
         
-        public List<LinkHolder> Packages = new List<LinkHolder>()
+        public List<LinkHolder> Packages = new ()
         {
             new LinkHolder() { Name = "Input System", Link = "com.unity.inputsystem" },
             new LinkHolder() { Name = "Post Effects", Link = "com.unity.postprocessing" },
@@ -40,10 +43,11 @@ namespace InsaneOne.Core
             new LinkHolder() { Name = "Terrain Tools", Link = "com.unity.terrain-tools" },
         };
         
-        public List<LinkHolder> AssetLinks = new List<LinkHolder>()
+        public List<LinkHolder> AssetLinks = new ()
         {
             new LinkHolder() { Name = "DOTween", Link = "https://assetstore.unity.com/packages/tools/animation/dotween-hotween-v2-27676" },
             new LinkHolder() { Name = "More Effective Coroutines", Link = "https://assetstore.unity.com/packages/tools/animation/more-effective-coroutines-free-54975" },
+            new LinkHolder() { Name = "HotReload", Link = "https://assetstore.unity.com/packages/tools/utilities/hot-reload-edit-code-without-compiling-254358" },
             new LinkHolder() { Name = "ReWired", Link = "https://assetstore.unity.com/packages/tools/utilities/rewired-21676" },
             new LinkHolder() { Name = "Odin Inspector", Link = "https://assetstore.unity.com/packages/tools/utilities/odin-inspector-and-serializer-89041" },
             new LinkHolder() { Name = "vFolders 2", Link = "https://assetstore.unity.com/packages/tools/utilities/vfolders-2-255470" },
@@ -62,9 +66,7 @@ namespace InsaneOne.Core
 
         public static CoreData Load()
         {
-            var isLoaded = TryLoad(out var result);
-
-            if (!isLoaded)
+            if (!TryLoad(out var result))
                 throw new NullReferenceException("Possible, InsaneOne.Core initialization was failed, no CoreData found!");
             
             return result;
@@ -73,7 +75,7 @@ namespace InsaneOne.Core
         public static bool TryLoad(out CoreData result)
         {
             if (!instance)
-                instance = Resources.Load<CoreData>(ResourcesPath);
+                instance = LoadFromResources();
 
             if (!instance)
             {
@@ -88,24 +90,26 @@ namespace InsaneOne.Core
         /// <summary> For internal usage. </summary>
         public static void Log(string text)
         {
-            var coreData = Resources.Load<CoreData>(ResourcesPath);
+            var coreData = LoadFromResources();
 
             if (coreData && coreData.SuppressLogs)
                 return;
 
-            Debug.Log("<b>[InsaneOne.Core]</b> " + text);
+            Debug.Log(LogPrefix + text);
         }
 
         /// <summary> For internal usage. </summary>
         public static void LogError(string text)
         {
-            var coreData = Resources.Load<CoreData>(ResourcesPath);
+            var coreData = LoadFromResources();
 
             if (coreData && coreData.SuppressLogs)
                 return;
 
-            Debug.LogError("<b>[InsaneOne.Core]</b> " + text);
+            Debug.LogError(LogPrefix + text);
         }
+        
+        static CoreData LoadFromResources() => Resources.Load<CoreData>(ResourcesPath);
     }
 
     [Serializable]
