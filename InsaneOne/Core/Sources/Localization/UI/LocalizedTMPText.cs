@@ -27,9 +27,7 @@ namespace InsaneOne.Core.Locales
             }
 
             var locale = localizationId.Localize();
-            
-            if (locale != Localization.NoLocalizationText)
-                text.text = localizationId.Localize();
+            text.text = locale;
 
             text.parseCtrlCharacters = true;
         }
