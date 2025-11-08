@@ -2,9 +2,9 @@
     "name": "com.insaneone.core",
     "author": "Oleg Dzhuraev (InsaneOne)",
     "displayName": "InsaneOne Core",
-    "description": "My tools and extensions for Unity engine, which I'm use in all my projects to speedup development. MIT License.",
+    "description": "My tools and extensions for Unity engine, which I'm use in all my projects to speedup development. Apache 2.0, MIT Licenses.",
     "unity": "2022.1",
-    "version": "0.7.7",
+    "version": "0.7.8",
     "keywords": [
         "insaneone",
         "insaneone core",

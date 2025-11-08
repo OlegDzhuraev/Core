@@ -3,34 +3,35 @@ using UnityEngine;
 
 namespace InsaneOne.Core.Utility
 {
-    // TODO InsaneOne: Allow to pause custom time scales?
     public static class PauseUtility
     {
-        static readonly List<IPauseAffector> affectors = new List<IPauseAffector>();
-        
-        /// <summary> Pause by some affector (any object, which can pause app). Them stacks to allow make game be paused, when one of them called "Unpause", and other still pausing game. </summary>
-        public static void Pause(IPauseAffector pauseBy)
+        public static float DefaultTimeScale = 1f;
+
+        static readonly List<IPauseSource> sources = new ();
+
+        /// <summary> Pause by some source (any object, which can pause app). Allowed sources stacking to allow make game be paused, when one of them called "Unpause", and other still pausing game. </summary>
+        public static void Pause(IPauseSource pauseBy)
         {
-            affectors.Add(pauseBy);
+            sources.Add(pauseBy);
 
             Time.timeScale = 0;
         }
 
-        /// <summary> Unpauses by specific affector. If there others affectors, app will continue by paused. </summary>
-        public static void Unpause(IPauseAffector unpauseBy)
+        /// <summary> Unpauses by specific source. If there is any other source, app will continue by paused. </summary>
+        public static void Unpause(IPauseSource unpauseBy)
         {
-            affectors.Remove(unpauseBy);
+            sources.Remove(unpauseBy);
 
-            if (affectors.Count == 0)
-                Time.timeScale = 1f;
+            if (sources.Count == 0)
+                Time.timeScale = DefaultTimeScale;
         }
 
-        public static bool IsPaused() => affectors.Count > 0;
+        public static bool IsPaused() => sources.Count > 0;
 
-        /// <summary> Call this on app start or end one time. It will reset all pause affectors and timescale. </summary>
+        /// <summary> Call this once on app start/end. It will reset all pause sources and timescale. </summary>
         public static void Reset()
         {
-            affectors.Clear();
+            sources.Clear();
             Time.timeScale = 1f;
         }
     }

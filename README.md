@@ -339,13 +339,13 @@ class SomeTarget()
 ## Utility
 
 ### Pause Utility
-Allows to pause game and use multiple pause affectors object. 
+Allows to pause game and use multiple pause source objects. 
 So, for example, two different objects wants to pause game. Next call of unpause will actually **not** unpause game until **both** affector objects call it. 
 
 ```cs
 using InsaneOne.Core.Utility;
 
-class SomePauserObject : MonoBehaviour, IPauseAffector
+class SomePauserObject : MonoBehaviour, IPauseSource
 {
   void SomeAction()
   {
