@@ -102,8 +102,8 @@ namespace InsaneOne.Core.Locales
 
 		public static void ReloadLocalization()
 		{
-			var localizedtexts = GetAllObjectsOfType<MonoBehaviour>().OfType<ILocalized>();
-			foreach (var locText in localizedtexts)
+			var localizedTexts = GetAllObjectsOfType<MonoBehaviour>().OfType<ILocalized>();
+			foreach (var locText in localizedTexts)
 				locText.ReloadLocalization();
 		}
 

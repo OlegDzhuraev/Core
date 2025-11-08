@@ -64,8 +64,14 @@ namespace InsaneOne.Core
 		
 		/// <summary> Set this timer complete. </summary>
 		public void SetReady() => TimeLeft = 0f;
-		
-		/// <summary> Get timer reload percents. </summary>
+
+		/// <summary> Get timer reload percents (starting from 0 to 1). </summary>
 		public float GetReloadPercents() => (fullTime - TimeLeft) / fullTime;
+
+		/// <summary> Returns timer progress in percents (starting from 1 to 0). </summary>
+		public float GetProgressLeft() => TimeLeft / fullTime;
+
+		/// <summary> Hard override for time left. Use it only in some specific cases. </summary>
+		public void SetTimeLeft(float value) => TimeLeft = value;
 	}
 }
