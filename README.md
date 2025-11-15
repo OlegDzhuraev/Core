@@ -5,7 +5,7 @@
 </p>
 
 # Core
-My tools and extensions for Unity Engine, which I'm use in all my projects to speedup development. It allows to reduce amount of code - by implementing frequently used functionality. Mainly there stored tools, which is not enough big or good to move them in their own repos.
+My tools and extensions for Unity Engine, which I'm use in all my projects to speedup development. It allows to reduce amount of code — by implementing frequently used functionality. Mainly there stored tools, which is not enough big or good to move them in their own repos.
 
 This repo was exposed to public only just because I want to import it easily with Package Manager, but if you're interested, feel free to use it.
 
@@ -162,13 +162,14 @@ In the Project Manager window, in context menu now exist a new partition **Insan
 ## UI
 I've added some new elements and templates for UI, which is missing in Unity default package. Now it still very simple, but I want to improve it in the future.
 
-**Floating panel** - allows to create floating in a 3d world (following some object) UI-panel with some info.
-
-**TabControl** - classic tab control element.
-
-**PopupWindow** - allows to create a popup window with any title, text and Apply/Cancel buttons with apply callback.
-
-**Fader** - commonly used in a game projects. Fades screen alpha into some color. Requires DOTween.
+- **Element** — base abstract component with show/hide functionality, WasShown/WasHidden events, with support of ViewModel. You can use it in code to implement your own UI elements.
+- **FloatingPanel** — allows to create floating in a 3d world (following some object) UI-panel with some info.
+- **TabControl** — classic tab control element.
+- **PopupWindow** — allows to create a popup window with any title, text and Apply/Cancel buttons with apply callback.
+- **Fader** — commonly used in a game projects. Fades screen alpha into some color. Requires DOTween.
+- **Hint** — shows non-interactable pop-up with info text near cursor or some other element.
+- **ProgressBar** — component to automate usage of filled Image component.
+- **CircularLayout** — allows to automatically place elements on circle with specified radius. Alternative to **Horizontal/VerticalLayout**.
 
 ## Localization
 Repo contains localization extension, which allows to read CSV-based localization and translate ingame texts for selected language.
@@ -184,9 +185,9 @@ Localization.SetLanguage("English"); // id of the language
 var text = Localization.GetText("localeString");
 ```
 
-Also, there exist useful component for localization without code - **LocalizedTMPText**. Add it to your text object and write localeId in its text field.
+Also, there exist useful component for localization without code — **LocalizedTMPText**. Add it to your text object and write localeId in its text field.
 
-Localization uses **StreamingAssets** to contain a localization file - to allow modify it without game rebuild or allow modding of localization for players.
+Localization uses **StreamingAssets** to contain a localization file — to allow modify it without game rebuild or allow modding of localization for players.
 
 ## Architect
 Some code architect ready-made things. Probably not the best ones :)
@@ -297,7 +298,7 @@ void Update()
 }
 ```
 
-Actually, this code works with custom **TeamBehaviour** component - adds it to any teamed objects, and stores actual object team in this component.
+Actually, this code works with custom **TeamBehaviour** component — adds it to any teamed objects, and stores actual object team in this component.
 
 You can also create TeamsSettings asset, and setup, which teams will be enemies to others. To create it, click **RMB** in **Project Window**, and in the context menu select **InsaneOne** -> **TeamsSettings**.
 
@@ -371,7 +372,7 @@ void Start()
 
 void Update() 
 {
-  timer.DoTick(); // iterating timer in the update (for example, you can do it only with condition, to imitate some pause)
+  timer.DoTick(Time.deltaTime); // iterating timer in the update (for example, you can do it only with condition, to imitate some pause)
   
   if (timer.IsReady())
   {
