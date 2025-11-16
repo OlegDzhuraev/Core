@@ -6,7 +6,7 @@ namespace InsaneOne.Core.Locales
 {
     public sealed class LocalizedTMPText : Element<LocalizedTextViewModel>, ILocalized
     {
-        [SerializeField] string localizationId;
+        [SerializeField, Localized] string localizationId;
 
         TMP_Text text;
 
