@@ -39,11 +39,11 @@ namespace InsaneOne.Core.UI
 
         void Update()
         {
-            if (!viewModel.FollowTarget)
+            if (!ViewModel.IsTargetExist)
                 return;
 
-            var worldTargetPos = viewModel.FollowTarget.transform.position;
-            var screenPos = MainCamera.Cached.WorldToScreenPoint(worldTargetPos + Vector3.up * viewModel.VerticalOffset);
+            var worldTargetPos = ViewModel.FollowTarget.transform.position;
+            var screenPos = MainCamera.Cached.WorldToScreenPoint(worldTargetPos + Vector3.up * ViewModel.VerticalOffset);
 
             RectTransform.anchoredPosition = screenPos / CanvasTransform.localScale.x;
         }
@@ -51,10 +51,12 @@ namespace InsaneOne.Core.UI
 
     public class FloatingPanelViewModel
     {
+        public bool IsTargetExist => FollowTarget != null;
+
         public Transform FollowTarget;
         public float VerticalOffset;
 
-        public FloatingPanelViewModel(Transform followTarget, float verticalOffset)
+        public FloatingPanelViewModel(Transform followTarget, float verticalOffset = 0)
         {
             FollowTarget = followTarget;
             VerticalOffset = verticalOffset;

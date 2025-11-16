@@ -64,20 +64,21 @@ namespace InsaneOne.Core.Architect
 			set.Add(serviceType);
 		}
 
-		public static void Unregister<T>() => services.Remove(typeof(T));
-
 		public static T Get<T>() => Get<T>(typeof(T));
 
 		static T Get<T>(Type type)
 		{
-			if (services.TryGetValue(type, out var value))
+			if (TryGet(type, out var value))
 				return (T)value;
 
 			throw new NullReferenceException($"No service of type '{type}' registered!");
 		}
 
+		public static void Unregister<T>() => Unregister(typeof(T));
+		static void Unregister(Type type) => services.Remove(type);
+
 		/// <summary> When using it, keep in mind the peculiarities of Unity.Object, which may not be null when destroyed,
-		/// and therefore needs to be unregistered when destroyed.  </summary>
+		/// and therefore needs to be unregistered when destroyed. </summary>
 		public static bool TryGet<T>(out T typedResult)
 		{
 			var isExist = TryGet(typeof(T), out var result);
@@ -87,13 +88,22 @@ namespace InsaneOne.Core.Architect
 
 		static bool TryGet(Type type, out object result)
 		{
+			result = null;
+
 			if (services.TryGetValue(type, out var value))
 			{
+#if UNITY_5_3_OR_NEWER
+				if (value is UnityEngine.Object unityObject && unityObject == null)
+				{
+					UnityEngine.Debug.LogWarning($"[ServiceLocator] Object of type {type} is {nameof(UnityEngine.Object)}, and it was destroyed. Can't get it from ServiceLocator.");
+					Unregister(type);
+					return false;
+				}
+#endif
 				result = value;
 				return true;
 			}
 
-			result = default;
 			return false;
 		}
 	}

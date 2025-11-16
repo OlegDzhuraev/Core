@@ -45,7 +45,7 @@ namespace InsaneOne.Core.UI
 
 		void Update()
 		{
-			if (viewModel.ShowOnCursor)
+			if (ViewModel.ShowOnCursor)
 				rectTransform.anchoredPosition = Input.mousePosition;
 		}
 	}

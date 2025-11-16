@@ -13,13 +13,13 @@ namespace InsaneOne.Core.Locales
         void Awake() => text = GetComponent<TMP_Text>();
         void Start()
         {
-            if (viewModel != null && viewModel.AutoReload)
+            if (ViewModel != null && ViewModel.AutoReload)
                 ReloadLocalization();
         }
 
         public void ReloadLocalization()
         {
-            if (viewModel == null)
+            if (ViewModel == null)
                 SetViewModel(new LocalizedTextViewModel(localizationId));
 
             if (!Localization.IsLoaded)
@@ -34,7 +34,7 @@ namespace InsaneOne.Core.Locales
                 return;
             }
 
-            text.text = viewModel!.LocalizedText;
+            text.text = ViewModel!.LocalizedText;
             text.parseCtrlCharacters = true;
         }
 

@@ -69,13 +69,13 @@ namespace InsaneOne.Core.UI
 		
 		void OnApplyClick()
 		{
-			viewModel.ApplyAction?.Invoke();
+			ViewModel.ApplyAction?.Invoke();
 			Hide();
 		}
 
 		void OnCancelClick()
 		{
-			viewModel.CancelAction?.Invoke();
+			ViewModel.CancelAction?.Invoke();
 			Hide();
 		}
 		

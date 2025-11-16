@@ -35,8 +35,8 @@ namespace InsaneOne.Core.UI
 
 		void OnDestroy()
 		{
-			if (viewModel != null)
-				viewModel.Changed -= OnChanged;
+			if (ViewModel != null)
+				ViewModel.Changed -= OnChanged;
 		}
 
 		void OnChanged(float value)
@@ -45,7 +45,7 @@ namespace InsaneOne.Core.UI
 				fillBar.fillAmount = value;
 
 			if (numberText)
-				numberText.text = viewModel.MakeText();
+				numberText.text = ViewModel.MakeText();
 		}
 	}
 

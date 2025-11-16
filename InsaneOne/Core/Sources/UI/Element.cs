@@ -29,13 +29,16 @@ namespace InsaneOne.Core.UI
 	public abstract class Element<TViewModel> : MonoBehaviour, IElement
 	{
 		public event Action WasShown, WasHidden;
+		public event Action<TViewModel> ViewModelChanged;
+
+		public TViewModel ViewModel { get; private set; }
 
 		[SerializeField] protected GameObject selfObject;
-		protected TViewModel viewModel;
 
 		public void SetViewModel(TViewModel viewModel)
 		{
-			this.viewModel = viewModel;
+			ViewModel = viewModel;
+			ViewModelChanged?.Invoke(ViewModel);
 			OnViewModelChanged(viewModel);
 		}
 
