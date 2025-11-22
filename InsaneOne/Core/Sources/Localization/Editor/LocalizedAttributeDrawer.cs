@@ -11,6 +11,7 @@ namespace InsaneOne.Core.Locales.Editor
 		GUIStyle labelStyle;
 		float extraHeight;
 		string localizedText;
+		string lastLocale;
 
 		public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
 		{
@@ -18,12 +19,15 @@ namespace InsaneOne.Core.Locales.Editor
 			EditorGUI.PropertyField(position, property, label);
 			extraHeight = 0;
 
+			if (property.propertyType is not SerializedPropertyType.String)
+				return;
+
 			var locale = property.stringValue;
 
 			if (string.IsNullOrWhiteSpace(locale))
 				return;
 
-			if (!string.IsNullOrWhiteSpace(localizedText))
+			if (!string.IsNullOrWhiteSpace(localizedText) && locale == lastLocale)
 			{
 				extraHeight = MaxTextHeight;
 				var pos = position; // todo draw text correctly
@@ -33,11 +37,19 @@ namespace InsaneOne.Core.Locales.Editor
 				return;
 			}
 
-			labelStyle = new GUIStyle(EditorStyles.label) { fontSize = 10 };
+			labelStyle = new GUIStyle(EditorStyles.label)
+			{
+				fontSize = 10, normal = { textColor = Color.gray },
+			};
 
 			Localization.Initialize();
-			Localization.TryGetText(locale, out localizedText);
+			Localization.SetLanguage(Localization.Language); // default language
+
+			if (!Localization.TryGetText(locale, out localizedText))
+				localizedText = "Localization not found!";
+
 			Localization.Unload();
+			lastLocale = locale;
 		}
 
 		public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
