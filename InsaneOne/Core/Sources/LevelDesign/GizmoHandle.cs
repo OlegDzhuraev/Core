@@ -26,7 +26,7 @@ namespace InsaneOne.Core
 			Gizmos.matrix = transform.localToWorldMatrix;
 			Gizmos.color = gizmoColor;
 
-			if (form == Form.Sphere)
+			if (form is Form.Sphere)
 				DrawSphere(drawType);
 			else
 				DrawCube(drawType);
@@ -34,18 +34,24 @@ namespace InsaneOne.Core
 
 		void DrawSphere(DrawType type)
 		{
-			if (type == DrawType.WiredAndFilled)
-				Gizmos.DrawSphere(Vector3.zero, 0.5f);
+			var center = Vector3.zero;
+			var radius = 0.5f;
+
+			if (type is DrawType.WiredAndFilled)
+				Gizmos.DrawSphere(center, radius);
 			
-			Gizmos.DrawWireSphere(Vector3.zero, 0.5f);
+			Gizmos.DrawWireSphere(center, radius);
 		}
 
 		void DrawCube(DrawType type)
-		{	
-			if (type == DrawType.WiredAndFilled)
-				Gizmos.DrawCube(Vector3.zero, Vector3.one);
+		{
+			var center = Vector3.zero;
+			var size = Vector3.one;
+
+			if (type is DrawType.WiredAndFilled)
+				Gizmos.DrawCube(center, size);
 			
-			Gizmos.DrawWireCube(Vector3.zero, Vector3.one);
+			Gizmos.DrawWireCube(center, size);
 		}
 	}
 }

@@ -18,8 +18,8 @@ namespace InsaneOne.Core.Development
 
 		public static void DrawSphere(Vector3 point, float radius, int numSegments = 20, SphereViewMode mode = SphereViewMode.Flat)
 		{
-			var faceColor = mode == SphereViewMode.Wireframe ? Color.clear : DefaultFullColor;
-			var outlineColor = mode == SphereViewMode.Flat ? Color.clear : DefaultFullColor;
+			var faceColor = mode is SphereViewMode.Wireframe ? Color.clear : DefaultFullColor;
+			var outlineColor = mode is SphereViewMode.Flat ? Color.clear : DefaultFullColor;
 
 			var prevZTest = Handles.zTest;
 			Handles.zTest = DefaultZTest;
@@ -47,8 +47,8 @@ namespace InsaneOne.Core.Development
 
 		public static void DrawBox(Vector3 point, Vector3 size, SphereViewMode mode = SphereViewMode.Flat)
 		{
-			var faceColor = mode == SphereViewMode.Wireframe ? Color.clear : DefaultFullColor;
-			var outlineColor = mode == SphereViewMode.Flat ? Color.clear : DefaultFullColor;
+			var faceColor = mode is SphereViewMode.Wireframe ? Color.clear : DefaultFullColor;
+			var outlineColor = mode is SphereViewMode.Flat ? Color.clear : DefaultFullColor;
 			
 			var hs = new Vector3(size.x / 2, size.y / 2, size.z / 2);
 

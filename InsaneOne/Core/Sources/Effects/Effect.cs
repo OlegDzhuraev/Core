@@ -4,7 +4,7 @@ using InsaneOne.PerseidsPooling;
 using InsaneOne.PerseidsPooling.Utils;
 #endif
 
-namespace InsaneOne.Core
+namespace InsaneOne.Core.Effects
 {
     /// <summary> VFX spawner class. Will use pooling system, if Perseids Pooling is added to the project. </summary>
     public static class Effect

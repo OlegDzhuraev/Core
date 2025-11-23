@@ -5,7 +5,10 @@ namespace InsaneOne.Core.Utility
 {
     public static class PauseUtility
     {
-        public static float DefaultTimeScale = 1f;
+        const float DefaultTimeScale = 1f;
+
+        /// <summary> After unpause, timescale will be restored to this value. By default, it is 1. </summary>
+        public static float TimeScale = DefaultTimeScale;
 
         static readonly List<IPauseSource> sources = new ();
 
@@ -23,7 +26,7 @@ namespace InsaneOne.Core.Utility
             sources.Remove(unpauseBy);
 
             if (sources.Count == 0)
-                Time.timeScale = DefaultTimeScale;
+                Time.timeScale = TimeScale;
         }
 
         public static bool IsPaused() => sources.Count > 0;
@@ -32,7 +35,8 @@ namespace InsaneOne.Core.Utility
         public static void Reset()
         {
             sources.Clear();
-            Time.timeScale = 1f;
+            TimeScale = DefaultTimeScale;
+            Time.timeScale = TimeScale;
         }
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine.UIElements;
 
 namespace InsaneOne.Core.Development
 {
-	public class CoreInitEditorWindow : EditorWindow
+	public sealed class CoreInitEditorWindow : EditorWindow
 	{
 		Label infoLabel;
 		Button setupButton;
@@ -25,42 +25,15 @@ namespace InsaneOne.Core.Development
 			infoLabel = new Label("Looks like InsaneOne.Core was not setup before\n(No CoreData asset found).");
 			root.Add(infoLabel);
 
-			setupButton = new Button
+			setupButton = new Button(Init)
 			{
-				name = "setup_button",
 				text = "Setup InsaneOne.Core",
-				style =
-				{
-					backgroundColor = new StyleColor(new Color(0.2f, 0.4f, 0.2f)),
-				},
+				style = { backgroundColor = new Color(0.2f, 0.4f, 0.2f) },
 			};
 
 			root.Add(setupButton);
 
 			TryShowSetupComplete();
-			SetupButtonHandler();
-		}
-
-		void SetupButtonHandler()
-		{
-			var buttons = rootVisualElement.Query<Button>();
-			buttons.ForEach(RegisterHandler);
-		}
-
-		void RegisterHandler(Button button)
-		{
-			button.RegisterCallback<ClickEvent>(OnButtonClick);
-		}
-
-		void OnButtonClick(ClickEvent evt)
-		{
-			if (evt.currentTarget is not Button btn)
-				return;
-
-			if (btn.name.Contains("setup_button"))
-				Init();
-			else if (btn.name.Contains("close_button"))
-				Close();
 		}
 
 		void Init()
@@ -94,12 +67,8 @@ namespace InsaneOne.Core.Development
 			var setupLabel = new Label("Setup is finished!");
 			root.Add(setupLabel);
 
-			var closeButton = new Button();
-			closeButton.name = "close_button";
-			closeButton.text = "Close window";
+			var closeButton = new Button(Close) { text = "Close window" };
 			root.Add(closeButton);
-
-			SetupButtonHandler();
 		}
 	}
 }

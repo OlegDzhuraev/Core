@@ -41,9 +41,11 @@ namespace InsaneOne.Core
 		public static void GetObjectsOfTypeIn2DCircle<T>(Vector2 position, float radius, List<T> output, int layerMask = Physics2D.AllLayers)
 		{
 			output.Clear();
-			var size = Physics2D.OverlapCircleNonAlloc(position, radius, searchColliders2D, layerMask);
 
-			for (int i = 0; i < size; i++)
+			var contactFilter = new ContactFilter2D { useLayerMask = true, layerMask = layerMask };
+			var size = Physics2D.OverlapCircle(position, radius, contactFilter, searchColliders2D);
+
+			for (var i = 0; i < size; i++)
 			{
 				var target = searchColliders2D[i].GetComponent<T>();
 

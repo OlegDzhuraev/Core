@@ -1,8 +1,10 @@
 #if UNITY_EDITOR
 using UnityEditor;
+using UnityEditor.UIElements;
 #endif
 
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace InsaneOne.Core
 {
@@ -12,16 +14,11 @@ namespace InsaneOne.Core
 	[CustomPropertyDrawer(typeof(ReadOnlyAttribute))]
 	public class ReadOnlyDrawer : PropertyDrawer
 	{
-		public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+		public override VisualElement CreatePropertyGUI(SerializedProperty property)
 		{
-			return EditorGUI.GetPropertyHeight(property, label, true);
-		}
-
-		public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
-		{
-			GUI.enabled = false;
-			EditorGUI.PropertyField(position, property, label, true);
-			GUI.enabled = true;
+			var field = new PropertyField(property);
+			field.SetEnabled(false);
+			return field;
 		}
 	}
 #endif

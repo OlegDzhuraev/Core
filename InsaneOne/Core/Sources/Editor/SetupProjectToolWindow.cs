@@ -10,7 +10,7 @@ using LogLevel = InsaneOne.Core.Utility.LogLevel;
 
 namespace InsaneOne.Core.Development
 {
-    public class SetupProjectToolWindow : EditorWindow
+    public sealed class SetupProjectToolWindow : EditorWindow
     {
         const string OriginPlacePrefName = "Create3DObject.PlaceAtWorldOrigin";
 
@@ -36,7 +36,7 @@ namespace InsaneOne.Core.Development
 
         bool separateUiInClassicStyle;
         
-        [MenuItem("Tools/Setup Project Tool")]
+        [MenuItem("Tools/InsaneOne/Setup Project Tool")]
         public static void ShowWindow()
         {
             var window = GetWindow<SetupProjectToolWindow>(false, "Setup Project Tool", true);

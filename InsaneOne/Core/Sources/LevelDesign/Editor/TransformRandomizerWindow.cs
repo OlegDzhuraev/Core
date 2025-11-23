@@ -31,7 +31,7 @@ namespace InsaneOne.Core.LevelDesign
 		EnumFlagsField positionAxesField;
 		Slider positionTiltShiftSlider;
 
-		[MenuItem("Tools/Level Design/Transform Randomizer")]
+		[MenuItem("Tools/InsaneOne/Level Design/Transform Randomizer")]
 		static void Init()
 		{
 			var window = (TransformRandomizerWindow)GetWindow(typeof(TransformRandomizerWindow), false, "Transform Randomizer", true);
@@ -40,12 +40,15 @@ namespace InsaneOne.Core.LevelDesign
 
 		void CreateGUI()
 		{
-			var root = rootVisualElement;
+			var defaultAxes = Axes.X | Axes.Y | Axes.Z;
 			var style = Resources.Load(StylesPath) as StyleSheet;
+			var root = rootVisualElement;
 			root.styleSheets.Add(style);
 
-			var infoLabel = new Label("This tool randomizes the parameters of transforms selected in the scene");
-			infoLabel.style.unityTextAlign = new StyleEnum<TextAnchor>(TextAnchor.MiddleCenter);
+			var infoLabel = new Label("This tool randomizes the parameters of transforms selected in the scene")
+			{
+				style = { unityTextAlign = new StyleEnum<TextAnchor>(TextAnchor.MiddleCenter) }
+			};
 
 			var infoBox = new VisualElement();
 			infoBox.AddToClassList(GroupStyleName);
@@ -54,10 +57,9 @@ namespace InsaneOne.Core.LevelDesign
 			var rotationBox = new VisualElement();
 			rotationBox.AddToClassList(GroupStyleName);
 
-			rotationAxesField = new EnumFlagsField("Rotation Axes", Axes.X | Axes.Y | Axes.Z);
+			rotationAxesField = new EnumFlagsField("Rotation Axes", defaultAxes);
 			rotationAxesField.RegisterValueChangedCallback(OnRotationAxisChanged);
-			maxRotationAngleField = new Slider("Rotation randomize angle", 0f, 180f);
-			maxRotationAngleField.showInputField = true;
+			maxRotationAngleField = new Slider("Rotation randomize angle", 0f, 180f) { showInputField = true };
 
 			rotationBox.Add(rotationAxesField);
 			rotationBox.Add(maxRotationAngleField);
@@ -65,10 +67,12 @@ namespace InsaneOne.Core.LevelDesign
 			var sizeBox = new Box();
 			sizeBox.AddToClassList(GroupStyleName);
 
-			sizeAxesField = new EnumFlagsField("Size Axes",Axes.X | Axes.Y | Axes.Z);
+			sizeAxesField = new EnumFlagsField("Size Axes",defaultAxes);
 			sizeAxesField.RegisterValueChangedCallback(OnSizeAxesChanged);
-			sizeSliderValueLabel = new Label("Min: 0.5 | Max: 1.5");
-			sizeSliderValueLabel.style.unityTextAlign = new StyleEnum<TextAnchor>(TextAnchor.MiddleCenter);
+			sizeSliderValueLabel = new Label("Min: 0.5 | Max: 1.5")
+			{
+				style = { unityTextAlign = new StyleEnum<TextAnchor>(TextAnchor.MiddleCenter) },
+			};
 			sizeSlider = new MinMaxSlider("Scale random min max value", 0.5f, 1.5f, 0f, 10f);
 			sizeSlider.RegisterValueChangedCallback(OnSizeSliderChanged);
 
@@ -79,19 +83,18 @@ namespace InsaneOne.Core.LevelDesign
 			var posBox = new Box();
 			posBox.AddToClassList(GroupStyleName);
 
-			positionAxesField = new EnumFlagsField("Position Axes",Axes.X | Axes.Y | Axes.Z);
+			positionAxesField = new EnumFlagsField("Position Axes", defaultAxes);
 			positionAxesField.RegisterValueChangedCallback(OnPositionAxesChanged);
-			positionTiltShiftSlider = new Slider("Position tilt shift max value", 0f, 10f);
-			positionTiltShiftSlider.showInputField = true;
+			positionTiltShiftSlider = new Slider("Position tilt shift max value") { showInputField = true };
 
 			posBox.Add(positionAxesField);
 			posBox.Add(positionTiltShiftSlider);
 
-			var randomizeBtn = new Button(OnButtonClicked) { text = "Randomize" };
-
-			randomizeBtn.style.width = 150;
-			randomizeBtn.style.height = 50;
-			randomizeBtn.style.alignSelf = new StyleEnum<Align>(Align.Center);
+			var randomizeBtn = new Button(OnButtonClicked)
+			{
+				text = "Randomize",
+				style = { width = 150, height = 50, alignSelf = new StyleEnum<Align>(Align.Center) },
+			};
 
 			root.Add(infoBox);
 			root.Add(rotationBox);
@@ -143,18 +146,21 @@ namespace InsaneOne.Core.LevelDesign
 				var finalScale = tr.localScale;
 				var scaleChange = GetAxisValuedVector3(sizeAxes) * Random.Range(sizeSlider.value.x, sizeSlider.value.y);
 
-				if (!Mathf.Approximately(scaleChange.x, 0))
-					finalScale.x = scaleChange.x;
-				if (!Mathf.Approximately(scaleChange.y, 0))
-					finalScale.y = scaleChange.y;
-				if (!Mathf.Approximately(scaleChange.z, 0))
-					finalScale.z = scaleChange.z;
+				ApplyNonZeroTo(ref finalScale.x, scaleChange.x);
+				ApplyNonZeroTo(ref finalScale.y, scaleChange.y);
+				ApplyNonZeroTo(ref finalScale.z, scaleChange.z);
 
 				tr.localScale = finalScale;
 			}
 
 			if (positionAxes != Axes.None)
 				tr.position += GetAxisValuedVector3(positionAxes) * Random.Range(-positionMaxTilt, positionMaxTilt);
+		}
+
+		static void ApplyNonZeroTo(ref float target, float value)
+		{
+			if (!Mathf.Approximately(value, 0))
+				target = value;
 		}
 
 		static Vector3 GetAxisValuedVector3(Axes axes)

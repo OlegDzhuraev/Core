@@ -3,7 +3,7 @@ using UnityEditor.Callbacks;
 
 namespace InsaneOne.Core.Development
 {
-	public class CoreEditorInit
+	public static class CoreEditorInit
 	{
 		[DidReloadScripts]
 		static void Initialize()

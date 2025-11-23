@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace InsaneOne.Core.Utility
@@ -8,11 +9,14 @@ namespace InsaneOne.Core.Utility
 		{
 			Debug.Assert(gridSize != 0);
 
-			var x = Mathf.Round(position.x / gridSize) * gridSize;
-			var y = Mathf.Round(position.y / gridSize) * gridSize;
-			var z = Mathf.Round(position.z / gridSize) * gridSize;
-
+			var x = SnapValueTo(position.x, gridSize);
+			var y = SnapValueTo(position.y, gridSize);
+			var z = SnapValueTo(position.z, gridSize);
+			
 			return new Vector3(x, y, z);
 		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		static float SnapValueTo(float value, float step) => Mathf.Round(value / step) * step;
 	}
 }

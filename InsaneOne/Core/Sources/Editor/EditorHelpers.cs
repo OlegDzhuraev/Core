@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace InsaneOne.Core.Development
 {
@@ -49,11 +51,12 @@ namespace InsaneOne.Core.Development
 		}
 		
 		/// <summary> Creates 2D texture with selected size and color. Useful for editor gui styles. </summary>
+		[Obsolete("Bro, use UI Toolkit instead...")]
 		public static Texture2D MakeTexture(int width, int height, Color color)
 		{
 			var pixels = new Color[width * height];
  
-			for (int i = 0; i < pixels.Length; i++)
+			for (var i = 0; i < pixels.Length; i++)
 				pixels[i] = color;
  
 			var resultTexture = new Texture2D(width, height);

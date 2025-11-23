@@ -8,7 +8,7 @@ namespace InsaneOne.Core
 {
     public static class RandomExtensions
     {
-        static readonly List<object> tempRandomElements = new List<object>();
+        static readonly List<object> tempRandomElements = new ();
 
         /// <summary>Gets random element from list of objects of any type.</summary>
         public static T Random<T>(this List<T> list) => list[URnd.Range(0, list.Count)];

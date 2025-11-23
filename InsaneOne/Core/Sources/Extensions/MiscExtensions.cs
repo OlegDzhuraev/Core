@@ -43,7 +43,7 @@ namespace InsaneOne.Core
 				return component;
 			
 			if (!isNeeded && component)
-				GameObject.DestroyImmediate(component);
+				Object.DestroyImmediate(component);
 
 			return null;
 		}

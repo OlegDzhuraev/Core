@@ -3,13 +3,13 @@ using UnityEditor;
 namespace InsaneOne.Core.Development
 {
 	[CustomEditor(typeof(TeamsSettings))]
-	public class TeamsSettingsEditor : Editor
+	public sealed class TeamsSettingsEditor : Editor
 	{
 		public override void OnInspectorGUI()
 		{
 			var teamsSettings = target as TeamsSettings;
 
-			var rules = teamsSettings.GetAllRulesInternal();
+			var rules = teamsSettings!.GetAllRulesInternal();
 
 			for (var index = 0; index < rules.Length; index++)
 			{
