@@ -1,3 +1,4 @@
+#if INSANE_TEAMS_EXTENSION
 using System;
 
 namespace InsaneOne.Core.Architect
@@ -10,3 +11,4 @@ namespace InsaneOne.Core.Architect
 		public void ChangeTeam(int newTeam);
 	}
 }
+#endif

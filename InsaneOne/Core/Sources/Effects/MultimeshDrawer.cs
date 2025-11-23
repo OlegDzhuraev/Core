@@ -17,7 +17,7 @@ namespace InsaneOne.Core.Effects
 		[Tooltip("Use to add this drawer to Service Locator. Can be useful when there only ony Model Drawer in game.")]
 		[SerializeField] bool registerAsService;
 
-		readonly List<DrawerRenderPart> drawerParts = new List<DrawerRenderPart>();
+		readonly List<DrawerRenderPart> drawerParts = new ();
 
 		static readonly int _colorId = Shader.PropertyToID("_Color");
 

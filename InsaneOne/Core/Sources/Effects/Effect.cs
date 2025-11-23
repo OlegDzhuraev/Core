@@ -10,7 +10,6 @@ namespace InsaneOne.Core
     public static class Effect
     {
         const float DefaultDestructionDelay = 15f;
-
         const string effectsParentName = "[Effects]";
         
         static Transform effectsParent;
@@ -59,7 +58,7 @@ namespace InsaneOne.Core
             if (destructionDelay <= -1)
             {
                 if (delayedDestruction)
-                    GameObject.Destroy(delayedDestruction);
+                    Object.Destroy(delayedDestruction);
             }
             else
             {

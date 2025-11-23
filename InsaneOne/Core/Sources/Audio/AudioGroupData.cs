@@ -22,9 +22,6 @@ namespace InsaneOne.Core
 			};
 		}
 
-		public static AudioGroupData GetDefault2D()
-		{
-			return new AudioGroupData { Is3D = false };
-		}
+		public static AudioGroupData GetDefault2D() => new () { Is3D = false };
 	}
 }

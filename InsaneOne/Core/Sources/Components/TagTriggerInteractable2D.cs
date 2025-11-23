@@ -4,6 +4,7 @@ using UnityEngine;
 namespace InsaneOne.Core
 {
 	/// <summary> 2D Trigger for interactable component, allows to interact on enter or key press when staying in trigger. </summary>
+	[DisallowMultipleComponent]
 	public sealed class TagTriggerInteractable2D : BaseTriggerInteractable2D
 	{
 		[SerializeField] bool interactOnEnter;

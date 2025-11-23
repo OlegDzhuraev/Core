@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using InsaneOne.Core.Utility;
 using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
+using LogLevel = InsaneOne.Core.Utility.LogLevel;
 
 namespace InsaneOne.Core.Development
 {
@@ -52,9 +53,7 @@ namespace InsaneOne.Core.Development
             
             partitionHeader = new GUIStyle(EditorStyles.boldLabel)
             {
-                fontSize = 16, 
-                richText = true, 
-                alignment = TextAnchor.UpperCenter
+                fontSize = 16, richText = true, alignment = TextAnchor.UpperCenter,
             };
         }
 
@@ -444,7 +443,7 @@ namespace InsaneOne.Core.Development
             installRequest = Client.Add(nameOrUrl);
             EditorApplication.update += InstallProgress;
     
-            Debug.Log("Started installing " + nameOrUrl);
+            CoreUnityLogger.I.Log("Started installing " + nameOrUrl);
         }
 
         static void InstallProgress()
@@ -453,9 +452,9 @@ namespace InsaneOne.Core.Development
                 return;
 
             if (installRequest.Status == StatusCode.Success)
-                Debug.Log($"Installed: {installRequest.Result.packageId}");
+                CoreUnityLogger.I.Log($"Installed: {installRequest.Result.packageId}");
             else if (installRequest.Status >= StatusCode.Failure)
-                Debug.Log(installRequest.Error.message);
+                CoreUnityLogger.I.Log(installRequest.Error.message, LogLevel.Error);
 
             EditorApplication.update -= InstallProgress;
             installRequest = null;

@@ -19,30 +19,32 @@ namespace InsaneOne.Core.Development
 		}
 		
 		/// <summary> Loads all assets, found in project by search filter, in List of type T. </summary>
-		public static void LoadAssetsToList<T>(List<T> listToAddIn, string searchFilter) where T : Object
+		public static void LoadAssetsToList<T>(IList<T> target, string searchFilter) where T : Object
 		{
-			listToAddIn.Clear();
-            
+			target.Clear();
+
+			var type = typeof(T);
 			var assets = AssetDatabase.FindAssets(searchFilter);
 
-			for (int i = 0; i < assets.Length; i++)
+			for (var i = 0; i < assets.Length; i++)
 			{
-				var asset = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(assets[i]), typeof(T)) as T;
-				listToAddIn.Add(asset);
+				var asset = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(assets[i]), type) as T;
+				target.Add(asset);
 			}
 		}
 		
 		/// <summary> Loads all assets, found in project by search filter, in List of type T. </summary>
-		public static void LoadAssetsToList<T>(List<T> listToAddIn) where T : Object
+		public static void LoadAssetsToList<T>(IList<T> target) where T : Object
 		{
-			listToAddIn.Clear();
-            
-			var assets = AssetDatabase.FindAssets($"t:{typeof(T)}");
+			target.Clear();
 
-			for (int i = 0; i < assets.Length; i++)
+			var type = typeof(T);
+			var assets = AssetDatabase.FindAssets($"t:{type}");
+
+			for (var i = 0; i < assets.Length; i++)
 			{
-				var asset = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(assets[i]), typeof(T)) as T;
-				listToAddIn.Add(asset);
+				var asset = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(assets[i]), type) as T;
+				target.Add(asset);
 			}
 		}
 		

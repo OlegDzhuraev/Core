@@ -1,4 +1,5 @@
 ﻿using InsaneOne.Core.UI;
+using InsaneOne.Core.Utility;
 using TMPro;
 using UnityEngine;
 
@@ -24,13 +25,13 @@ namespace InsaneOne.Core.Locales
 
             if (!Localization.IsLoaded)
             {
-                Debug.LogError($"No localization is loaded, can't apply localization on text object [{name}]!");
+                CoreUnityLogger.I.Log($"No localization is loaded, can't apply localization on text object [{name}]!", LogLevel.Error);
                 return;
             }
             
             if (text == null && !TryGetComponent(out text))
             {
-                Debug.LogError($"No localization TMP text on object [{name}]");
+                CoreUnityLogger.I.Log($"No localization TMP text on object [{name}]", LogLevel.Error);
                 return;
             }
 

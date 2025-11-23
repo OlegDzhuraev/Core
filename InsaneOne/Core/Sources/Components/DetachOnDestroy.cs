@@ -3,6 +3,7 @@ using UnityEngine;
 namespace InsaneOne.Core
 {
 	/// <summary> Detaches selected transforms from root transform on destroy of this object. </summary>
+	[DisallowMultipleComponent]
 	public class DetachOnDestroy : MonoBehaviour
 	{
 		[SerializeField] Transform[] toDetach = new Transform[0];

@@ -9,12 +9,13 @@ namespace InsaneOne.Core
     {
         const string RepoName = "OlegDzhuraev";
         const string ResourcesPath = "InsaneOne/CoreData";
-        const string LogPrefix = "<b>[InsaneOne.Core]</b> ";
 
         static CoreData instance;
 
         [Header("Features settings")]
+#if INSANE_TEAMS_EXTENSION
         public TeamsSettings TeamsSettings;
+#endif
         
         [Tooltip("Place here prefab, which will be used as UI fader.")]
         public GameObject UiFaderTpl;
@@ -88,28 +89,6 @@ namespace InsaneOne.Core
             return true;
         }
 
-        /// <summary> For internal usage. </summary>
-        public static void Log(string text)
-        {
-            var coreData = LoadFromResources();
-
-            if (coreData && coreData.SuppressLogs)
-                return;
-
-            Debug.Log(LogPrefix + text);
-        }
-
-        /// <summary> For internal usage. </summary>
-        public static void LogError(string text)
-        {
-            var coreData = LoadFromResources();
-
-            if (coreData && coreData.SuppressLogs)
-                return;
-
-            Debug.LogError(LogPrefix + text);
-        }
-        
         static CoreData LoadFromResources() => Resources.Load<CoreData>(ResourcesPath);
     }
 

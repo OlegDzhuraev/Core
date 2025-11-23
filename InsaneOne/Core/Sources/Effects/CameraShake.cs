@@ -1,4 +1,5 @@
 using System;
+using InsaneOne.Core.Utility;
 using UnityEngine;
 
 namespace InsaneOne.Core.Effects
@@ -39,7 +40,7 @@ namespace InsaneOne.Core.Effects
 			
 			if (camTransform.parent == null)
 			{
-				Debug.LogWarning("Camera Shake: requires camera to be child of some other transform. Actually it is not. Cancelled shake.");
+				CoreUnityLogger.I.Log("Camera Shake: requires camera to be child of some other transform. Actually it is not. Cancelled shake.", LogLevel.Warning);
 				return;
 			}
 			

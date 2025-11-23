@@ -6,25 +6,26 @@ namespace InsaneOne.Core.Development
 	/// <summary> Adds new spawns to the Create menu. </summary>
 	public static class CustomEditorObjects
 	{
-		const string pathToUI = "InsaneOne/UI/";
+		const string PathToUI = "InsaneOne/UI/";
+		const string MenuPath = "GameObject/UI/";
 
 		static Canvas sceneCanvas;
 
-		[MenuItem("GameObject/UI/Floating Panel", priority = -199)]
+		[MenuItem(MenuPath + "Floating Panel", priority = -199)]
 		static void SpawnFloatingPanel() => SpawnUIElement("FloatingPanel");
 
-		[MenuItem("GameObject/UI/Tab Control", priority = -199)]
+		[MenuItem(MenuPath + "Tab Control", priority = -199)]
 		static void SpawnTabControl() => SpawnUIElement("TabControl");
 		
-		[MenuItem("GameObject/UI/Popup Window", priority = -199)]
+		[MenuItem(MenuPath + "Popup Window", priority = -199)]
 		static void SpawnPopupControl() => SpawnUIElement("PopupWindowTpl");
 		
-		[MenuItem("GameObject/UI/Fader", priority = -199)]
+		[MenuItem(MenuPath + "Fader", priority = -199)]
 		static void SpawnFaderControl() => SpawnUIElement("FaderTpl");
 
 		static void SpawnUIElement(string elemName)
 		{
-			var prefab = (GameObject)Resources.Load(pathToUI + elemName, typeof(GameObject));
+			var prefab = (GameObject)Resources.Load(PathToUI + elemName, typeof(GameObject));
 			
 			SetupCanvas();
 			
@@ -39,7 +40,7 @@ namespace InsaneOne.Core.Development
 			if (sceneCanvas)
 				return;
 			
-			sceneCanvas = GameObject.FindFirstObjectByType<Canvas>();
+			sceneCanvas = Object.FindFirstObjectByType<Canvas>();
 
 			if (!sceneCanvas)
 				sceneCanvas = new GameObject("Canvas").AddComponent<Canvas>();

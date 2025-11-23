@@ -31,7 +31,7 @@ namespace InsaneOne.Core.Architect
 
 		static void ResetService(Type type, object service, bool remove = false)
 		{
-			if (service is IDisposableService disposable)
+			if (service is IDisposable disposable)
 				disposable.Dispose();
 
 			if (remove)

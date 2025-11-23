@@ -10,7 +10,7 @@ namespace InsaneOne.Core.Components
 	{
 		public event Action WasInteracted;
 
-		readonly List<object> interactionBlockers = new List<object>();
+		readonly List<object> interactionBlockers = new ();
 
 		public virtual bool TryInteract()
 		{

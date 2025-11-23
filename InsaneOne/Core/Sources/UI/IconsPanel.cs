@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using InsaneOne.Core.Utility;
 using UnityEngine;
 
 namespace InsaneOne.Core.UI
@@ -49,7 +50,7 @@ namespace InsaneOne.Core.UI
 			{
 				if (data == null)
 				{
-					Debug.LogWarning("Some data in input list is NULL! Skipped.");
+					CoreUnityLogger.I.Log("Some data in input list is NULL! Skipped.", LogLevel.Warning);
 					continue;
 				}
 				

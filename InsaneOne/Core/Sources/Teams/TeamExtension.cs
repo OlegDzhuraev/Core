@@ -1,5 +1,4 @@
 #if INSANE_TEAMS_EXTENSION
-
 using InsaneOne.Core.Architect;
 using UnityEngine;
 
@@ -33,5 +32,4 @@ namespace InsaneOne.Core
 		}
 	}
 }
-
 #endif

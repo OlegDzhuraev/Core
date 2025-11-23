@@ -1,4 +1,6 @@
+#if INSANE_TEAMS_EXTENSION
 using System;
+using InsaneOne.Core.Utility;
 using UnityEngine;
 
 namespace InsaneOne.Core
@@ -40,7 +42,7 @@ namespace InsaneOne.Core
 			if (coreData && coreData.TeamsSettings)
 				return coreData.TeamsSettings;
 
-			CoreData.LogError("No CoreData found! TeamsSettings not work correctly!");
+			CoreUnityLogger.I.Log("No CoreData found! TeamsSettings not work correctly!", LogLevel.Error);
 			return CreateInstance<TeamsSettings>();
 		}
 	}
@@ -65,3 +67,4 @@ namespace InsaneOne.Core
 		}
 	}
 }
+#endif

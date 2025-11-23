@@ -3,6 +3,7 @@
 namespace InsaneOne.Core.Components
 {
     /// <summary> Use to make transform following without parenting. Can be used for camera follow or something else like this. </summary>
+    [DisallowMultipleComponent]
     public sealed class TargetFollow : MonoBehaviour
     {
         [Tooltip("Use lerp to smooth movement. Note that this is not fully correct lerp, it will never reach 100% same position. Better not use it for game logic.")]
@@ -12,6 +13,7 @@ namespace InsaneOne.Core.Components
         [SerializeField] bool useLateUpdate;
         
         public Transform Target { get; set; }
+        public bool Lerp { get => lerp; set => lerp = value; }
 
         void Update()
         {

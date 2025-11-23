@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using InsaneOne.Core.Utility;
 using UnityEngine;
+using ILogger = InsaneOne.Core.Utility.ILogger;
 
 namespace InsaneOne.Core.Locales
 {
@@ -26,15 +28,20 @@ namespace InsaneOne.Core.Locales
 
 		static string[] loadedLocalizationTexts;
 
+		static ILogger logger = new CoreUnityLogger();
+
 		/// <summary>Initializes localization. Call this once at the game initialization. </summary>
-		public static void Initialize(string fileName = "Localization.csv")
+		public static void Initialize(string fileName = "Localization.csv", ILogger customLogger = default)
 		{
+			if (customLogger != default)
+				logger = customLogger;
+
 			if (IsLoaded)
 			{
-				Debug.LogWarning("Localization already loaded - don't needed to call initialize method again.");
+				logger.Log("Localization already loaded — don't needed to call initialize method again.", LogLevel.Warning);
 				return;
 			}
-			
+
 			var path = Path.Combine(Application.streamingAssetsPath, fileName);
 
 			if (!File.Exists(path))

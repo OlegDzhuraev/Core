@@ -1,3 +1,4 @@
+#if INSANE_TEAMS_EXTENSION
 using System;
 using InsaneOne.Core.Architect;
 using UnityEngine;
@@ -27,3 +28,4 @@ namespace InsaneOne.Core
 		public int GetTeam() => team;
 	}
 }
+#endif

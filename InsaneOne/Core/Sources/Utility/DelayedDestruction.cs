@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace InsaneOne.Core
 {
@@ -8,7 +7,6 @@ namespace InsaneOne.Core
 		public float SecondsToDestruction => secondsToDestruction;
 
 		[SerializeField] [Range(0f, 1000f)] float secondsToDestruction = 3f;
-		[FormerlySerializedAs("detachChilds")]
 		[SerializeField] bool detachChildren;
 
 		void Update()

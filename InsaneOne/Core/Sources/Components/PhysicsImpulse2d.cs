@@ -2,6 +2,7 @@ using UnityEngine;
 
 namespace InsaneOne.Core.Components
 {
+	[DisallowMultipleComponent]
 	public sealed class PhysicsImpulse2d : MonoBehaviour
 	{
 		[SerializeField] bool applyOnStart = true;

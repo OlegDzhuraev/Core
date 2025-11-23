@@ -10,7 +10,7 @@ namespace InsaneOne.Core.Components
 
 		protected Interactable interactable;
 
-		void Awake()
+		protected virtual void Awake()
 		{
 			interactable = GetComponent<Interactable>();
 		}

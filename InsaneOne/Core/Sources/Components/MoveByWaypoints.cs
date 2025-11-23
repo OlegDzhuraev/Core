@@ -4,6 +4,7 @@ using UnityEngine;
 namespace Features.Effects
 {
     /// <summary> Will move this object by a given waypoints list. This can be most useful for simple animation effects, etc. Like basic tween.</summary>
+    [DisallowMultipleComponent]
     public sealed class MoveByWaypoints : MonoBehaviour
     {
         public event Action StartedMove;

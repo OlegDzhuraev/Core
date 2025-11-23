@@ -1,3 +1,4 @@
+using InsaneOne.Core.Utility;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -57,14 +58,14 @@ namespace InsaneOne.Core.Development
 				return;
 
 			if (btn.name.Contains("setup_button"))
-			    Init();
+				Init();
 			else if (btn.name.Contains("close_button"))
 				Close();
 		}
 
 		void Init()
 		{
-			var newData = ScriptableObject.CreateInstance<CoreData>();
+			var newData = CreateInstance<CoreData>();
 
 			if (!AssetDatabase.IsValidFolder("Assets/Resources"))
 				AssetDatabase.CreateFolder("Assets", "Resources");
@@ -75,7 +76,7 @@ namespace InsaneOne.Core.Development
 			AssetDatabase.Refresh();
 			AssetDatabase.CreateAsset(newData, "Assets/Resources/InsaneOne/CoreData.asset");
 
-			CoreData.Log("new CoreData was <b><color=#55ff33>created</color></b>.");
+			CoreUnityLogger.I.Log("new CoreData was <b><color=#55ff33>created</color></b>.");
 
 			TryShowSetupComplete();
 		}

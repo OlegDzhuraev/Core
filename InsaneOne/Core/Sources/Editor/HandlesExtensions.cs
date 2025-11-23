@@ -10,7 +10,7 @@ namespace InsaneOne.Core.Development
 		public enum SphereViewMode { Flat, Wireframe, FlatWireframe }
 
 		public static CompareFunction DefaultZTest { get; set; } = CompareFunction.Less;
-		public static Color DefaultFullColor { get; set; } = new Color(1f, 1f, 1f, 0.5f);
+		public static Color DefaultFullColor { get; set; } = new (1f, 1f, 1f, 0.5f);
 
 		static readonly Vector3[] tempPoly = new Vector3[4];
 		static readonly Vector3[] tempBoxVerts = new Vector3[8];
