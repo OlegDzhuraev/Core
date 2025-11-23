@@ -7,6 +7,7 @@ namespace InsaneOne.Core.Utility
 	{
 		const string CorePrefix = "<b>[InsaneOne.Core]</b> ";
 
+		/// <summary> Unique instance of the logger. </summary>
 		public static CoreUnityLogger I => instance ??= new CoreUnityLogger();
 		static CoreUnityLogger instance;
 

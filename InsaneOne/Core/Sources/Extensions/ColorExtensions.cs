@@ -4,6 +4,8 @@ namespace InsaneOne.Core
 {
     public static class ColorExtensions
     {
+        const string Format = "X2";
+
         public static Color32 GetWithR(this Color32 c, byte value) => new(value, c.g, c.b, c.a);
         public static Color GetWithR(this Color c, float value) => new(value, c.g, c.b, c.a);
 
@@ -30,21 +32,14 @@ namespace InsaneOne.Core
 
         public static string GetHexValue(this Color32 c, bool isNeededAlpha = false)
         {
-            var result = "#";
-
-            result += c.r.ToString("X2") + c.g.ToString("X2") + c.b.ToString("X2");
+            var result = "#" + c.r.ToString(Format) + c.g.ToString(Format) + c.b.ToString(Format);
 
             if (isNeededAlpha)
-                result += c.a.ToString("X2");
+                result += c.a.ToString(Format);
 
             return result;
         }
 
-        public static string GetHexValue(this Color inputColor, bool isNeededAlpha = false)
-        {
-            Color32 color32 = inputColor;
-
-            return color32.GetHexValue();
-        }
+        public static string GetHexValue(this Color inputColor, bool isNeededAlpha = false) => ((Color32)inputColor).GetHexValue();
     }
 }

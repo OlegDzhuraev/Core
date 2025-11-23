@@ -12,6 +12,7 @@ namespace InsaneOne.Core.Locales
         TMP_Text text;
 
         void Awake() => text = GetComponent<TMP_Text>();
+
         void Start()
         {
             if (ViewModel != null && ViewModel.AutoReload)

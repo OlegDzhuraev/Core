@@ -6,7 +6,7 @@ using UnityEngine.UIElements;
 namespace InsaneOne.Core
 {
 	[CustomPropertyDrawer(typeof(AudioData))]
-	public class AudioDataEditor : PropertyDrawer
+	public class AudioDataDrawer : PropertyDrawer
 	{
 		const string StylesPath = "InsaneOne/ToolsStyles";
 
