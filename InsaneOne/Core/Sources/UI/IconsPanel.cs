@@ -35,11 +35,11 @@ namespace InsaneOne.Core.UI
 		}
 		
 		[Tooltip("Icons will be placed onto this panel. Recommended to use some Layout Group.")]
-		[SerializeField] Transform panel;
+		[SerializeField] protected Transform panel;
 		[Tooltip("Default icon template to spawn. Can be overriden via code by using public property.")]
-		[SerializeField] GameObject iconTemplate;
+		[SerializeField] protected GameObject iconTemplate;
 
-		readonly List<GameObject> drawnIcons = new ();
+		protected readonly List<TIcon> drawnIcons = new ();
 		
 		/// <summary> Use to redraw icons with a new datas. </summary>
 		public void Redraw(List<TData> datas)
@@ -50,24 +50,27 @@ namespace InsaneOne.Core.UI
 			{
 				if (data == null)
 				{
-					CoreUnityLogger.I.Log("Some data in input list is NULL! Skipped.", LogLevel.Warning);
+					CoreUnityLogger.I.Log($"Some data in input list is NULL on the [{gameObject.name}] IconsPanel! Skipped.", LogLevel.Warning);
 					continue;
 				}
 				
 				var iconGo = Instantiate(iconTemplate, panel);
 				var icon = iconGo.GetComponent<TIcon>();
 				
-				drawnIcons.Add(iconGo);
+				drawnIcons.Add(icon);
 				InitIcon(icon, data);
 			}
 			
+			OnRedraw();
 			WasRedrawn?.Invoke();
 		}
 
-		void ClearDrawn()
+		protected virtual void OnRedraw() { }
+
+		protected virtual void ClearDrawn()
 		{
-			foreach (var drawnIcon in drawnIcons)
-				Destroy(drawnIcon);
+			foreach (var icon in drawnIcons)
+				Destroy(icon.gameObject);
 
 			drawnIcons.Clear();
 		}
