@@ -36,18 +36,24 @@ namespace InsaneOne.Core.Development
 
         bool separateUiInClassicStyle;
         
-        [MenuItem("Tools/InsaneOne/Setup Project Tool")]
+        [MenuItem("Tools/InsaneOne/Setup Project Tool...")]
         public static void ShowWindow()
         {
             var window = GetWindow<SetupProjectToolWindow>(false, "Setup Project Tool", true);
             window.Init();
         }
 
+        [MenuItem("Tools/InsaneOne/Update")]
+        public static void UpdatePlugin()
+        {
+            AddPackage($"https://github.com/{CoreData.RepoName}/Core.git");
+        }
+
         void Init()
         {
             minSize = new Vector2(532, 532);
             maxSize = new Vector2(798, 798);
-            richText = new GUIStyle(EditorStyles.label) { richText = true, wordWrap = true};
+            richText = new GUIStyle(EditorStyles.label) { richText = true, wordWrap = true };
             blockStyle = new GUIStyle(EditorStyles.helpBox);
             bigBlockStyle = EditorHelpers.GetBigBlockStyle();
             
@@ -435,7 +441,7 @@ namespace InsaneOne.Core.Development
                 AssetDatabase.CreateFolder(path, folderName);
         }
 
-        void AddPackage(string nameOrUrl)
+        static void AddPackage(string nameOrUrl)
         {
             if (installRequest != null)
                 return;

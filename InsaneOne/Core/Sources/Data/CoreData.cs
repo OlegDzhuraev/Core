@@ -7,7 +7,7 @@ namespace InsaneOne.Core
     [CreateAssetMenu(menuName = "InsaneOne/Core Data")]
     public sealed class CoreData : ScriptableObject
     {
-        const string RepoName = "OlegDzhuraev";
+        public const string RepoName = "OlegDzhuraev";
         const string ResourcesPath = "InsaneOne/CoreData";
 
         static CoreData instance;

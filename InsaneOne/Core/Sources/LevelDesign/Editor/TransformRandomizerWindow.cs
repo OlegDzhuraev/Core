@@ -31,7 +31,7 @@ namespace InsaneOne.Core.LevelDesign
 		EnumFlagsField positionAxesField;
 		Slider positionTiltShiftSlider;
 
-		[MenuItem("Tools/InsaneOne/Level Design/Transform Randomizer")]
+		[MenuItem("Tools/InsaneOne/Level Design/Transform Randomizer...")]
 		static void Init()
 		{
 			var window = (TransformRandomizerWindow)GetWindow(typeof(TransformRandomizerWindow), false, "Transform Randomizer", true);
@@ -47,7 +47,7 @@ namespace InsaneOne.Core.LevelDesign
 
 			var infoLabel = new Label("This tool randomizes the parameters of transforms selected in the scene")
 			{
-				style = { unityTextAlign = new StyleEnum<TextAnchor>(TextAnchor.MiddleCenter) }
+				style = { unityTextAlign = new StyleEnum<TextAnchor>(TextAnchor.MiddleCenter) },
 			};
 
 			var infoBox = new VisualElement();

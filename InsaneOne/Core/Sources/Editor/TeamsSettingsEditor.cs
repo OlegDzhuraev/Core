@@ -1,3 +1,4 @@
+#if INSANE_TEAMS_EXTENSION
 using UnityEditor;
 
 namespace InsaneOne.Core.Development
@@ -26,10 +27,11 @@ namespace InsaneOne.Core.Development
 				}
 
 				if (ruleA.teamA == ruleA.teamB)
-					EditorGUILayout.HelpBox($"There is same teams in rule with index {index}.", MessageType.Warning);
+					EditorGUILayout.HelpBox($"There are same teams in rule with index {index}.", MessageType.Warning);
 			}
 
 			DrawDefaultInspector();
 		}
 	}
 }
+#endif
