@@ -8,6 +8,9 @@ namespace InsaneOne.Core.Locales.Editor
 	[CustomPropertyDrawer(typeof(LocalizedAttribute))]
 	public class LocalizedAttributeDrawer : PropertyDrawer
 	{
+		static readonly StyleColor DefaultColor = Color.gray;
+		static readonly StyleColor WarningColor = Color.yellow;
+
 		string lastLocale;
 
 		Label helpLabel;
@@ -23,7 +26,7 @@ namespace InsaneOne.Core.Locales.Editor
 
 			field.RegisterValueChangeCallback(OnChanged);
 
-			helpLabel = new Label { style = { fontSize = 10, color = Color.gray } };
+			helpLabel = new Label { style = { paddingLeft = 4, fontSize = 10, color = DefaultColor } };
 			root.Add(helpLabel);
 
 			OnChanged(new SerializedPropertyChangeEvent { changedProperty = property }); // for first update
@@ -35,7 +38,7 @@ namespace InsaneOne.Core.Locales.Editor
 		{
 			if (Application.isPlaying)
 				return;
-			
+
 			var locale = evt.changedProperty.stringValue;
 			if (locale == lastLocale)
 				return;
@@ -44,7 +47,14 @@ namespace InsaneOne.Core.Locales.Editor
 			Localization.SetLanguage(Localization.Language); // default language
 
 			if (!Localization.TryGetText(locale, out var localizedText))
+			{
 				localizedText = "Localization not found!";
+				helpLabel.style.color = WarningColor;
+			}
+			else
+			{
+				helpLabel.style.color = DefaultColor;
+			}
 
 			helpLabel.text = localizedText;
 
