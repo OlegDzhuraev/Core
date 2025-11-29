@@ -10,12 +10,16 @@ namespace InsaneOne.Core.Utility
         /// <summary> After unpause, timescale will be restored to this value. By default, it is 1. </summary>
         public static float TimeScale = DefaultTimeScale;
 
-        static readonly List<IPauseSource> sources = new ();
+        static readonly HashSet<IPauseSource> sources = new ();
 
         /// <summary> Pause by some source (any object, which can pause app). Allowed sources stacking to allow make game be paused, when one of them called "Unpause", and other still pausing game. </summary>
         public static void Pause(IPauseSource pauseBy)
         {
-            sources.Add(pauseBy);
+            if (!sources.Add(pauseBy))
+            {
+                CoreUnityLogger.I.Log($"Pause source [{pauseBy}] was already added to the pause sources! Ignored pause request.", LogLevel.Warning);
+                return;
+            }
 
             Time.timeScale = 0;
         }
@@ -23,7 +27,11 @@ namespace InsaneOne.Core.Utility
         /// <summary> Unpauses by specific source. If there is any other source, app will continue by paused. </summary>
         public static void Unpause(IPauseSource unpauseBy)
         {
-            sources.Remove(unpauseBy);
+            if (!sources.Remove(unpauseBy))
+            {
+                CoreUnityLogger.I.Log($"Pause source [{unpauseBy}] wasn't added to the pause sources! Ignored unpause request.", LogLevel.Warning);
+                return;
+            }
 
             if (sources.Count == 0)
                 Time.timeScale = TimeScale;
@@ -31,7 +39,7 @@ namespace InsaneOne.Core.Utility
 
         public static bool IsPaused() => sources.Count > 0;
 
-        /// <summary> Call this once on app start/end. It will reset all pause sources and timescale. </summary>
+        /// <summary> Call this every game state/scope change! It will reset all pause sources and timescale. </summary>
         public static void Reset()
         {
             sources.Clear();
