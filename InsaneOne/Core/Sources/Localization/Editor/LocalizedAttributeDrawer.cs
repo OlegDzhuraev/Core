@@ -33,6 +33,9 @@ namespace InsaneOne.Core.Locales.Editor
 
 		void OnChanged(SerializedPropertyChangeEvent evt)
 		{
+			if (Application.isPlaying)
+				return;
+			
 			var locale = evt.changedProperty.stringValue;
 			if (locale == lastLocale)
 				return;
