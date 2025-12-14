@@ -13,7 +13,7 @@ namespace InsaneOne.Core.Injection
 			if (rotation == default)
 				rotation = Quaternion.identity;
 
-			var instance = GameObject.Instantiate(prefab, position, rotation, parent);
+			var instance = Object.Instantiate(prefab, position, rotation, parent);
 			ApplyTo(instance);
 
 			return instance;

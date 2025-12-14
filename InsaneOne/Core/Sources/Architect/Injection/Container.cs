@@ -7,8 +7,8 @@ namespace InsaneOne.Core.Injection
 	[Flags]
 	public enum InjectionType
 	{
-		Method,
-		Field,
+		Method = 1,
+		Field = 2,
 		All = Method | Field,
 	}
 
@@ -19,6 +19,8 @@ namespace InsaneOne.Core.Injection
 
 		/// <summary> Used to prevent GC alloc on every injection. </summary>
 		readonly Dictionary<int, object[]> arraysPool = new ();
+		readonly Dictionary<Type, List<MethodInfo>> methodsCache = new ();
+		readonly Dictionary<Type, List<FieldInfo>> fieldsCache = new ();
 
 		readonly List<object> targets = new ();
 		readonly List<InjectData> dependenciesData = new ();
@@ -37,24 +39,15 @@ namespace InsaneOne.Core.Injection
 				arraysPool.Add(i, new object[i]);
 		}
 
-		public InjectData AddDependency(object data)
-		{
-			if (data == null)
-				throw new NullReferenceException("[Injection] Dependency data can't be null!");
-
-			// todo disallow multiple additions
-			var result = new InjectData(data);
-			dependenciesData.Add(result);
-			return result;
-		}
-
+		public InjectData AddDependency(object data) => AddDependencyAs(data, null);
 		public InjectData AddDependencyAs<T>(T data) => AddDependencyAs(data, typeof(T));
 
 		public InjectData AddDependencyAs(object data, Type type)
 		{
 			if (data == null)
-				throw new NullReferenceException("[Injection] Dependency data can't be null!");
+				throw new NullReferenceException("Data can't be null!");
 
+			// todo disallow multiple additions of same dep
 			var result = new InjectData(data, type);
 			dependenciesData.Add(result);
 			return result;
@@ -81,19 +74,15 @@ namespace InsaneOne.Core.Injection
 				InjectToMethod(target, dependenciesData);
 
 			if (injectionType.HasFlag(InjectionType.Field) && target is not INoFieldsInject)
-				foreach (var data in dependenciesData)
-					InjectToField(target, data);
+				InjectToFields(target, dependenciesData);
 		}
 
-		void InjectToMethod(object target, List<InjectData> data)
+		void InjectToMethod(object target, IList<InjectData> data)
 		{
-			var systemType = target.GetType();
+			var methods = GetInjectableMethods(target.GetType());
 
-			foreach (var method in systemType.GetMethods(BindingAttribute))
+			foreach (var method in methods)
 			{
-				if (method.IsStatic || !Attribute.IsDefined(method, injectAttributeType))
-					continue;
-
 				var injectAttribute = method.GetCustomAttribute<InjectAttribute>();
 				var parameters = method.GetParameters();
 
@@ -113,9 +102,8 @@ namespace InsaneOne.Core.Injection
 						if (injectData.BindToIds.Count > 0 && !injectData.BindToIds.Contains(injectAttribute.Id)) // if binds only to specific attribute ids and attribute has no this id, skipping
 							continue;
 
-						var injectType = injectData.GetInjectType();
-
-						if (parameter.ParameterType.IsAssignableFrom(injectType))
+						var dataType = injectData.GetInjectType();
+						if (parameter.ParameterType.IsAssignableFrom(dataType))
 						{
 							input[i] = injectData.Data;
 							break;
@@ -127,32 +115,63 @@ namespace InsaneOne.Core.Injection
 				}
 
 				method.Invoke(target, input);
-
 				break;
 			}
 		}
 
-		void InjectToField(object system, InjectData injectionData)
+		void InjectToFields(object target, IList<InjectData> data)
 		{
-			var dataType = injectionData.GetInjectType();
-			var systemType = system.GetType();
+			var fields = GetInjectableFields(target.GetType());
 
-			foreach (var field in systemType.GetFields(BindingAttribute))
+			foreach (var field in fields)
 			{
-				if (field.IsStatic || !Attribute.IsDefined(field, injectAttributeType))
-					continue;
-
 				var injectAttribute = field.GetCustomAttribute<InjectAttribute>();
 
-				if (injectionData.BindToIds.Count > 0 && !injectionData.BindToIds.Contains(injectAttribute.Id)) // if binds only to specific attribute ids and attribute has no this id, skipping
-					continue;
-
-				if (field.FieldType.IsAssignableFrom(dataType))
+				foreach (var injectionData in data)
 				{
-					field.SetValue(system, injectionData.Data);
-					break;
+					if (injectionData.BindToIds.Count > 0 && !injectionData.BindToIds.Contains(injectAttribute.Id)) // if binds only to specific attribute ids and attribute has no this id, skipping
+						continue;
+
+					var dataType = injectionData.GetInjectType();
+					if (field.FieldType.IsAssignableFrom(dataType))
+					{
+						field.SetValue(target, injectionData.Data);
+						break; // field can be assigned from only one dependency. Other next dependencies, associated with same type will be skipped
+					}
 				}
 			}
+		}
+
+		List<MethodInfo> GetInjectableMethods(Type type)
+		{
+			if (methodsCache.TryGetValue(type, out var methods))
+				return methods;
+
+			var result = new List<MethodInfo>();
+			foreach (var method in type.GetMethods(BindingAttribute))
+			{
+				if (!method.IsStatic && Attribute.IsDefined(method, injectAttributeType))
+					result.Add(method);
+			}
+
+			methodsCache[type] = result;
+			return result;
+		}
+
+		List<FieldInfo> GetInjectableFields(Type type)
+		{
+			if (fieldsCache.TryGetValue(type, out var fields))
+				return fields;
+
+			var result = new List<FieldInfo>();
+			foreach (var field in type.GetFields(BindingAttribute))
+			{
+				if (!field.IsStatic && Attribute.IsDefined(field, injectAttributeType))
+					result.Add(field);
+			}
+
+			fieldsCache[type] = result;
+			return result;
 		}
 	}
 }

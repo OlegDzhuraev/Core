@@ -8,13 +8,13 @@ namespace InsaneOne.Core.Injection
 	{
 		public object Data;
 		public Type AsType;
-		public List<string> BindToIds;
+		public HashSet<string> BindToIds;
 		bool isCustomType;
 
 		public InjectData(object data)
 		{
 			Data = data;
-			BindToIds = new List<string>();
+			BindToIds = new HashSet<string>();
 
 			AsType = null;
 			isCustomType = false;
@@ -23,9 +23,10 @@ namespace InsaneOne.Core.Injection
 		public InjectData(object data, Type asType)
 		{
 			Data = data;
-			BindToIds = new List<string>();
+			BindToIds = new HashSet<string>();
+
 			AsType = asType;
-			isCustomType = true;
+			isCustomType = asType != null;
 		}
 
 		public InjectData Bind(string id)
