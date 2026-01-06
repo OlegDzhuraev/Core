@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace InsaneOne.Core.Architect
 {
@@ -84,6 +85,20 @@ namespace InsaneOne.Core.Architect
 			var isExist = TryGet(typeof(T), out var result);
 			typedResult = (T) result;
 			return isExist;
+		}
+
+		/// <summary> Automatically finds services for all type fields with attribute <see cref="LocateAttribute"/> and fills it. </summary>
+		public static void AutoLocate(object target)
+		{
+			const BindingFlags BindingAttribute = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+			var locateAttributeType = typeof(LocateAttribute);
+			var targetType = target.GetType();
+
+			foreach (var field in targetType.GetFields(BindingAttribute))
+			{
+				if (Attribute.IsDefined(field, locateAttributeType) && TryGet(field.FieldType, out var service))
+					field.SetValue(target, service);
+			}
 		}
 
 		static bool TryGet(Type type, out object result)
