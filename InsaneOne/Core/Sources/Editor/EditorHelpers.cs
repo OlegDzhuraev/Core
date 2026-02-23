@@ -65,5 +65,18 @@ namespace InsaneOne.Core.Development
  
 			return resultTexture;
 		}
+
+		[MenuItem("Assets/Force Re-serialize all ScriptableObjects")]
+		static void ForceReSerializeAll()
+		{
+			var guids = AssetDatabase.FindAssets("t:ScriptableObject");
+			var paths = Array.ConvertAll(guids, AssetDatabase.GUIDToAssetPath);
+
+			AssetDatabase.ForceReserializeAssets(paths);
+			AssetDatabase.SaveAssets();
+			AssetDatabase.Refresh();
+
+			Debug.Log($"Re-serialized {paths.Length} ScriptableObjects");
+		}
 	}
 }
