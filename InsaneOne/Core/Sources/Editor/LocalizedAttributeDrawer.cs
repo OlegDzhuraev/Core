@@ -5,15 +5,17 @@ using UnityEngine.UIElements;
 
 namespace InsaneOne.Core.Locales.Editor
 {
+	internal class LocalizedDrawerState
+	{
+		public string prevLocale;
+		public Label helpLabel;
+	}
+
 	[CustomPropertyDrawer(typeof(LocalizedAttribute))]
 	public class LocalizedAttributeDrawer : PropertyDrawer
 	{
 		static readonly StyleColor DefaultColor = Color.gray;
 		static readonly StyleColor WarningColor = Color.yellow;
-
-		string lastLocale;
-
-		Label helpLabel;
 
 		public override VisualElement CreatePropertyGUI(SerializedProperty property)
 		{
@@ -24,30 +26,33 @@ namespace InsaneOne.Core.Locales.Editor
 			if (property.propertyType is not SerializedPropertyType.String)
 				return root;
 
-			field.RegisterValueChangeCallback(OnChanged);
+			field.RegisterValueChangeCallback(evt => OnChanged(evt, root));
 
-			helpLabel = new Label { style = { paddingLeft = 4, fontSize = 10, color = DefaultColor } };
+			var helpLabel = new Label { style = { paddingLeft = 4, fontSize = 10, color = DefaultColor } };
 			root.Add(helpLabel);
+			root.userData = new LocalizedDrawerState { helpLabel = helpLabel };
 
-			OnChanged(new SerializedPropertyChangeEvent { changedProperty = property }); // for first update
+			OnChanged(new SerializedPropertyChangeEvent { changedProperty = property }, root); // for first update
 
 			return root;
 		}
 
-		void OnChanged(SerializedPropertyChangeEvent evt)
+		void OnChanged(SerializedPropertyChangeEvent evt, VisualElement root)
 		{
-			if (Application.isPlaying)
+			if (Application.isPlaying || root.userData is not LocalizedDrawerState state)
 				return;
 
 			var locale = evt.changedProperty.stringValue;
+			var helpLabel = state.helpLabel;
 
 			if (string.IsNullOrWhiteSpace(locale))
 			{
 				helpLabel.text = "";
+				state.prevLocale = "";
 				return;
 			}
 
-			if (locale == lastLocale)
+			if (locale == state.prevLocale)
 				return;
 
 			Localization.Initialize();
@@ -66,7 +71,7 @@ namespace InsaneOne.Core.Locales.Editor
 			helpLabel.text = localizedText;
 
 			Localization.Unload();
-			lastLocale = locale;
+			state.prevLocale = locale;
 		}
 	}
 }
