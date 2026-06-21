@@ -40,15 +40,15 @@ namespace InsaneOne.Core.Locales.Editor
 				return;
 
 			var locale = evt.changedProperty.stringValue;
-			if (locale == lastLocale)
-				return;
 
 			if (string.IsNullOrWhiteSpace(locale))
 			{
 				helpLabel.text = "";
-				lastLocale = locale;
 				return;
 			}
+
+			if (locale == lastLocale)
+				return;
 
 			Localization.Initialize();
 			Localization.SetLanguage(Localization.Language); // default language
