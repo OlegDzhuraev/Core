@@ -10,43 +10,39 @@ namespace InsaneOne.Core
 	{
 		const string StylesPath = "InsaneOne/ToolsStyles";
 
-		Foldout box;
-		Label noClipsLabel;
-
 		public override VisualElement CreatePropertyGUI(SerializedProperty property)
 		{
 			var style = Resources.Load(StylesPath) as StyleSheet;
-			box = new Foldout { text = property.displayName, tooltip = property.tooltip, value = true };
-			noClipsLabel = new Label("No clips are set!") {style = {color = Color.yellow}};
+			var box = new Foldout { text = property.displayName, tooltip = property.tooltip, value = true };
+			var noClipsLabel = new Label("No clips are set!") { style = { color = Color.yellow } };
 
 			box.styleSheets.Add(style);
 			box.AddToClassList("audio-bg");
 
 			box.Add(noClipsLabel);
 			var (clipsProp, clipsField) = AddPropField(property, "clipVariations");
-			clipsField.RegisterValueChangeCallback(OnClipsFieldChanged);
+			clipsField.RegisterValueChangeCallback(evt => OnClipsFieldChanged(evt, noClipsLabel));
 			AddPropField(property, "pitchRandom");
 			AddPropField(property, "volume");
 			AddPropField(property, "loop");
 
-			UpdateNoClipsLabel(clipsProp);
+			UpdateNoClipsLabel(noClipsLabel, clipsProp);
 
 			return box;
+
+			(SerializedProperty, PropertyField) AddPropField(SerializedProperty parentProperty, string name)
+			{
+				var prop = parentProperty.FindPropertyRelative(name);
+				var field = new PropertyField(prop);
+				box.Add(field);
+				return (prop, field);
+			}
 		}
 
-		void OnClipsFieldChanged(SerializedPropertyChangeEvent spChangeEvt) => UpdateNoClipsLabel(spChangeEvt.changedProperty);
+		void OnClipsFieldChanged(SerializedPropertyChangeEvent spChangeEvt, Label noClipsLabel)
+			=> UpdateNoClipsLabel(noClipsLabel, spChangeEvt.changedProperty);
 
-		void UpdateNoClipsLabel(SerializedProperty clipsProperty)
-		{
-			noClipsLabel.style.display = clipsProperty.arraySize == 0 ? DisplayStyle.Flex : DisplayStyle.None;
-		}
-
-		public (SerializedProperty, PropertyField) AddPropField(SerializedProperty parentProperty, string name)
-		{
-			var prop = parentProperty.FindPropertyRelative(name);
-			var field = new PropertyField(prop);
-			box.Add(field);
-			return (prop, field);
-		}
+		void UpdateNoClipsLabel(Label noClipsLabel, SerializedProperty clipsProperty)
+			=> noClipsLabel.style.display = clipsProperty.arraySize == 0 ? DisplayStyle.Flex : DisplayStyle.None;
 	}
 }
