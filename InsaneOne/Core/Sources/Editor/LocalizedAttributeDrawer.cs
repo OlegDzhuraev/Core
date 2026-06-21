@@ -43,6 +43,12 @@ namespace InsaneOne.Core.Locales.Editor
 			if (locale == lastLocale)
 				return;
 
+			if (string.IsNullOrWhiteSpace(locale))
+			{
+				helpLabel.text = "";
+				return;
+			}
+
 			Localization.Initialize();
 			Localization.SetLanguage(Localization.Language); // default language
 
