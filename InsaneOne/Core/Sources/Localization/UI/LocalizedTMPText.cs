@@ -8,18 +8,17 @@ namespace InsaneOne.Core.Locales
     [DisallowMultipleComponent]
     public sealed class LocalizedTMPText : Element<LocalizedTextViewModel>, ILocalized
     {
+        [Header("Localized text settings")]
         [SerializeField, Localized] string localizationId;
         [SerializeField] bool addUiTextIfNotFound = true;
         [SerializeField] bool initializeOnStart = true;
 
         TMP_Text text;
 
-        void Awake()
+        protected override void OnAwake()
         {
-            text = GetComponent<TMP_Text>();
-
-            if (addUiTextIfNotFound && !text)
-                text = gameObject.AddComponent<TextMeshProUGUI>();
+            if (!SelfObject.TryGetComponent(out text) && addUiTextIfNotFound)
+                text = SelfObject.AddComponent<TextMeshProUGUI>();
         }
 
         void Start()
@@ -32,7 +31,7 @@ namespace InsaneOne.Core.Locales
         {
             if (string.IsNullOrWhiteSpace(localizationId) && gameObject.activeSelf)
             {
-                CoreUnityLogger.I.Log($"Empty localization id on text object [{name}]!", LogLevel.Warning);
+                CoreUnityLogger.I.Log($"Empty localization id on text object [ {name} ]!", LogLevel.Warning);
                 return;
             }
 
@@ -41,13 +40,13 @@ namespace InsaneOne.Core.Locales
 
             if (!Localization.IsLoaded)
             {
-                CoreUnityLogger.I.Log($"No localization is loaded, can't apply localization on text object [{name}]!", LogLevel.Error);
+                CoreUnityLogger.I.Log($"No localization is loaded, can't apply localization on text object [ {name} ]!", LogLevel.Error);
                 return;
             }
             
-            if (text == null && !TryGetComponent(out text))
+            if (text == null && !SelfObject.TryGetComponent(out text))
             {
-                CoreUnityLogger.I.Log($"No localization TMP text on object [{name}]", LogLevel.Error);
+                CoreUnityLogger.I.Log($"No localization TMP text on object [ {name} ]", LogLevel.Error);
                 return;
             }
 

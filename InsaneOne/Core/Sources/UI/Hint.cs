@@ -27,7 +27,8 @@ namespace InsaneOne.Core.UI
 
 		RectTransform rectTransform;
 
-		void Awake() => rectTransform = GetComponent<RectTransform>();
+		protected override void OnAwake() => rectTransform = GetComponent<RectTransform>();
+
 		void Start() => Hide();
 
 		public override void OnViewModelChanged(HintViewModel viewModel)

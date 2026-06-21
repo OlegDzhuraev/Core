@@ -25,10 +25,10 @@ namespace InsaneOne.Core.UI
         public Transform CanvasTransform;
         public RectTransform RectTransform;
 
-        void Awake()
+        protected override void OnAwake()
         {
             if (!RectTransform)
-                RectTransform = GetComponent<RectTransform>();
+                RectTransform = SelfObject.GetComponent<RectTransform>();
         }
 
         void Start()

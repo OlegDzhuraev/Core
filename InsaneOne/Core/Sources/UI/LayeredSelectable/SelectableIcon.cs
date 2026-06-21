@@ -28,7 +28,7 @@ namespace InsaneOne.Core.UI
 	
 		Sprite hoverPreviousIcon;
 		
-		void Awake() => iconImage.sprite = icon;
+		protected override void OnAwake() => iconImage.sprite = icon;
 
 		void ISelectionReceiver.SetState(bool isSelected)
 		{

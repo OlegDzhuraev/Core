@@ -30,9 +30,15 @@ namespace InsaneOne.Core.UI
 		[SerializeField] GameObject content;
 		[SerializeField] RectTransform openIconTransform;
 
-		void Awake()
+		protected override void OnAwake()
 		{
 			toggle.ViewModelChanged += OnToggleViewModelChanged;
+		}
+
+		void OnDestroy()
+		{
+			if (toggle)
+				toggle.ViewModelChanged -= OnToggleViewModelChanged;
 		}
 
 		void OnToggleViewModelChanged(ToggleViewModel toggleVm)

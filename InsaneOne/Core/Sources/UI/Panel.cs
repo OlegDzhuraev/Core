@@ -22,19 +22,15 @@ namespace InsaneOne.Core.UI
 	public sealed class Panel : Element<object>
 	{
 		[SerializeField] bool hideOnStart;
-		
-		public GameObject SelfObject => selfObject;
+
 		public RectTransform RectTransform { get; private set; }
 		public bool IsShown { get; private set; }
 
 		bool wasShown;
 		
-		void Awake()
+		protected override void OnAwake()
 		{
-			if (!selfObject)
-				selfObject = gameObject;
-
-			RectTransform = selfObject.GetComponent<RectTransform>();
+			RectTransform = SelfObject.GetComponent<RectTransform>();
 		}
 
 		void Start()

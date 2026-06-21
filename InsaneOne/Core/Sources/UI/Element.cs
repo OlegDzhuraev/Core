@@ -33,7 +33,19 @@ namespace InsaneOne.Core.UI
 
 		public TViewModel ViewModel { get; private set; }
 
-		[SerializeField] protected GameObject selfObject;
+		public GameObject SelfObject => selfObject ? selfObject : gameObject;
+
+		[SerializeField] GameObject selfObject;
+
+		void Awake()
+		{
+			if (!selfObject)
+				selfObject = gameObject;
+
+			OnAwake();
+		}
+
+		protected virtual void OnAwake() { }
 
 		public void SetViewModel(TViewModel viewModel)
 		{
