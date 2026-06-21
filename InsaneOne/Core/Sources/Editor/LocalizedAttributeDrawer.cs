@@ -46,6 +46,7 @@ namespace InsaneOne.Core.Locales.Editor
 			if (string.IsNullOrWhiteSpace(locale))
 			{
 				helpLabel.text = "";
+				lastLocale = locale;
 				return;
 			}
 
