@@ -39,16 +39,18 @@ namespace InsaneOne.Core.Injection
 				arraysPool.Add(i, new object[i]);
 		}
 
-		public InjectData AddDependency(object data) => AddDependencyAs(data, null);
+		public InjectData AddDependency(object data) => AddDependencyAs(data);
 		public InjectData AddDependencyAs<T>(T data) => AddDependencyAs(data, typeof(T));
 
-		public InjectData AddDependencyAs(object data, Type type)
+		/// <summary> Registers the dependency, optionally as an alias of one or more types (e.g. base classes or interfaces),
+		/// so it can be resolved by any of them in addition to its actual runtime type. </summary>
+		public InjectData AddDependencyAs(object data, params Type[] asTypes)
 		{
 			if (data == null)
 				throw new NullReferenceException("Data can't be null!");
 
 			// todo disallow multiple additions of same dep
-			var result = new InjectData(data, type);
+			var result = new InjectData(data, asTypes);
 			dependenciesData.Add(result);
 			return result;
 		}
@@ -102,8 +104,7 @@ namespace InsaneOne.Core.Injection
 						if (injectData.BindToIds.Count > 0 && !injectData.BindToIds.Contains(injectAttribute.Id)) // if binds only to specific attribute ids and attribute has no this id, skipping
 							continue;
 
-						var dataType = injectData.GetInjectType();
-						if (parameter.ParameterType.IsAssignableFrom(dataType))
+						if (injectData.CanInjectTo(parameter.ParameterType))
 						{
 							input[i] = injectData.Data;
 							break;
@@ -132,8 +133,7 @@ namespace InsaneOne.Core.Injection
 					if (injectionData.BindToIds.Count > 0 && !injectionData.BindToIds.Contains(injectAttribute.Id)) // if binds only to specific attribute ids and attribute has no this id, skipping
 						continue;
 
-					var dataType = injectionData.GetInjectType();
-					if (field.FieldType.IsAssignableFrom(dataType))
+					if (injectionData.CanInjectTo(field.FieldType))
 					{
 						field.SetValue(target, injectionData.Data);
 						break; // field can be assigned from only one dependency. Other next dependencies, associated with same type will be skipped
