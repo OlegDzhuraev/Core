@@ -62,10 +62,15 @@ namespace InsaneOne.Core.Injection
 		}
 
 		/// <summary> Injects dependencies to all targets. </summary>
-		public void Resolve()
+		/// <param name="clearTargetsAfterResolve"> If true (default), targets list is cleared after resolving,
+		/// so the next Resolve() call won't re-inject already processed targets. </param>
+		public void Resolve(bool clearTargetsAfterResolve = true)
 		{
 			foreach (var target in targets)
 				InjectDirectly(target);
+
+			if (clearTargetsAfterResolve)
+				targets.Clear();
 		}
 
 		/// <summary> Can be used in runtime for any target.
@@ -79,7 +84,9 @@ namespace InsaneOne.Core.Injection
 				InjectToFields(target, dependenciesData);
 		}
 
-		void InjectToMethod(object target, IList<InjectData> data)
+		/// <param name="stopAfterFirst"> If true, only the first found Inject-method is invoked (optimization for
+		/// the common case of a single Inject-method per target). Default is false, so all Inject-methods are invoked. </param>
+		void InjectToMethod(object target, IList<InjectData> data, bool stopAfterFirst = false)
 		{
 			var methods = GetInjectableMethods(target.GetType());
 
@@ -116,7 +123,9 @@ namespace InsaneOne.Core.Injection
 				}
 
 				method.Invoke(target, input);
-				break;
+
+				if (stopAfterFirst)
+					break;
 			}
 		}
 
@@ -127,6 +136,7 @@ namespace InsaneOne.Core.Injection
 			foreach (var field in fields)
 			{
 				var injectAttribute = field.GetCustomAttribute<InjectAttribute>();
+				var isInjected = false;
 
 				foreach (var injectionData in data)
 				{
@@ -136,9 +146,13 @@ namespace InsaneOne.Core.Injection
 					if (injectionData.CanInjectTo(field.FieldType))
 					{
 						field.SetValue(target, injectionData.Data);
+						isInjected = true;
 						break; // field can be assigned from only one dependency. Other next dependencies, associated with same type will be skipped
 					}
 				}
+
+				if (!isInjected)
+					logger?.Log($"[Injection] Not found required injection data of type {field.FieldType} for field '{field.Name}' in '{target.GetType()}'!");
 			}
 		}
 

@@ -7,33 +7,61 @@ namespace InsaneOne.Core.Development
 {
 	public sealed class CoreInitEditorWindow : EditorWindow
 	{
+		const string StylesPath = "InsaneOne/ToolsStyles";
+		const string PackageName = "InsaneOne.Core";
+		public const string DismissedSessionKey = "InsaneOne.Core.Setup.Dismissed";
+
+		VisualElement content;
+		VisualElement initialSetupContainer;
 		Label infoLabel;
 		Button setupButton;
 
+		[MenuItem("Tools/InsaneOne/Initial setup...", priority = 200)]
 		public static void ShowWindow()
 		{
-			var wnd = GetWindow<CoreInitEditorWindow>();
-			wnd.titleContent = new GUIContent("InsaneOne.Core Setup");
-			wnd.minSize = new Vector2(340, 64);
-			wnd.maxSize = new Vector2(340, 128);
+			var wnd = CreateInstance<CoreInitEditorWindow>();
+			wnd.titleContent = new GUIContent($"Setup");
+			wnd.minSize = new Vector2(360, 96);
+			wnd.maxSize = new Vector2(360, 96);
+			wnd.ShowModal();
 		}
 
 		void CreateGUI()
 		{
 			var root = rootVisualElement;
 
-			infoLabel = new Label("Looks like InsaneOne.Core was not setup before\n(No CoreData asset found).");
-			root.Add(infoLabel);
+			var style = Resources.Load(StylesPath) as StyleSheet;
+			root.styleSheets.Add(style);
 
-			setupButton = new Button(Init)
-			{
-				text = "Setup InsaneOne.Core",
-				style = { backgroundColor = new Color(0.2f, 0.4f, 0.2f) },
-			};
+			content = new VisualElement();
+			content.AddToClassList("core-init-root");
+			root.Add(content);
 
-			root.Add(setupButton);
+			var titleLabel = new Label($"{PackageName} Setup");
+			titleLabel.AddToClassList("core-init-title");
+			content.Add(titleLabel);
+
+			initialSetupContainer = new VisualElement();
+			content.Add(initialSetupContainer);
+
+			infoLabel = new Label($"Looks like {PackageName} was not setup before\n(No {nameof(CoreData)} asset found).");
+			initialSetupContainer.Add(infoLabel);
+
+			setupButton = new Button(Init) { text = $"Setup {PackageName}" };
+			setupButton.AddToClassList("core-init-setup-button");
+
+			var skipButton = new Button(Dismiss) { text = "Dismiss in current session" };
+
+			initialSetupContainer.Add(setupButton);
+			initialSetupContainer.Add(skipButton);
 
 			TryShowSetupComplete();
+		}
+
+		void Dismiss()
+		{
+			SessionState.SetBool(DismissedSessionKey, true);
+			Close();
 		}
 
 		void Init()
@@ -49,7 +77,7 @@ namespace InsaneOne.Core.Development
 			AssetDatabase.Refresh();
 			AssetDatabase.CreateAsset(newData, "Assets/Resources/InsaneOne/CoreData.asset");
 
-			CoreUnityLogger.I.Log("new CoreData was <b><color=#55ff33>created</color></b>.");
+			CoreUnityLogger.I.Log($"new {nameof(CoreData)} was <b><color=#55ff33>created</color></b>.");
 
 			TryShowSetupComplete();
 		}
@@ -59,16 +87,13 @@ namespace InsaneOne.Core.Development
 			if (!CoreData.TryLoad(out _))
 				return;
 
-			var root = rootVisualElement;
-
-			setupButton.SetEnabled(false);
-			infoLabel.SetEnabled(false);
+			content.Remove(initialSetupContainer);
 
 			var setupLabel = new Label("Setup is finished!");
-			root.Add(setupLabel);
+			content.Add(setupLabel);
 
 			var closeButton = new Button(Close) { text = "Close window" };
-			root.Add(closeButton);
+			content.Add(closeButton);
 		}
 	}
 }

@@ -4,7 +4,7 @@ namespace InsaneOne.Core.Injection
 {
 	public class UnityContainer : Container
 	{
-		public UnityContainer(InjectionType injectionType) : base(injectionType) { }
+		public UnityContainer(InjectionType injectionType, ILogger logger = null) : base(injectionType, logger) { }
 
 		/// <summary> Creates an object and resolves all dependencies in its MonoBehaviour classes methods with Inject attribute.
 		/// Currently, this method is not optimized to use at runtime, so be careful.</summary>

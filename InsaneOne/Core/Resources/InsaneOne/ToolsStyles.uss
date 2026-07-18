@@ -11,3 +11,24 @@
     border-radius: 4px;
     padding: 6px;
 }
+
+.core-init-root
+{
+    padding: 4px;
+}
+
+.core-init-title
+{
+    font-size: 14px;
+    -unity-font-style: bold;
+}
+
+.core-init-setup-button
+{
+    background-color: rgba(50, 101, 50, 1);
+}
+
+.core-init-setup-button:hover
+{
+    background-color: rgba(70, 145, 60, 1);
+}
