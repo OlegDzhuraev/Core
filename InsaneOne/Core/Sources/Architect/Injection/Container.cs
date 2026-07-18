@@ -49,16 +49,66 @@ namespace InsaneOne.Core.Injection
 			if (data == null)
 				throw new NullReferenceException("Data can't be null!");
 
-			// todo disallow multiple additions of same dep
+			if (dependenciesData.Exists(d => ReferenceEquals(d.Data, data)))
+				throw new InvalidOperationException($"Dependency [ {data} ] of type [ {data.GetType()} ] is already added to the container!");
+
 			var result = new InjectData(data, asTypes);
 			dependenciesData.Add(result);
 			return result;
 		}
 
+		/// <summary> Removes the dependency, using the handle returned by AddDependency/AddDependencyAs. </summary>
+		public bool RemoveDependency(InjectData data) => dependenciesData.Remove(data);
+
+		/// <summary> Removes the dependency, previously registered with the same data reference. </summary>
+		public bool RemoveDependency(object data) => dependenciesData.RemoveAll(d => ReferenceEquals(d.Data, data)) > 0;
+
+		public void ClearDependencies() => dependenciesData.Clear();
+
 		public void AddTarget(object target)
 		{
 			if (!targets.Contains(target))
 				targets.Add(target);
+		}
+
+		public bool RemoveTarget(object target) => targets.Remove(target);
+
+		public void ClearTargets() => targets.Clear();
+
+		/// <summary> Clears both registered dependencies and pending targets.
+		/// Reflection caches are kept, as they don't depend on container state. </summary>
+		public void Clear()
+		{
+			ClearDependencies();
+			ClearTargets();
+		}
+
+		/// <summary> Resolves the currently registered dependency of type T, or throws if none is found. </summary>
+		public T Resolve<T>(string id = null)
+		{
+			if (TryResolve<T>(out var value, id))
+				return value;
+
+			throw new InvalidOperationException($"Dependency of type [ {typeof(T)} (id: {id ?? "none"}) ] is not registered in the container!");
+		}
+
+		/// <summary> Tries to resolve the currently registered dependency of type T. </summary>
+		public bool TryResolve<T>(out T value, string id = null)
+		{
+			foreach (var injectData in dependenciesData)
+			{
+				if (injectData.BindToIds.Count > 0 && !injectData.BindToIds.Contains(id))
+					continue;
+
+				if (injectData.CanInjectTo(typeof(T)))
+				{
+					value = (T) injectData.Data;
+					return true;
+				}
+			}
+
+			value = default;
+			return false;
 		}
 
 		/// <summary> Injects dependencies to all targets. </summary>
@@ -118,8 +168,8 @@ namespace InsaneOne.Core.Injection
 						}
 					}
 
-					if (input[i] == null)
-						logger?.Log($"[Injection] Not found required injection data of type {parameter.ParameterType}!");
+					if (input[i] == null && !injectAttribute.Optional)
+						logger?.Log($"[Injection] Not found required injection data of type [ {parameter.ParameterType} ]!");
 				}
 
 				method.Invoke(target, input);
@@ -151,8 +201,8 @@ namespace InsaneOne.Core.Injection
 					}
 				}
 
-				if (!isInjected)
-					logger?.Log($"[Injection] Not found required injection data of type {field.FieldType} for field '{field.Name}' in '{target.GetType()}'!");
+				if (!isInjected && !injectAttribute.Optional)
+					logger?.Log($"[Injection] Not found required injection data of type [ {field.FieldType} ] for field [ {field.Name} ] in [ {target.GetType()} ]!");
 			}
 		}
 

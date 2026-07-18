@@ -20,6 +20,8 @@ namespace InsaneOne.Core.LevelDesign
 		const string ScaleRangeMaxKey = "InsaneOne.ObjectPlacer.ScaleRangeMax";
 		const string RandomizePositionKey = "InsaneOne.ObjectPlacer.RandomizePosition";
 		const string MaxPositionOffsetKey = "InsaneOne.ObjectPlacer.MaxPositionOffset";
+		const string SnapToGridKey = "InsaneOne.ObjectPlacer.SnapToGrid";
+		const string GridSizeKey = "InsaneOne.ObjectPlacer.GridSize";
 
 		public float MaxSlopeAngle => maxSlopeAngleField.value;
 
@@ -34,6 +36,9 @@ namespace InsaneOne.Core.LevelDesign
 		public bool RandomizePosition => randomizePositionToggle.value;
 		public float MaxPositionOffset => maxPositionOffsetField.value;
 
+		public bool SnapToGrid => snapToGridToggle.value;
+		public float GridSize => gridSizeField.value;
+
 		readonly Slider maxSlopeAngleField;
 
 		readonly Toggle alignToNormalToggle;
@@ -47,6 +52,9 @@ namespace InsaneOne.Core.LevelDesign
 
 		readonly Toggle randomizePositionToggle;
 		readonly Slider maxPositionOffsetField;
+
+		readonly Toggle snapToGridToggle;
+		readonly Slider gridSizeField;
 
 		public ObjectPlacerPlacementSettingsSection()
 		{
@@ -91,6 +99,16 @@ namespace InsaneOne.Core.LevelDesign
 			maxPositionOffsetField.RegisterValueChangedCallback(ev => SessionState.SetFloat(MaxPositionOffsetKey, ev.newValue));
 			maxPositionOffsetField.style.display = GetDisplay(randomizePositionToggle.value);
 
+			snapToGridToggle = new Toggle("Snap To Grid") { value = SessionState.GetBool(SnapToGridKey, false) };
+			gridSizeField = new Slider("Grid Size", 0.01f, 10f) { value = SessionState.GetFloat(GridSizeKey, 1f), showInputField = true };
+			snapToGridToggle.RegisterValueChangedCallback(ev =>
+			{
+				SessionState.SetBool(SnapToGridKey, ev.newValue);
+				gridSizeField.style.display = GetDisplay(ev.newValue);
+			});
+			gridSizeField.RegisterValueChangedCallback(ev => SessionState.SetFloat(GridSizeKey, ev.newValue));
+			gridSizeField.style.display = GetDisplay(snapToGridToggle.value);
+
 			Add(randomizeRotationToggle);
 			Add(maxRotationAngleField);
 			Add(randomizeScaleToggle);
@@ -98,6 +116,8 @@ namespace InsaneOne.Core.LevelDesign
 			Add(scaleRangeSlider);
 			Add(randomizePositionToggle);
 			Add(maxPositionOffsetField);
+			Add(snapToGridToggle);
+			Add(gridSizeField);
 		}
 
 		void OnScaleRangeChanged(ChangeEvent<Vector2> ev)

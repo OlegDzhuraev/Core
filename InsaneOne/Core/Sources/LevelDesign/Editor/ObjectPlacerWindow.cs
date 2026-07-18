@@ -13,8 +13,11 @@ namespace InsaneOne.Core.LevelDesign
 		const float RaycastMaxDistance = 1000f;
 		const string PlaceUndoGroupName = "Place Prefabs";
 
+		const float NormalPreviewLength = 1f;
+
 		static readonly Color PreviewSphereReadyColor = new (0.3f, 0.75f, 1f, 0.9f);
 		static readonly Color PreviewSphereNoEntryColor = new (1f, 0.3f, 0.3f, 0.9f);
+		static readonly Color PositionScatterDiscColor = new (0.3f, 0.75f, 1f, 0.15f);
 
 		ObjectPlacerGeneralSection generalSection;
 		ObjectPlacerPaletteSection paletteSection;
@@ -51,10 +54,13 @@ namespace InsaneOne.Core.LevelDesign
 			paletteSection = new ObjectPlacerPaletteSection();
 			placementSettingsSection = new ObjectPlacerPlacementSettingsSection();
 
-			root.Add(infoBox);
-			root.Add(generalSection);
-			root.Add(paletteSection);
-			root.Add(placementSettingsSection);
+			var scrollView = new ScrollView(ScrollViewMode.Vertical);
+			scrollView.Add(infoBox);
+			scrollView.Add(generalSection);
+			scrollView.Add(paletteSection);
+			scrollView.Add(placementSettingsSection);
+
+			root.Add(scrollView);
 		}
 
 		void OnSceneGUI(SceneView sceneView)
@@ -78,6 +84,18 @@ namespace InsaneOne.Core.LevelDesign
 				Handles.color = canPlaceHere ? PreviewSphereReadyColor : PreviewSphereNoEntryColor;
 				var size = HandleUtility.GetHandleSize(hit.point) * 0.15f;
 				Handles.SphereHandleCap(0, hit.point, Quaternion.identity, size, EventType.Repaint);
+
+				if (placementSettingsSection.AlignToNormal)
+				{
+					Handles.color = Color.cyan;
+					Handles.DrawLine(hit.point, hit.point + hit.normal * NormalPreviewLength);
+				}
+
+				if (placementSettingsSection.RandomizePosition)
+				{
+					Handles.color = PositionScatterDiscColor;
+					Handles.DrawSolidDisc(hit.point, hit.normal, placementSettingsSection.MaxPositionOffset);
+				}
 			}
 
 			var eventType = e.GetTypeForControl(controlId);
@@ -144,9 +162,14 @@ namespace InsaneOne.Core.LevelDesign
 			var instance = (GameObject)PrefabUtility.InstantiatePrefab(entry.Prefab);
 			Undo.RegisterCreatedObjectUndo(instance, "Place Prefab");
 
+			if (generalSection.ParentTransform)
+				instance.transform.SetParent(generalSection.ParentTransform, false);
+
 			var position = hit.point;
 			if (placementSettingsSection.RandomizePosition)
 				position += GetRandomTangentOffset(hit.normal, placementSettingsSection.MaxPositionOffset);
+			if (placementSettingsSection.SnapToGrid)
+				position = SnapToGrid(position, placementSettingsSection.GridSize);
 
 			var rotation = placementSettingsSection.AlignToNormal ? Quaternion.FromToRotation(Vector3.up, hit.normal) : Quaternion.identity;
 			if (placementSettingsSection.RandomizeRotation)
@@ -160,6 +183,17 @@ namespace InsaneOne.Core.LevelDesign
 				var multiplier = Random.Range(range.x, range.y);
 				instance.transform.localScale = entry.Prefab.transform.localScale * multiplier;
 			}
+		}
+
+		static Vector3 SnapToGrid(Vector3 position, float gridSize)
+		{
+			if (gridSize <= 0f)
+				return position;
+
+			return new Vector3(
+				Mathf.Round(position.x / gridSize) * gridSize,
+				Mathf.Round(position.y / gridSize) * gridSize,
+				Mathf.Round(position.z / gridSize) * gridSize);
 		}
 
 		static Vector3 GetRandomTangentOffset(Vector3 normal, float maxDistance)
