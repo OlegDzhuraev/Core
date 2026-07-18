@@ -12,6 +12,9 @@ namespace InsaneOne.Core.Utility
 
 		public static float GetAngleByPositionOnCircle(float angleOffset, int id, int count)
 		{
+			if (count <= 1)
+				return 0f;
+
 			var halfAngle = count / 2f * angleOffset;
 			return Mathf.Lerp(-halfAngle, halfAngle, id / (float) (count - 1));
 		}

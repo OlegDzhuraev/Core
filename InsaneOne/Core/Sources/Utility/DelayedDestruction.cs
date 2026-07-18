@@ -18,7 +18,7 @@ namespace InsaneOne.Core
 				return;
 			
 			if (detachChildren)
-				for (int i = 0; i < transform.childCount; i++)
+				for (int i = transform.childCount - 1; i >= 0; i--)
 					transform.GetChild(i).SetParent(null);
 
 			Destroy(gameObject);

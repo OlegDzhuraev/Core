@@ -1,5 +1,9 @@
 ﻿using System;
 
+#if UNITY_5_3_OR_NEWER
+using UnityEngine;
+#endif
+
 namespace InsaneOne.Core
 {
 	/// <summary>This class describes timer. Every time when you need to do some periodic action with delay using Time.deltaTime, but do not want to use coroutine, you can use this timer. </summary>
@@ -10,13 +14,12 @@ namespace InsaneOne.Core
 
 		public float FullTime => fullTime;
 		public float TimeLeft { get; private set; }
-
+		public bool IsFinished => TimeLeft <= 0;
+		
 #if UNITY_5_3_OR_NEWER
-		[UnityEngine.SerializeField]
+		[SerializeField]
 #endif
 		float fullTime;
-
-		bool isFinished;
 
 		public Timer(float timeValue)
 		{
@@ -31,7 +34,7 @@ namespace InsaneOne.Core
 			{
 				TimeLeft -= dTime;
 
-				if (TimeLeft <= 0) // required to check it here to work correct with TickIfNotReady method
+				if (IsFinished) // required to check it here to work correct with TickIfNotReady method
 					Finished?.Invoke();
 			}
 			else
@@ -66,10 +69,22 @@ namespace InsaneOne.Core
 		public void SetReady() => TimeLeft = 0f;
 
 		/// <summary> Get timer reload percents (starting from 0 to 1). </summary>
-		public float GetReloadPercents() => (fullTime - TimeLeft) / fullTime;
+		public float GetReloadPercents()
+		{
+#if UNITY_5_3_OR_NEWER
+			Debug.Assert(fullTime != 0);
+#endif
+			return (fullTime - TimeLeft) / fullTime;
+		}
 
 		/// <summary> Returns timer progress in percents (starting from 1 to 0). </summary>
-		public float GetProgressLeft() => TimeLeft / fullTime;
+		public float GetProgressLeft()
+		{
+#if UNITY_5_3_OR_NEWER
+			Debug.Assert(fullTime != 0);
+#endif
+			return TimeLeft / fullTime;
+		}
 
 		/// <summary> Hard override for time left. Use it only in some specific cases. </summary>
 		public void SetTimeLeft(float value) => TimeLeft = value;

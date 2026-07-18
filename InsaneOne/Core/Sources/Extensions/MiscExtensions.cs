@@ -43,7 +43,12 @@ namespace InsaneOne.Core
 				return component;
 			
 			if (!isNeeded && component)
-				Object.DestroyImmediate(component);
+			{
+				if (Application.isPlaying)
+					Object.Destroy(component);
+				else
+					Object.DestroyImmediate(component);
+			}
 
 			return null;
 		}
