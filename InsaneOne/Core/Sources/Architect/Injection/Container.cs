@@ -156,32 +156,51 @@ namespace InsaneOne.Core.Injection
 			}
 		}
 
+		/// <summary> Walks the whole type hierarchy (declaring type included) to find Inject-methods, because
+		/// GetMethods(Public | NonPublic) does not return private methods declared in base classes. Overridden
+		/// virtual methods are de-duplicated via GetBaseDefinition, so an override is invoked only once. </summary>
 		List<MethodInfo> GetInjectableMethods(Type type)
 		{
 			if (methodsCache.TryGetValue(type, out var methods))
 				return methods;
 
 			var result = new List<MethodInfo>();
-			foreach (var method in type.GetMethods(BindingAttribute))
+			var seenBaseDefinitions = new HashSet<MethodInfo>();
+
+			for (var current = type; current != null; current = current.BaseType)
 			{
-				if (!method.IsStatic && Attribute.IsDefined(method, injectAttributeType))
+				foreach (var method in current.GetMethods(BindingAttribute | BindingFlags.DeclaredOnly))
+				{
+					if (method.IsStatic || !Attribute.IsDefined(method, injectAttributeType))
+						continue;
+
+					if (!seenBaseDefinitions.Add(method.GetBaseDefinition()))
+						continue; // a more derived override of this method was already added
+
 					result.Add(method);
+				}
 			}
 
 			methodsCache[type] = result;
 			return result;
 		}
 
+		/// <summary> Walks the whole type hierarchy (declaring type included) to find Inject-fields, because
+		/// GetFields(Public | NonPublic) does not return private fields declared in base classes. </summary>
 		List<FieldInfo> GetInjectableFields(Type type)
 		{
 			if (fieldsCache.TryGetValue(type, out var fields))
 				return fields;
 
 			var result = new List<FieldInfo>();
-			foreach (var field in type.GetFields(BindingAttribute))
+
+			for (var current = type; current != null; current = current.BaseType)
 			{
-				if (!field.IsStatic && Attribute.IsDefined(field, injectAttributeType))
-					result.Add(field);
+				foreach (var field in current.GetFields(BindingAttribute | BindingFlags.DeclaredOnly))
+				{
+					if (!field.IsStatic && Attribute.IsDefined(field, injectAttributeType))
+						result.Add(field);
+				}
 			}
 
 			fieldsCache[type] = result;
