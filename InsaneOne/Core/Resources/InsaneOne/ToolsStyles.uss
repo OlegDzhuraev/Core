@@ -32,3 +32,25 @@
 {
     background-color: rgba(70, 145, 60, 1);
 }
+
+.palette-grid
+{
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.palette-item
+{
+    width: 48px;
+    height: 48px;
+    margin: 2px;
+    padding: 2px;
+    background-color: rgba(60, 60, 60, 1);
+    border-width: 2px;
+    border-color: rgba(60, 60, 60, 1);
+}
+
+.palette-item-selected
+{
+    border-color: rgba(80, 160, 255, 1);
+}

@@ -73,6 +73,8 @@ assembly and don't grow its dependencies unnecessarily:
   statement.
 - Private fields — `camelCase` without an underscore prefix; constants — `PascalCase`
   (e.g. `const int MaxSourcesInLayer`).
+- Member ordering within a class: constants, then static members, then events, then public
+  properties, and only after those — internal/private fields and `[SerializeField]` fields.
 - Static singleton-style classes (`Audio`, `Localization`, `PauseUtility`, `ServiceLocator`,
   `Context<T>`) are the main architectural pattern for "global" systems; each one has an
   explicit `Init`/`Initialize` and often a `Reset`/`Dispose`/`Unload` to clear state between
