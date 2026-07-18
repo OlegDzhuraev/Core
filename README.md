@@ -23,6 +23,9 @@ These tools also can be found in the top menu in **Tools** menu item.
 ### Transform Randomize
 Allows to randomize rotation, scale and position of the scene-selected transforms.
 
+### Object Placer
+Places prefabs from an assigned palette onto scene colliders by clicking in the Scene view, with support for physics layer filtering, aligning to the surface normal, and randomizing position, rotation and scale. Can be toggled on/off from the tool window or from its own Scene view overlay toggle.
+
 ## Extensions
 Contains some extensions for Transform, Color, Vectors, Random and other components. Some examples below.
 

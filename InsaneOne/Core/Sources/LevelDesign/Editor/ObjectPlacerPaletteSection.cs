@@ -1,24 +1,30 @@
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Object = UnityEngine.Object;
+using Random = UnityEngine.Random;
 
 namespace InsaneOne.Core.LevelDesign
 {
 	/// <summary> Palette block of the Object Placer tool: palette asset field, prefab icon grid and selection status.
-	/// The assigned palette and selected entry are persisted in SessionState, so they survive domain reloads within the same Editor session. </summary>
+	/// The assigned palette, selected entry and random-from-palette flag are persisted in SessionState, so they survive domain reloads within the same Editor session. </summary>
 	public class ObjectPlacerPaletteSection : VisualElement
 	{
 		const string GroupStyleName = "group-box";
 		const string PaletteGuidKey = "InsaneOne.ObjectPlacer.PaletteGuid";
 		const string SelectedEntryIndexKey = "InsaneOne.ObjectPlacer.SelectedEntryIndex";
+		const string RandomFromPaletteKey = "InsaneOne.ObjectPlacer.RandomFromPalette";
 
 		public ObjectPalette.Entry SelectedEntry => palette && selectedEntryIndex >= 0 && selectedEntryIndex < palette.Entries.Count
 			? palette.Entries[selectedEntryIndex]
 			: null;
 
+		public bool CanPlace => palette && (randomFromPaletteToggle.value ? GetFirstAvailableEntryIndex() >= 0 : SelectedEntry != null);
+
 		readonly ObjectField paletteField;
+		readonly Toggle randomFromPaletteToggle;
 		readonly VisualElement paletteGrid;
 		readonly Label statusLabel;
 
@@ -35,6 +41,14 @@ namespace InsaneOne.Core.LevelDesign
 			paletteField.RegisterValueChangedCallback(OnPaletteChanged);
 			Add(paletteField);
 
+			randomFromPaletteToggle = new Toggle("Random From Palette") { value = SessionState.GetBool(RandomFromPaletteKey, false) };
+			randomFromPaletteToggle.RegisterValueChangedCallback(ev =>
+			{
+				SessionState.SetBool(RandomFromPaletteKey, ev.newValue);
+				UpdateStatusLabel();
+			});
+			Add(randomFromPaletteToggle);
+
 			paletteGrid = new VisualElement();
 			paletteGrid.AddToClassList("palette-grid");
 			Add(paletteGrid);
@@ -46,6 +60,23 @@ namespace InsaneOne.Core.LevelDesign
 
 			RebuildPaletteGrid();
 			UpdateStatusLabel();
+		}
+
+		/// <summary> Returns the entry to place for a single click/drag step: a random placeable entry when Random From Palette is on, otherwise the selected entry. </summary>
+		public ObjectPalette.Entry GetEntryToPlace()
+		{
+			if (!palette)
+				return null;
+
+			if (!randomFromPaletteToggle.value)
+				return SelectedEntry;
+
+			var placeableEntries = new List<ObjectPalette.Entry>();
+			foreach (var entry in palette.Entries)
+				if (entry.Prefab)
+					placeableEntries.Add(entry);
+
+			return placeableEntries.Count > 0 ? placeableEntries[Random.Range(0, placeableEntries.Count)] : null;
 		}
 
 		void LoadPersistedSelection()
@@ -172,6 +203,8 @@ namespace InsaneOne.Core.LevelDesign
 		{
 			if (!palette)
 				statusLabel.text = "No palette assigned.";
+			else if (randomFromPaletteToggle.value)
+				statusLabel.text = GetFirstAvailableEntryIndex() >= 0 ? "Placing a random prefab from the palette." : "Palette has no placeable prefabs.";
 			else if (selectedEntryIndex < 0 || selectedEntryIndex >= palette.Entries.Count)
 				statusLabel.text = "Select a prefab from the palette.";
 			else

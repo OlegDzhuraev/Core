@@ -9,6 +9,9 @@ namespace InsaneOne.Core.Architect
 		static readonly Dictionary<Type, object> services = new ();
 		static readonly Dictionary<string, HashSet<Type>> groups = new ();
 
+		/// <summary> Maps an alias type to the canonical type it was registered under, see <see cref="Alias{T,TAlias}"/>. </summary>
+		static readonly Dictionary<Type, Type> aliases = new ();
+
 		public static void Reset()
 		{
 			foreach (var (type, service) in services)
@@ -16,6 +19,7 @@ namespace InsaneOne.Core.Architect
 
 			services.Clear();
 			groups.Clear();
+			aliases.Clear();
 		}
 
 		public static void ResetGroup(string group)
@@ -36,7 +40,25 @@ namespace InsaneOne.Core.Architect
 				disposable.Dispose();
 
 			if (remove)
+			{
 				services.Remove(type);
+				RemoveAliasesOf(type);
+			}
+		}
+
+		static void RemoveAliasesOf(Type type)
+		{
+			List<Type> toRemove = null;
+
+			foreach (var (alias, canonical) in aliases)
+				if (canonical == type)
+					(toRemove ??= new List<Type>()).Add(alias);
+
+			if (toRemove == null)
+				return;
+
+			foreach (var alias in toRemove)
+				aliases.Remove(alias);
 		}
         
 		public static bool Register<T>(T service, string group = "")
@@ -65,6 +87,24 @@ namespace InsaneOne.Core.Architect
 			set.Add(serviceType);
 		}
 
+		/// <summary> Registers an additional type this already-registered service of type <typeparamref name="T"/> can also be resolved by
+		/// (e.g. an interface or base class it implements), so <see cref="Get{T}"/>/<see cref="TryGet{T}"/> will return the same instance
+		/// for both types. Returns false if <typeparamref name="T"/> isn't registered yet, or <typeparamref name="TAlias"/> is already taken. </summary>
+		public static bool Alias<T, TAlias>() where T : TAlias
+		{
+			var type = typeof(T);
+			var aliasType = typeof(TAlias);
+
+			if (!services.ContainsKey(type))
+				return false;
+
+			if (services.ContainsKey(aliasType) || aliases.ContainsKey(aliasType))
+				return false;
+
+			aliases.Add(aliasType, type);
+			return true;
+		}
+
 		public static T Get<T>() => Get<T>(typeof(T));
 
 		static T Get<T>(Type type)
@@ -76,7 +116,12 @@ namespace InsaneOne.Core.Architect
 		}
 
 		public static void Unregister<T>() => Unregister(typeof(T));
-		static void Unregister(Type type) => services.Remove(type);
+
+		static void Unregister(Type type)
+		{
+			services.Remove(type);
+			RemoveAliasesOf(type);
+		}
 
 		/// <summary> When using it, keep in mind the peculiarities of Unity.Object, which may not be null when destroyed,
 		/// and therefore needs to be unregistered when destroyed. </summary>
@@ -104,6 +149,9 @@ namespace InsaneOne.Core.Architect
 		static bool TryGet(Type type, out object result)
 		{
 			result = null;
+
+			if (aliases.TryGetValue(type, out var canonicalType))
+				type = canonicalType;
 
 			if (services.TryGetValue(type, out var value))
 			{

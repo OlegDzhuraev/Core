@@ -11,6 +11,7 @@ namespace InsaneOne.Core.LevelDesign
 	{
 		const string GroupStyleName = "group-box";
 
+		const string MaxSlopeAngleKey = "InsaneOne.ObjectPlacer.MaxSlopeAngle";
 		const string AlignToNormalKey = "InsaneOne.ObjectPlacer.AlignToNormal";
 		const string RandomizeRotationKey = "InsaneOne.ObjectPlacer.RandomizeRotation";
 		const string MaxRotationAngleKey = "InsaneOne.ObjectPlacer.MaxRotationAngle";
@@ -19,6 +20,8 @@ namespace InsaneOne.Core.LevelDesign
 		const string ScaleRangeMaxKey = "InsaneOne.ObjectPlacer.ScaleRangeMax";
 		const string RandomizePositionKey = "InsaneOne.ObjectPlacer.RandomizePosition";
 		const string MaxPositionOffsetKey = "InsaneOne.ObjectPlacer.MaxPositionOffset";
+
+		public float MaxSlopeAngle => maxSlopeAngleField.value;
 
 		public bool AlignToNormal => alignToNormalToggle.value;
 
@@ -30,6 +33,8 @@ namespace InsaneOne.Core.LevelDesign
 
 		public bool RandomizePosition => randomizePositionToggle.value;
 		public float MaxPositionOffset => maxPositionOffsetField.value;
+
+		readonly Slider maxSlopeAngleField;
 
 		readonly Toggle alignToNormalToggle;
 
@@ -48,6 +53,10 @@ namespace InsaneOne.Core.LevelDesign
 			AddToClassList(GroupStyleName);
 
 			Add(new Label("Placement Settings") { style = { unityFontStyleAndWeight = FontStyle.Bold } });
+
+			maxSlopeAngleField = new Slider("Max Surface Slope", 0f, 90f) { value = SessionState.GetFloat(MaxSlopeAngleKey, 90f), showInputField = true };
+			maxSlopeAngleField.RegisterValueChangedCallback(ev => SessionState.SetFloat(MaxSlopeAngleKey, ev.newValue));
+			Add(maxSlopeAngleField);
 
 			alignToNormalToggle = new Toggle("Align Up To Surface Normal") { value = SessionState.GetBool(AlignToNormalKey, false) };
 			alignToNormalToggle.RegisterValueChangedCallback(ev => SessionState.SetBool(AlignToNormalKey, ev.newValue));

@@ -1,10 +1,10 @@
 using System;
-using System.Linq;
 using UnityEngine;
 
 namespace InsaneOne.Core.Effects
 {
-	/// <summary> You can use this for flipbook-animations for Ui sprites and 2D games. </summary>
+	/// <summary> You can use this for flipbook-animations for Ui sprites and 2D games. If you don't need a Unity
+	/// component, use <see cref="SheetAnimatorCore"/> directly instead - it has the same animation logic/API. </summary>
 	public abstract class SheetAnimator : MonoBehaviour
 #if PERSEIDS_POOLING
 		, PerseidsPooling.IResettable
@@ -14,101 +14,49 @@ namespace InsaneOne.Core.Effects
 		[SerializeField] bool loopStartAnimation = true;
 		[SerializeField] SpriteAnimationData[] animations = Array.Empty<SpriteAnimationData>();
 
-		public SpriteAnimationData[] Animations => animations;
-		
-		protected Sprite defaultSprite;
-		
-		SpriteAnimationData activeAnimation;
-		int frame;
-		bool loop;
-		
-		float frameTimeLength, frameProgress;
+		public SpriteAnimationData[] Animations => core.Animations;
+
+		protected Sprite defaultSprite
+		{
+			get => core.DefaultSprite;
+			set => core.DefaultSprite = value;
+		}
+
+		Core core;
+
+		protected virtual void Awake() => core = new Core(this, animations, startAnimation, loopStartAnimation);
 
 		void Start() => Init();
 
-		protected virtual void Init()
-		{
-			PlayStartAnimation();
-		}
+		protected virtual void Init() => core.Init();
 
-		void Update()
-		{
-			if (activeAnimation == null)
-				return;
+		void Update() => core.Tick(Time.deltaTime);
 
-			SetSprite(activeAnimation.Frames[frame]);
-			
-			if (frameProgress < frameTimeLength)
-			{
-				frameProgress += Time.deltaTime;
-				return;
-			}
-			
-			frameProgress = 0;
-			frame++;
-			
-			var endAnimation = false;
-			if (frame >= activeAnimation.Frames.Length)
-			{
-				frame = 0;
-				endAnimation = !loop;
-			}
+		public void PlayAnimation(string animationName, bool loopAnimation = false, bool hardSet = false) => core.PlayAnimation(animationName, loopAnimation, hardSet);
 
-			if (endAnimation)
-				activeAnimation = null;
-		}
+		public void PlayStartAnimation() => core.PlayStartAnimation();
 
-		public void PlayAnimation(string animationName, bool loopAnimation = false, bool hardSet = false)
-		{
-			if (activeAnimation != null && activeAnimation.Name == animationName && !hardSet)
-				return;
-			
-			for (var i = 0; i < animations.Length; i++)
-			{
-				var animationData = animations[i];
+		public void SetAnimation(SpriteAnimationData data) => core.SetAnimation(data);
 
-				if (animationData.Name == animationName)
-				{
-					activeAnimation = animationData;
-					frame = 0;
-					frameProgress = 0;
-					loop = loopAnimation;
-					frameTimeLength = 1f / activeAnimation.FramesPerSpeed;
-					break;
-				}
-			}
-		}
-
-		public void PlayStartAnimation()
-		{
-			if (!string.IsNullOrEmpty(startAnimation))
-				PlayAnimation(startAnimation, loopStartAnimation, true);
-		}
-
-		public void SetAnimation(SpriteAnimationData data)
-		{
-			for (var i = 0; i < animations.Length; i++)
-			{
-				if (animations[i].Name == data.Name)
-				{
-					animations[i] = data;
-					break;
-				}
-			}
-
-			animations = animations.Append(data).ToArray();
-		}
-
-		public void Stop()
-		{
-			SetSprite(defaultSprite);
-			loop = false;
-		}
+		public void Stop() => core.Stop();
 
 		protected abstract void SetSprite(Sprite sprite);
-		
+
 #if PERSEIDS_POOLING
 		public void ResetPooled() => Init();
 #endif
+
+		/// <summary> Bridges the MonoBehaviour to the plain <see cref="SheetAnimatorCore"/> logic, forwarding sprite changes to the owner. </summary>
+		sealed class Core : SheetAnimatorCore
+		{
+			readonly SheetAnimator owner;
+
+			public Core(SheetAnimator owner, SpriteAnimationData[] animations, string startAnimation, bool loopStartAnimation)
+				: base(animations, startAnimation, loopStartAnimation) => this.owner = owner;
+
+			public Sprite DefaultSprite { get => defaultSprite; set => defaultSprite = value; }
+
+			protected override void SetSprite(Sprite sprite) => owner.SetSprite(sprite);
+		}
 	}
 }

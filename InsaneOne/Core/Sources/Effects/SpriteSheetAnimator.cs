@@ -10,8 +10,10 @@ namespace InsaneOne.Core.Effects
 		
 		SpriteRenderer spriteRenderer;
 
-		void Awake()
+		protected override void Awake()
 		{
+			base.Awake();
+
 			spriteRenderer = GetComponent<SpriteRenderer>();
 			defaultSprite = spriteRenderer.sprite;
 		}

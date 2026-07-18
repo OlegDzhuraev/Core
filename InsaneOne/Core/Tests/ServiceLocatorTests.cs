@@ -7,7 +7,9 @@ namespace InsaneOne.Core.Tests
 	[TestFixture]
 	public class ServiceLocatorTests
 	{
-		class TestServiceA {}
+		interface ITestService {}
+
+		class TestServiceA : ITestService {}
 		class TestServiceB {}
 
 		[Test]
@@ -114,6 +116,53 @@ namespace InsaneOne.Core.Tests
 
 			Assert.False(isExist);
 			Assert.Null(result);
+		}
+
+		[Test]
+		public void TestAlias()
+		{
+			Prepare();
+			ServiceLocator.Register(new TestServiceA());
+
+			var isAliased = ServiceLocator.Alias<TestServiceA, ITestService>();
+
+			Assert.True(isAliased);
+			Assert.AreSame(ServiceLocator.Get<TestServiceA>(), ServiceLocator.Get<ITestService>());
+		}
+
+		[Test]
+		public void TestAliasWithoutRegisterShouldFail()
+		{
+			Prepare();
+
+			var isAliased = ServiceLocator.Alias<TestServiceA, ITestService>();
+
+			Assert.False(isAliased);
+		}
+
+		[Test]
+		public void TestAliasTakenTwiceShouldFail()
+		{
+			Prepare();
+			ServiceLocator.Register(new TestServiceA());
+
+			ServiceLocator.Alias<TestServiceA, ITestService>();
+			var isAliasedTwice = ServiceLocator.Alias<TestServiceA, ITestService>();
+
+			Assert.False(isAliasedTwice);
+		}
+
+		[Test]
+		public void TestUnregisterRemovesAlias()
+		{
+			Prepare();
+			ServiceLocator.Register(new TestServiceA());
+			ServiceLocator.Alias<TestServiceA, ITestService>();
+
+			ServiceLocator.Unregister<TestServiceA>();
+
+			var isExist = ServiceLocator.TryGet<ITestService>(out _);
+			Assert.False(isExist);
 		}
 
 		[Test]

@@ -5,12 +5,13 @@ using Random = UnityEngine.Random;
 
 namespace InsaneOne.Core.LevelDesign
 {
-	/// <summary> Editor tool to place prefabs from an ObjectPalette onto scene colliders by clicking in the Scene view. </summary>
+	/// <summary> Editor tool to place prefabs from an ObjectPalette onto scene colliders by clicking (or drag-scattering) in the Scene view. </summary>
 	public class ObjectPlacerWindow : EditorWindow
 	{
 		const string StylesPath = "InsaneOne/ToolsStyles";
 		const string GroupStyleName = "group-box";
 		const float RaycastMaxDistance = 1000f;
+		const string PlaceUndoGroupName = "Place Prefabs";
 
 		static readonly Color PreviewSphereReadyColor = new (0.3f, 0.75f, 1f, 0.9f);
 		static readonly Color PreviewSphereNoEntryColor = new (1f, 0.3f, 0.3f, 0.9f);
@@ -18,6 +19,10 @@ namespace InsaneOne.Core.LevelDesign
 		ObjectPlacerGeneralSection generalSection;
 		ObjectPlacerPaletteSection paletteSection;
 		ObjectPlacerPlacementSettingsSection placementSettingsSection;
+
+		bool isDragScattering;
+		Vector3 lastPlacementPoint;
+		int activeUndoGroup = -1;
 
 		[MenuItem("Tools/InsaneOne/Level Design/Object Placer...")]
 		static void Init()
@@ -57,7 +62,6 @@ namespace InsaneOne.Core.LevelDesign
 			if (generalSection == null || !ObjectPlacerToolState.IsActive)
 				return;
 
-			var entry = paletteSection.SelectedEntry;
 			var e = Event.current;
 			var controlId = GUIUtility.GetControlID(FocusType.Passive);
 
@@ -66,10 +70,12 @@ namespace InsaneOne.Core.LevelDesign
 
 			var ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
 			var hasHit = Physics.Raycast(ray, out var hit, RaycastMaxDistance, generalSection.LayerMask);
+			var isSlopeValid = hasHit && Vector3.Angle(hit.normal, Vector3.up) <= placementSettingsSection.MaxSlopeAngle;
+			var canPlaceHere = hasHit && isSlopeValid && paletteSection.CanPlace;
 
 			if (hasHit)
 			{
-				Handles.color = entry != null ? PreviewSphereReadyColor : PreviewSphereNoEntryColor;
+				Handles.color = canPlaceHere ? PreviewSphereReadyColor : PreviewSphereNoEntryColor;
 				var size = HandleUtility.GetHandleSize(hit.point) * 0.15f;
 				Handles.SphereHandleCap(0, hit.point, Quaternion.identity, size, EventType.Repaint);
 			}
@@ -79,15 +85,33 @@ namespace InsaneOne.Core.LevelDesign
 			if (eventType == EventType.MouseDown && e.button == 0 && !e.alt && !e.control && !e.command)
 			{
 				GUIUtility.hotControl = controlId;
+				isDragScattering = generalSection.DragScatter;
 
-				if (hasHit && entry != null)
-					PlacePrefab(entry, hit);
+				BeginUndoGroup();
+
+				if (canPlaceHere)
+				{
+					PlaceEntry(hit);
+					lastPlacementPoint = hit.point;
+				}
+
+				e.Use();
+			}
+			else if (eventType == EventType.MouseDrag && e.button == 0 && GUIUtility.hotControl == controlId)
+			{
+				if (isDragScattering && canPlaceHere && Vector3.Distance(hit.point, lastPlacementPoint) >= generalSection.DragScatterSpacing)
+				{
+					PlaceEntry(hit);
+					lastPlacementPoint = hit.point;
+				}
 
 				e.Use();
 			}
 			else if (eventType == EventType.MouseUp && e.button == 0 && GUIUtility.hotControl == controlId)
 			{
 				GUIUtility.hotControl = 0;
+				isDragScattering = false;
+				EndUndoGroup();
 				e.Use();
 			}
 
@@ -95,8 +119,28 @@ namespace InsaneOne.Core.LevelDesign
 				sceneView.Repaint();
 		}
 
-		void PlacePrefab(ObjectPalette.Entry entry, RaycastHit hit)
+		void BeginUndoGroup()
 		{
+			Undo.IncrementCurrentGroup();
+			Undo.SetCurrentGroupName(PlaceUndoGroupName);
+			activeUndoGroup = Undo.GetCurrentGroup();
+		}
+
+		void EndUndoGroup()
+		{
+			if (activeUndoGroup < 0)
+				return;
+
+			Undo.CollapseUndoOperations(activeUndoGroup);
+			activeUndoGroup = -1;
+		}
+
+		void PlaceEntry(RaycastHit hit)
+		{
+			var entry = paletteSection.GetEntryToPlace();
+			if (entry == null || !entry.Prefab)
+				return;
+
 			var instance = (GameObject)PrefabUtility.InstantiatePrefab(entry.Prefab);
 			Undo.RegisterCreatedObjectUndo(instance, "Place Prefab");
 
