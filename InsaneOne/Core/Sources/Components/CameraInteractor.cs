@@ -41,7 +41,7 @@ namespace InsaneOne.Core.Components
 			if (hit.collider && hit.collider.TryGetComponent<Interactable>(out var interactable))
 			{
 				if (focusedInteractable != interactable)
-					Focused?.Invoke(focusedInteractable);
+					Focused?.Invoke(interactable);
 
 				focusedInteractable = interactable;
 			}

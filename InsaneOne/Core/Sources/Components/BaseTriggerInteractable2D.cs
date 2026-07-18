@@ -3,6 +3,7 @@ using UnityEngine;
 namespace InsaneOne.Core.Components
 {
 	/// <summary> 2D Trigger for interactable component. This is base abstract class to make your own ones from. </summary>
+	[RequireComponent(typeof(Interactable))]
 	public abstract class BaseTriggerInteractable2D : MonoBehaviour
 	{
 		/// <summary> Is trigger-affector target in trigger. Set this in OnTriggerEnter/Exit. </summary>

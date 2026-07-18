@@ -17,6 +17,9 @@ namespace InsaneOne.Core
 		{
 			foreach (var tr in toDetach)
 			{
+				if (!tr)
+					continue;
+
 				if (!allowOtherParent && tr.parent != transform)
 					continue;
 

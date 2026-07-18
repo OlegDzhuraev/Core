@@ -1,136 +1,147 @@
 using System;
 using UnityEngine;
 
-namespace Features.Effects
+namespace InsaneOne.Core.Components
 {
-    /// <summary> Will move this object by a given waypoints list. This can be most useful for simple animation effects, etc. Like basic tween.</summary>
-    [DisallowMultipleComponent]
-    public sealed class MoveByWaypoints : MonoBehaviour
-    {
-        public event Action StartedMove;
-        public event Action<Transform> ReachedWaypoint;
+	/// <summary> Will move this object by a given waypoints list. This can be most useful for simple animation effects, etc. Like basic tween.</summary>
+	[DisallowMultipleComponent]
+	public sealed class MoveByWaypoints : MonoBehaviour
+	{
+		public event Action StartedMove;
+		public event Action<Transform> ReachedWaypoint;
 
-        public float Speed
-        {
-            get => speed;
-            set => speed = value;
-        }
-        
-        /// <summary> Can be used to randomize movement a bit. Path will be offseted with this value. </summary>
-        public Vector3 Offset { get; set; }
-   
-        [SerializeField] Transform[] waypoints = Array.Empty<Transform>();
-        [SerializeField] bool activateOnStart = true;
-        [SerializeField] float speed = 3f;
-        [Tooltip("Minimum distance to the current waypoint to start move to the next waypoint.")]
-        [SerializeField] float minDist = 0.25f;
-        [SerializeField] bool repeat = true;
-        [SerializeField] bool startFromStartPoint;
-        
-        [Header("Rotation")]
-        [SerializeField] bool rotateToNextPoint;
-        [Tooltip("In angle/sec.")]
-        [SerializeField] float rotationSpeed = 360f;
+		public float Speed
+		{
+			get => speed;
+			set => speed = value;
+		}
 
-        [Header("Threading")]
-        [Tooltip("If you want to run some of calculations manually (for multi-thread as example), check this.")]
-        bool calculateManually;
+		public bool CalculateManually
+		{
+			get => calculateManually;
+			set => calculateManually = value;
+		}
 
-        float sqrMinDist;
+		/// <summary> Can be used to randomize movement a bit. Path will be offseted with this value. </summary>
+		public Vector3 Offset { get; set; }
 
-        int currentWaypointId;
+		[SerializeField] Transform[] waypoints = Array.Empty<Transform>();
+		[SerializeField] bool activateOnStart = true;
+		[SerializeField] float speed = 3f;
+		[Tooltip("Minimum distance to the current waypoint to start move to the next waypoint.")]
+		[SerializeField] float minDist = 0.25f;
+		[SerializeField] bool repeat = true;
+		[SerializeField] bool startFromStartPoint;
 
-        float sqrDistance;
-        bool isReachedWaypoint;
+		[Header("Rotation")]
+		[SerializeField] bool rotateToNextPoint;
+		[Tooltip("In angle/sec.")]
+		[SerializeField] float rotationSpeed = 360f;
 
-        void Start()
-        {
-            sqrMinDist = (float) Math.Pow(minDist, 2);
-            
-            if (!activateOnStart)
-            {
-                enabled = false;
-                return;
-            }
-            
-            Restart();
-        }
+		[Header("Threading")]
+		[Tooltip("If you want to run some of calculations manually (for multi-thread as example), check this.")]
+		[SerializeField] bool calculateManually;
 
-        void Update()
-        {
-            if (!calculateManually)
-                CalculateDistance();
-            
-            if (isReachedWaypoint)
-                ReachWaypoint();
-            else
-                Move();
-        }
+		float sqrMinDist;
 
-        void ReachWaypoint()
-        {
-            currentWaypointId++;
-                
-            if (currentWaypointId >= waypoints.Length)
-            {
-                if (repeat)
-                    currentWaypointId = 0;
-                else
-                    enabled = false;
-            }
-            
-            ReachedWaypoint?.Invoke(waypoints[currentWaypointId]);
-        }
-        
-        void Move()
-        {
-            var smoothDt = Time.smoothDeltaTime;
-            var pos = transform.position;
-            var nextPos = waypoints[currentWaypointId].position + Offset;
+		int currentWaypointId;
 
-            transform.position = Vector3.MoveTowards(pos, nextPos, smoothDt * speed);
+		float sqrDistance;
+		bool isReachedWaypoint;
 
-            if (rotateToNextPoint)
-            {
-                var direction = (nextPos - pos).normalized;
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(direction), smoothDt * rotationSpeed);
-            }
-        }
+		void Start()
+		{
+			sqrMinDist = (float) Math.Pow(minDist, 2);
 
-        public void CalculateDistance()
-        {
-            sqrDistance = (transform.position - (waypoints[currentWaypointId].position + Offset)).sqrMagnitude;
+			if (!activateOnStart)
+			{
+				enabled = false;
+				return;
+			}
 
-            isReachedWaypoint = sqrDistance <= sqrMinDist;
-        }
+			Restart();
+		}
 
-        public void SetWaypoints(Transform[] newWaypoints, bool restart = false)
-        {
-            waypoints = newWaypoints;
+		void Update()
+		{
+			if (!calculateManually)
+				CalculateDistance();
 
-            if (restart)
-                Restart();
-        }
-        
-        public void Restart()
-        {
-            currentWaypointId = 0;
+			if (isReachedWaypoint)
+				ReachWaypoint();
+			else
+				Move();
+		}
 
-            if (startFromStartPoint)
-                transform.position = waypoints[currentWaypointId].position;
-            
-            StartedMove?.Invoke();
-        }
+		void ReachWaypoint()
+		{
+			currentWaypointId++;
 
-        void OnDrawGizmosSelected()
-        {
-            if (waypoints.Length == 0)
-                return;
-            
-            for (int i = 1; i < waypoints.Length; i++)
-                Gizmos.DrawLine(waypoints[i].position, waypoints[i - 1].position);
-            
-            Gizmos.DrawLine(waypoints[0].position, waypoints[^1].position);
-        }
-    }
+			if (currentWaypointId >= waypoints.Length)
+			{
+				if (repeat)
+				{
+					currentWaypointId = 0;
+				}
+				else
+				{
+					enabled = false;
+					return;
+				}
+			}
+
+			ReachedWaypoint?.Invoke(waypoints[currentWaypointId]);
+		}
+
+		void Move()
+		{
+			var smoothDt = Time.smoothDeltaTime;
+			var pos = transform.position;
+			var nextPos = waypoints[currentWaypointId].position + Offset;
+
+			transform.position = Vector3.MoveTowards(pos, nextPos, smoothDt * speed);
+
+			if (rotateToNextPoint)
+			{
+				var direction = (nextPos - pos).normalized;
+				transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(direction), smoothDt * rotationSpeed);
+			}
+		}
+
+		public void CalculateDistance()
+		{
+			sqrDistance = (transform.position - (waypoints[currentWaypointId].position + Offset)).sqrMagnitude;
+
+			isReachedWaypoint = sqrDistance <= sqrMinDist;
+		}
+
+		public void SetWaypoints(Transform[] newWaypoints, bool restart = false)
+		{
+			waypoints = newWaypoints;
+
+			if (restart)
+				Restart();
+		}
+
+		public void Restart()
+		{
+			currentWaypointId = 0;
+
+			if (startFromStartPoint)
+				transform.position = waypoints[currentWaypointId].position;
+
+			StartedMove?.Invoke();
+		}
+
+		void OnDrawGizmosSelected()
+		{
+			if (waypoints.Length == 0)
+				return;
+
+			for (var i = 1; i < waypoints.Length; i++)
+				Gizmos.DrawLine(waypoints[i].position, waypoints[i - 1].position);
+
+			Gizmos.DrawLine(waypoints[0].position, waypoints[^1].position);
+		}
+	}
 }
