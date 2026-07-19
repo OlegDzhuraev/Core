@@ -47,7 +47,13 @@ namespace InsaneOne.Core.LevelDesign
 			RegisterCallback<DetachFromPanelEvent>(_ => ObjectPlacerToolState.ActiveChanged -= OnStateActiveChanged);
 		}
 
-		void OnToggleChanged(ChangeEvent<bool> ev) => ObjectPlacerToolState.SetActive(ev.newValue);
+		void OnToggleChanged(ChangeEvent<bool> ev)
+		{
+			ObjectPlacerToolState.SetActive(ev.newValue);
+
+			if (ev.newValue)
+				ObjectPlacerWindow.Open();
+		}
 		void OnStateActiveChanged(bool value) => SetValueWithoutNotify(value);
 	}
 }

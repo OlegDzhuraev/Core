@@ -44,7 +44,10 @@ namespace InsaneOne.Core.LevelDesign
 		int activeUndoGroup = -1;
 
 		[MenuItem("Tools/InsaneOne/Level Design/Object Placer...")]
-		static void Init()
+		static void Init() => Open();
+
+		/// <summary> Opens the Object Placer window, or focuses it if it's already open. </summary>
+		public static void Open()
 		{
 			var window = (ObjectPlacerWindow)GetWindow(typeof(ObjectPlacerWindow), false, "Object Placer", true);
 			window.Show();
