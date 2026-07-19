@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+using System;
 using UnityEditor;
 using UnityEditor.Overlays;
 using UnityEditor.Toolbars;
@@ -21,13 +22,13 @@ using UnityEngine.UIElements;
 
 namespace InsaneOne.Core.LevelDesign
 {
-	/// <summary> Scene view toolbar overlay hosting the Object Placer activation toggle, same as Unity's own Scene view overlays. </summary>
+	/// <summary> Scene view toolbar overlay hosting the Object Placer activation toggle and mode dropdown, same as Unity's own Scene view overlays. </summary>
 	[Overlay(typeof(SceneView), Id, "Object Placer", defaultDisplay: true)]
 	public class ObjectPlacerToolOverlay : ToolbarOverlay
 	{
 		public const string Id = "InsaneOne.LevelDesign.ObjectPlacerOverlay";
 
-		ObjectPlacerToolOverlay() : base(ObjectPlacerActiveToggle.Id) { }
+		ObjectPlacerToolOverlay() : base(ObjectPlacerActiveToggle.Id, ObjectPlacerModeDropdown.Id) { }
 	}
 
 	[EditorToolbarElement(Id, typeof(SceneView))]
@@ -43,8 +44,8 @@ namespace InsaneOne.Core.LevelDesign
 			SetValueWithoutNotify(ObjectPlacerToolState.IsActive);
 			this.RegisterValueChangedCallback(OnToggleChanged);
 
-			ObjectPlacerToolState.ActiveChanged += OnStateActiveChanged;
-			RegisterCallback<DetachFromPanelEvent>(_ => ObjectPlacerToolState.ActiveChanged -= OnStateActiveChanged);
+			RegisterCallback<AttachToPanelEvent>(OnAttachedToPanel);
+			RegisterCallback<DetachFromPanelEvent>(OnDetachedFromPanel);
 		}
 
 		void OnToggleChanged(ChangeEvent<bool> ev)
@@ -55,6 +56,56 @@ namespace InsaneOne.Core.LevelDesign
 				ObjectPlacerWindow.Open();
 		}
 
+		void OnAttachedToPanel(AttachToPanelEvent ev)
+		{
+			OnStateActiveChanged(ObjectPlacerToolState.IsActive);
+			ObjectPlacerToolState.ActiveChanged += OnStateActiveChanged;
+		}
+
+		void OnDetachedFromPanel(DetachFromPanelEvent ev) => ObjectPlacerToolState.ActiveChanged -= OnStateActiveChanged;
+
 		void OnStateActiveChanged(bool value) => SetValueWithoutNotify(value);
+	}
+
+	[EditorToolbarElement(Id, typeof(SceneView))]
+	class ObjectPlacerModeDropdown : VisualElement
+	{
+		public const string Id = "InsaneOne.LevelDesign.ObjectPlacerOverlay.ModeDropdown";
+
+		readonly EnumField modeField;
+
+		public ObjectPlacerModeDropdown()
+		{
+			modeField = new EnumField(ObjectPlacerToolState.Mode) { style = { minWidth = 110 } };
+			modeField.tooltip = "Object Placer interaction mode.";
+			Add(modeField);
+
+			SetEnabled(ObjectPlacerToolState.IsActive);
+
+			modeField.RegisterValueChangedCallback(OnModeChanged);
+
+			RegisterCallback<AttachToPanelEvent>(OnAttachedToPanel);
+			RegisterCallback<DetachFromPanelEvent>(OnDetachedFromPanel);
+		}
+
+		void OnModeChanged(ChangeEvent<Enum> ev) => ObjectPlacerToolState.SetMode((ObjectPlacerMode)ev.newValue);
+
+		void OnAttachedToPanel(AttachToPanelEvent ev)
+		{
+			OnStateModeChanged(ObjectPlacerToolState.Mode);
+			OnStateActiveChanged(ObjectPlacerToolState.IsActive);
+
+			ObjectPlacerToolState.ModeChanged += OnStateModeChanged;
+			ObjectPlacerToolState.ActiveChanged += OnStateActiveChanged;
+		}
+
+		void OnDetachedFromPanel(DetachFromPanelEvent ev)
+		{
+			ObjectPlacerToolState.ModeChanged -= OnStateModeChanged;
+			ObjectPlacerToolState.ActiveChanged -= OnStateActiveChanged;
+		}
+
+		void OnStateModeChanged(ObjectPlacerMode mode) => modeField.SetValueWithoutNotify(mode);
+		void OnStateActiveChanged(bool value) => SetEnabled(value);
 	}
 }

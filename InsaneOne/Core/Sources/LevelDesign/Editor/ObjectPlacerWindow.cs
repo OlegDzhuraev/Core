@@ -28,10 +28,12 @@ namespace InsaneOne.Core.LevelDesign
 		const string GroupStyleName = "group-box";
 		const float RaycastMaxDistance = 1000f;
 		const string PlaceUndoGroupName = "Place Prefabs";
+		const string EraseUndoGroupName = "Erase Prefabs";
 
 		const float NormalPreviewLength = 1f;
 
 		static readonly Color PreviewSphereReadyColor = new (0.3f, 0.75f, 1f, 0.9f);
+		static readonly Color PreviewSphereEraseReadyColor = new (1f, 0.6f, 0.1f, 0.9f);
 		static readonly Color PreviewSphereNoEntryColor = new (1f, 0.3f, 0.3f, 0.9f);
 		static readonly Color PositionScatterDiscColor = new (0.3f, 0.75f, 1f, 0.15f);
 
@@ -50,6 +52,7 @@ namespace InsaneOne.Core.LevelDesign
 		public static void Open()
 		{
 			var window = (ObjectPlacerWindow)GetWindow(typeof(ObjectPlacerWindow), false, "Object Placer", true);
+			window.titleContent = new GUIContent("Object Placer", EditorGUIUtility.IconContent("GameObject Icon").image);
 			window.Show();
 		}
 
@@ -94,24 +97,30 @@ namespace InsaneOne.Core.LevelDesign
 			if (e.type == EventType.Layout)
 				HandleUtility.AddDefaultControl(controlId);
 
+			var mode = ObjectPlacerToolState.Mode;
+			var isEraseMode = mode == ObjectPlacerMode.Erase;
+
 			var ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
 			var hasHit = Physics.Raycast(ray, out var hit, RaycastMaxDistance, generalSection.LayerMask);
-			var isSlopeValid = hasHit && Vector3.Angle(hit.normal, Vector3.up) <= placementSettingsSection.MaxSlopeAngle;
-			var canPlaceHere = hasHit && isSlopeValid && paletteSection.CanPlace;
+
+			var (eraseTarget, eraseRegistry) = hasHit && isEraseMode ? FindPlacedRoot(hit.collider.gameObject) : (null, null);
+			var isSlopeValid = hasHit && !isEraseMode && Vector3.Angle(hit.normal, Vector3.up) <= placementSettingsSection.MaxSlopeAngle;
+			var canPlaceHere = hasHit && !isEraseMode && isSlopeValid && paletteSection.CanPlace;
+			var canActHere = isEraseMode ? eraseTarget != null : canPlaceHere;
 
 			if (hasHit)
 			{
-				Handles.color = canPlaceHere ? PreviewSphereReadyColor : PreviewSphereNoEntryColor;
+				Handles.color = canActHere ? (isEraseMode ? PreviewSphereEraseReadyColor : PreviewSphereReadyColor) : PreviewSphereNoEntryColor;
 				var size = HandleUtility.GetHandleSize(hit.point) * 0.15f;
 				Handles.SphereHandleCap(0, hit.point, Quaternion.identity, size, EventType.Repaint);
 
-				if (placementSettingsSection.AlignToNormal)
+				if (!isEraseMode && placementSettingsSection.AlignToNormal)
 				{
 					Handles.color = Color.cyan;
 					Handles.DrawLine(hit.point, hit.point + hit.normal * NormalPreviewLength);
 				}
 
-				if (placementSettingsSection.RandomizePosition)
+				if (!isEraseMode && placementSettingsSection.RandomizePosition)
 				{
 					Handles.color = PositionScatterDiscColor;
 					Handles.DrawSolidDisc(hit.point, hit.normal, placementSettingsSection.MaxPositionOffset);
@@ -123,13 +132,13 @@ namespace InsaneOne.Core.LevelDesign
 			if (eventType == EventType.MouseDown && e.button == 0 && !e.alt && !e.control && !e.command)
 			{
 				GUIUtility.hotControl = controlId;
-				isDragScattering = generalSection.DragScatter;
+				isDragScattering = mode == ObjectPlacerMode.DragScatter || isEraseMode;
 
-				BeginUndoGroup();
+				BeginUndoGroup(isEraseMode);
 
-				if (canPlaceHere)
+				if (canActHere)
 				{
-					PlaceEntry(hit);
+					PerformAction(isEraseMode, hit, eraseTarget, eraseRegistry);
 					lastPlacementPoint = hit.point;
 				}
 
@@ -137,9 +146,9 @@ namespace InsaneOne.Core.LevelDesign
 			}
 			else if (eventType == EventType.MouseDrag && e.button == 0 && GUIUtility.hotControl == controlId)
 			{
-				if (isDragScattering && canPlaceHere && Vector3.Distance(hit.point, lastPlacementPoint) >= generalSection.DragScatterSpacing)
+				if (isDragScattering && canActHere && Vector3.Distance(hit.point, lastPlacementPoint) >= generalSection.DragScatterSpacing)
 				{
-					PlaceEntry(hit);
+					PerformAction(isEraseMode, hit, eraseTarget, eraseRegistry);
 					lastPlacementPoint = hit.point;
 				}
 
@@ -157,10 +166,64 @@ namespace InsaneOne.Core.LevelDesign
 				sceneView.Repaint();
 		}
 
-		void BeginUndoGroup()
+		void PerformAction(bool isEraseMode, RaycastHit hit, GameObject eraseTarget, ObjectPlacerRegistry eraseRegistry)
+		{
+			if (isEraseMode)
+				EraseTarget(eraseTarget, eraseRegistry);
+			else
+				PlaceEntry(hit);
+		}
+
+		static (GameObject root, ObjectPlacerRegistry registry) FindPlacedRoot(GameObject hitObject)
+		{
+			var registries = Object.FindObjectsOfType<ObjectPlacerRegistry>();
+			var current = hitObject.transform;
+
+			while (current)
+			{
+				var candidate = current.gameObject;
+
+				foreach (var registry in registries)
+					if (registry.PlacedObjects.Contains(candidate))
+						return (candidate, registry);
+
+				current = current.parent;
+			}
+
+			return (null, null);
+		}
+
+		static void EraseTarget(GameObject target, ObjectPlacerRegistry registry)
+		{
+			if (!target)
+				return;
+
+			if (registry)
+			{
+				Undo.RecordObject(registry, "Erase Prefab");
+				registry.PlacedObjects.Remove(target);
+			}
+
+			Undo.DestroyObjectImmediate(target);
+		}
+
+		static ObjectPlacerRegistry GetOrCreateRegistry()
+		{
+			var registry = Object.FindObjectOfType<ObjectPlacerRegistry>();
+			if (registry)
+				return registry;
+
+			var go = new GameObject("Object Placer Registry");
+			registry = go.AddComponent<ObjectPlacerRegistry>();
+			Undo.RegisterCreatedObjectUndo(go, "Create Object Placer Registry");
+
+			return registry;
+		}
+
+		void BeginUndoGroup(bool isEraseMode)
 		{
 			Undo.IncrementCurrentGroup();
-			Undo.SetCurrentGroupName(PlaceUndoGroupName);
+			Undo.SetCurrentGroupName(isEraseMode ? EraseUndoGroupName : PlaceUndoGroupName);
 			activeUndoGroup = Undo.GetCurrentGroup();
 		}
 
@@ -181,6 +244,10 @@ namespace InsaneOne.Core.LevelDesign
 
 			var instance = (GameObject)PrefabUtility.InstantiatePrefab(entry.Prefab);
 			Undo.RegisterCreatedObjectUndo(instance, "Place Prefab");
+
+			var registry = GetOrCreateRegistry();
+			Undo.RecordObject(registry, "Place Prefab");
+			registry.PlacedObjects.Add(instance);
 
 			if (generalSection.ParentTransform)
 				instance.transform.SetParent(generalSection.ParentTransform, false);

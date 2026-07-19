@@ -19,18 +19,26 @@ using UnityEditor;
 
 namespace InsaneOne.Core.LevelDesign
 {
-	/// <summary> Shared activation state for the Object Placer tool, kept in sync between the tool window and the Scene view toolbar toggle.
+	/// <summary> Shared activation/mode state for the Object Placer tool, kept in sync between the tool window and the Scene view toolbar controls.
 	/// Backed by SessionState, so it survives domain reloads within the same Editor session. </summary>
 	public static class ObjectPlacerToolState
 	{
 		const string ActiveKey = "InsaneOne.ObjectPlacer.Active";
+		const string ModeKey = "InsaneOne.ObjectPlacer.Mode";
 
 		public static event Action<bool> ActiveChanged;
+		public static event Action<ObjectPlacerMode> ModeChanged;
 
 		public static bool IsActive
 		{
 			get => SessionState.GetBool(ActiveKey, false);
 			private set => SessionState.SetBool(ActiveKey, value);
+		}
+
+		public static ObjectPlacerMode Mode
+		{
+			get => (ObjectPlacerMode)SessionState.GetInt(ModeKey, (int)ObjectPlacerMode.SinglePlacement);
+			private set => SessionState.SetInt(ModeKey, (int)value);
 		}
 
 		public static void SetActive(bool value)
@@ -40,6 +48,15 @@ namespace InsaneOne.Core.LevelDesign
 
 			IsActive = value;
 			ActiveChanged?.Invoke(value);
+		}
+
+		public static void SetMode(ObjectPlacerMode value)
+		{
+			if (Mode == value)
+				return;
+
+			Mode = value;
+			ModeChanged?.Invoke(value);
 		}
 	}
 }
