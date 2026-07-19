@@ -11,6 +11,10 @@ namespace InsaneOne.Core.Effects
 		/// <summary> Set false to disable all camera shakes in game. </summary>
 		public static bool IsGlobalEnabled = true;
 
+		/// <summary> Timers can't work with a zero duration (it leads to NaN in reload percents calculations), so any
+		/// impulse-provided duration is clamped to be at least this small. </summary>
+		const float MinTimerDuration = 0.001f;
+
 		readonly Transform camTransform;
 		readonly Vector3 startPos;
 		
@@ -46,8 +50,8 @@ namespace InsaneOne.Core.Effects
 			
 			impulse = withImpulse;
 			
-			frequencyTimer = new Timer(impulse.GetFrequency(0));
-			shakeTimer = new Timer(impulse.TimeLength);
+			frequencyTimer = new Timer(Mathf.Max(impulse.GetFrequency(0), MinTimerDuration));
+			shakeTimer = new Timer(Mathf.Max(impulse.TimeLength, MinTimerDuration));
 			direction = Vector2.zero;
 			isActive = true;
 
@@ -67,7 +71,7 @@ namespace InsaneOne.Core.Effects
 				if (frequencyTimer.IsReady())
 				{
 					CalculateNewPosition();
-					frequencyTimer.SetFullTime(impulse.GetFrequency(GetProgress()));
+					frequencyTimer.SetFullTime(Mathf.Max(impulse.GetFrequency(GetProgress()), MinTimerDuration));
 					frequencyTimer.Restart();
 					actualPos = camTransform.localPosition;
 				}
