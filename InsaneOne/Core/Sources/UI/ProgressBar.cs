@@ -28,15 +28,21 @@ namespace InsaneOne.Core.UI
 		[SerializeField] TMP_Text titleText;
 		[SerializeField] TMP_Text numberText;
 
+		ProgressBarViewModel subscribedViewModel;
+
 		public override void OnViewModelChanged(ProgressBarViewModel viewModel)
 		{
+			if (subscribedViewModel != null)
+				subscribedViewModel.Changed -= OnChanged;
+
+			subscribedViewModel = viewModel;
 			viewModel.Changed += OnChanged;
 		}
 
 		void OnDestroy()
 		{
-			if (ViewModel != null)
-				ViewModel.Changed -= OnChanged;
+			if (subscribedViewModel != null)
+				subscribedViewModel.Changed -= OnChanged;
 		}
 
 		void OnChanged(float value)
@@ -70,7 +76,7 @@ namespace InsaneOne.Core.UI
 			Value = value;
 			MaxValue = maxValue;
 
-			Progress = Value / MaxValue;
+			Progress = MaxValue != 0 ? Value / MaxValue : 0;
 
 			Changed?.Invoke(Progress);
 			return Progress;

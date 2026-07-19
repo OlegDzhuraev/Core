@@ -22,7 +22,7 @@ using UnityEngine.UI;
 #if DOTWEEN
 using DG.Tweening;
 
-namespace InsaneOne.Core.Ui
+namespace InsaneOne.Core.UI
 {
     /// <summary> Ui screen fader. Requires DOTween to work. If you've DOTween installed, add DOTWEEN compile symbol
     /// to the Project Settings and check AsmDef InsaneOne.Core referenced to the DoTween. </summary>
@@ -43,7 +43,11 @@ namespace InsaneOne.Core.Ui
             }
         }
 
-        void OnDestroy() => ServiceLocator.Unregister<Fader>();
+        void OnDestroy()
+        {
+            if (instance == this)
+                ServiceLocator.Unregister<Fader>();
+        }
 
         public void Fade(float duration = 0.5f)
         {
@@ -107,7 +111,7 @@ namespace InsaneOne.Core.Ui
     }
 }
 #else 
-namespace InsaneOne.Core.Ui
+namespace InsaneOne.Core.UI
 {
     /// <summary> Mock for prefab. Install DOTween to use it. </summary>
     public sealed class Fader : MonoBehaviour { }

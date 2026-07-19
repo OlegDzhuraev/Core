@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+using System;
 using UnityEngine;
 
 namespace InsaneOne.Core.UI
@@ -39,6 +40,12 @@ namespace InsaneOne.Core.UI
 
         void Update()
         {
+            if (ViewModel == null)
+            {
+                enabled = false;
+                throw new NullReferenceException($"[{nameof(FloatingPanel)}] ViewModel is not set on object [{name}]! Disabling Update to stop the crash loop.");
+            }
+
             if (!ViewModel.IsTargetExist)
                 return;
 

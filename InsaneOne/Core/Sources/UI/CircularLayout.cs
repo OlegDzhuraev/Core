@@ -17,7 +17,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace InsaneOne.Core.Ui
+namespace InsaneOne.Core.UI
 {
     public sealed class CircularLayout : MonoBehaviour
     {

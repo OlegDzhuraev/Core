@@ -30,13 +30,7 @@ namespace InsaneOne.Core.UI
 		
 		protected override void OnAwake() => iconImage.sprite = icon;
 
-		void ISelectionReceiver.SetState(bool isSelected)
-		{
-			if (isSelected)
-				hoverPreviousIcon = iconImage.sprite = selectedIcon;
-			else 
-				iconImage.sprite = icon;
-		}
+		void ISelectionReceiver.SetState(bool isSelected) => hoverPreviousIcon = iconImage.sprite = isSelected ? selectedIcon : icon;
 
 		public void OnPointerEnter(PointerEventData eventData)
 		{

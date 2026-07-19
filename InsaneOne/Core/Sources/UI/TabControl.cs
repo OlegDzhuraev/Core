@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using InsaneOne.Core.Utility;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -25,7 +26,7 @@ namespace InsaneOne.Core.UI
 	public sealed class TabControl : Element<object>
 	{
 		public event Action<GameObject> TabWasShown;
-		
+
 		[SerializeField] List<GameObject> tabs = new ();
 		[SerializeField] List<Button> buttons = new ();
 
@@ -33,6 +34,8 @@ namespace InsaneOne.Core.UI
 
 		void Start()
 		{
+			Debug.Assert(tabs.Count == buttons.Count, $"[{nameof(TabControl)}] tabs and buttons count mismatch on [{name}]!");
+
 			for (var i = 0; i < buttons.Count; i++)
 			{
 				var cachedIndex = i;
@@ -45,11 +48,17 @@ namespace InsaneOne.Core.UI
 
 		public void ShowTab(int number)
 		{
+			if (number < 0 || number >= tabs.Count)
+			{
+				CoreUnityLogger.I.Log($"[{nameof(TabControl)}] Invalid tab index {number} on [{name}]!", LogLevel.Warning);
+				return;
+			}
+
 			tabs[shownTab].SetActive(false);
 			tabs[number].SetActive(true);
 
 			shownTab = number;
-			
+
 			TabWasShown?.Invoke(tabs[shownTab]);
 		}
 	}

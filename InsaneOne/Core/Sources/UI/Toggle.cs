@@ -8,14 +8,14 @@ namespace InsaneOne.Core.UI
 	{
 		[SerializeField] UnityEngine.UI.Toggle toggle;
 
-		void OnUnityToggleChanced(bool isOn) => ViewModel.SetValue(isOn);
+		void OnUnityToggleChanged(bool isOn) => ViewModel.SetValue(isOn);
 
 		public override void OnViewModelChanged(ToggleViewModel viewModel)
 		{
 			toggle.onValueChanged.RemoveAllListeners();
 			toggle.isOn = viewModel.IsOn;
 
-			toggle.onValueChanged.AddListener(OnUnityToggleChanced);
+			toggle.onValueChanged.AddListener(OnUnityToggleChanged);
 		}
 	}
 

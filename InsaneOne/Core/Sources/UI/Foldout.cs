@@ -33,6 +33,12 @@ namespace InsaneOne.Core.UI
 		protected override void OnAwake()
 		{
 			toggle.ViewModelChanged += OnToggleViewModelChanged;
+
+			if (toggle.ViewModel != null)
+			{
+				OnToggleViewModelChanged(toggle.ViewModel);
+				SetState(toggle.ViewModel.IsOn);
+			}
 		}
 
 		void OnDestroy()

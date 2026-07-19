@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+using System;
 using TMPro;
 using UnityEngine;
 
@@ -46,6 +47,12 @@ namespace InsaneOne.Core.UI
 
 		void Update()
 		{
+			if (ViewModel == null)
+			{
+				enabled = false;
+				throw new NullReferenceException($"[{nameof(Hint)}] ViewModel is not set on object [{name}]! Disabling Update to stop the crash loop.");
+			}
+
 			if (ViewModel.ShowOnCursor)
 				rectTransform.anchoredPosition = Input.mousePosition;
 		}
