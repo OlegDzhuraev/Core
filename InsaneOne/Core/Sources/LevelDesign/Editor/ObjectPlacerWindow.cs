@@ -39,7 +39,7 @@ namespace InsaneOne.Core.LevelDesign
 
 		ObjectPlacerGeneralSection generalSection;
 		ObjectPlacerPaletteSection paletteSection;
-		ObjectPlacerPlacementSettingsSection placementSettingsSection;
+		ObjectPlacerBrushSection brushSection;
 
 		bool isDragScattering;
 		Vector3 lastPlacementPoint;
@@ -75,13 +75,13 @@ namespace InsaneOne.Core.LevelDesign
 
 			generalSection = new ObjectPlacerGeneralSection();
 			paletteSection = new ObjectPlacerPaletteSection();
-			placementSettingsSection = new ObjectPlacerPlacementSettingsSection();
+			brushSection = new ObjectPlacerBrushSection();
 
 			var scrollView = new ScrollView(ScrollViewMode.Vertical);
 			scrollView.Add(infoBox);
 			scrollView.Add(generalSection);
 			scrollView.Add(paletteSection);
-			scrollView.Add(placementSettingsSection);
+			scrollView.Add(brushSection);
 
 			root.Add(scrollView);
 		}
@@ -99,12 +99,13 @@ namespace InsaneOne.Core.LevelDesign
 
 			var mode = ObjectPlacerToolState.Mode;
 			var isEraseMode = mode == ObjectPlacerMode.Erase;
+			var brush = brushSection.SelectedBrush;
 
 			var ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
 			var hasHit = Physics.Raycast(ray, out var hit, RaycastMaxDistance, generalSection.LayerMask);
 
 			var (eraseTarget, eraseRegistry) = hasHit && isEraseMode ? FindPlacedRoot(hit.collider.gameObject) : (null, null);
-			var isSlopeValid = hasHit && !isEraseMode && Vector3.Angle(hit.normal, Vector3.up) <= placementSettingsSection.MaxSlopeAngle;
+			var isSlopeValid = hasHit && !isEraseMode && Vector3.Angle(hit.normal, Vector3.up) <= brush.MaxSlopeAngle;
 			var canPlaceHere = hasHit && !isEraseMode && isSlopeValid && paletteSection.CanPlace;
 			var canActHere = isEraseMode ? eraseTarget != null : canPlaceHere;
 
@@ -114,16 +115,16 @@ namespace InsaneOne.Core.LevelDesign
 				var size = HandleUtility.GetHandleSize(hit.point) * 0.15f;
 				Handles.SphereHandleCap(0, hit.point, Quaternion.identity, size, EventType.Repaint);
 
-				if (!isEraseMode && placementSettingsSection.AlignToNormal)
+				if (!isEraseMode && brush.AlignToNormal)
 				{
 					Handles.color = Color.cyan;
 					Handles.DrawLine(hit.point, hit.point + hit.normal * NormalPreviewLength);
 				}
 
-				if (!isEraseMode && placementSettingsSection.RandomizePosition)
+				if (!isEraseMode && brush.RandomizePosition)
 				{
 					Handles.color = PositionScatterDiscColor;
-					Handles.DrawSolidDisc(hit.point, hit.normal, placementSettingsSection.MaxPositionOffset);
+					Handles.DrawSolidDisc(hit.point, hit.normal, brush.MaxPositionOffset);
 				}
 			}
 
@@ -242,6 +243,8 @@ namespace InsaneOne.Core.LevelDesign
 			if (entry == null || !entry.Prefab)
 				return;
 
+			var brush = brushSection.SelectedBrush;
+
 			var instance = (GameObject)PrefabUtility.InstantiatePrefab(entry.Prefab);
 			Undo.RegisterCreatedObjectUndo(instance, "Place Prefab");
 
@@ -253,20 +256,20 @@ namespace InsaneOne.Core.LevelDesign
 				instance.transform.SetParent(generalSection.ParentTransform, false);
 
 			var position = hit.point;
-			if (placementSettingsSection.RandomizePosition)
-				position += GetRandomTangentOffset(hit.normal, placementSettingsSection.MaxPositionOffset);
-			if (placementSettingsSection.SnapToGrid)
-				position = SnapToGrid(position, placementSettingsSection.GridSize);
+			if (brush.RandomizePosition)
+				position += GetRandomTangentOffset(hit.normal, brush.MaxPositionOffset);
+			if (brush.SnapToGrid)
+				position = SnapToGrid(position, brush.GridSize);
 
-			var rotation = placementSettingsSection.AlignToNormal ? Quaternion.FromToRotation(Vector3.up, hit.normal) : Quaternion.identity;
-			if (placementSettingsSection.RandomizeRotation)
-				rotation *= Quaternion.Euler(0f, Random.Range(-placementSettingsSection.MaxRotationAngle, placementSettingsSection.MaxRotationAngle), 0f);
+			var rotation = brush.AlignToNormal ? Quaternion.FromToRotation(Vector3.up, hit.normal) : Quaternion.identity;
+			if (brush.RandomizeRotation)
+				rotation *= Quaternion.Euler(0f, Random.Range(-brush.MaxRotationAngle, brush.MaxRotationAngle), 0f);
 
 			instance.transform.SetPositionAndRotation(position, rotation);
 
-			if (placementSettingsSection.RandomizeScale)
+			if (brush.RandomizeScale)
 			{
-				var range = placementSettingsSection.ScaleRange;
+				var range = brush.ScaleRange;
 				var multiplier = Random.Range(range.x, range.y);
 				instance.transform.localScale = entry.Prefab.transform.localScale * multiplier;
 			}

@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 276908e63179f49b8a83643defd2b389, type: 3}
+  m_Name: ExampleBrush
+  m_EditorClassIdentifier: 
+  MaxSlopeAngle: 90
+  AlignToNormal: 0
+  RandomizeRotation: 0
+  MaxRotationAngle: 45
+  RandomizeScale: 0
+  ScaleRange: {x: 0.8, y: 1.2}
+  RandomizePosition: 0
+  MaxPositionOffset: 0.5
+  SnapToGrid: 0
+  GridSize: 1
