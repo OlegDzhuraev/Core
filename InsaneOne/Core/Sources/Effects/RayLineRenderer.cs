@@ -45,7 +45,7 @@ namespace InsaneOne.Core.Effects
 		public virtual void Setup(float maxDistance, LayerMask layerMask, bool autoRedraw = false)
 		{
 			this.maxDistance = maxDistance;
-			this.autoRedraw = false;
+			this.autoRedraw = autoRedraw;
 			this.layerMask = layerMask;
 
 			Redraw();

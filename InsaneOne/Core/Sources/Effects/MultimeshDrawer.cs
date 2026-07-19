@@ -19,7 +19,9 @@ namespace InsaneOne.Core.Effects
 
 		readonly List<DrawerRenderPart> drawerParts = new ();
 
-		static readonly int _colorId = Shader.PropertyToID("_Color");
+		static readonly int colorId = Shader.PropertyToID("_Color");
+
+		MaterialPropertyBlock propertyBlock;
 
 		void Awake()
 		{
@@ -34,10 +36,16 @@ namespace InsaneOne.Core.Effects
 
 		void Update()
 		{
-			if (UseCustomColor)
+			if (!UseCustomColor)
+				return;
+
+			propertyBlock ??= new MaterialPropertyBlock();
+
+			foreach (var part in drawerParts)
 			{
-				foreach (var part in drawerParts)
-					part.MeshRenderer.material.SetColor(_colorId, Color);
+				part.MeshRenderer.GetPropertyBlock(propertyBlock);
+				propertyBlock.SetColor(colorId, Color);
+				part.MeshRenderer.SetPropertyBlock(propertyBlock);
 			}
 		}
 
@@ -80,7 +88,7 @@ namespace InsaneOne.Core.Effects
 					var emptyPartGo = new GameObject(templatePart.name);
 					emptyPartGo.transform.SetParent(attachTo);
 					CloneLocalTransform(templatePartChild, emptyPartGo.transform);
-					AddPartRecursive(templatePartChild, emptyPartGo.transform);
+					AddPartRecursive(templatePartChild, emptyPartGo.transform, materialUsageMode);
 					continue;
 				}
 
@@ -108,7 +116,7 @@ namespace InsaneOne.Core.Effects
 				}
 
 				CloneLocalTransform(templatePartChild, meshPartGo.transform);
-				AddPartRecursive(templatePartChild, meshPartGo.transform);
+				AddPartRecursive(templatePartChild, meshPartGo.transform, materialUsageMode);
 
 				drawerParts.Add(part);
 			}
