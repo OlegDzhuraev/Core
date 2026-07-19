@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using InsaneOne.Core.Utility;
 using UnityEditor;
 using UnityEditor.PackageManager;
@@ -39,8 +38,7 @@ namespace InsaneOne.Core.Development
         [MenuItem("Tools/InsaneOne/Setup Project Tool...")]
         public static void ShowWindow()
         {
-            var window = GetWindow<SetupProjectToolWindow>(false, "Setup Project Tool", true);
-            window.Init();
+            GetWindow<SetupProjectToolWindow>(false, "Setup Project Tool", true);
         }
 
         [MenuItem("Tools/InsaneOne/Update")]
@@ -49,14 +47,16 @@ namespace InsaneOne.Core.Development
             AddPackage($"https://github.com/{CoreData.RepoName}/Core.git");
         }
 
-        void Init()
+        // OnEnable (not just a manually-called Init) so styles are recreated after every domain reload -
+        // Unity keeps the window instance across recompiles, but GUIStyle fields don't survive it.
+        void OnEnable()
         {
             minSize = new Vector2(532, 532);
             maxSize = new Vector2(798, 798);
             richText = new GUIStyle(EditorStyles.label) { richText = true, wordWrap = true };
             blockStyle = new GUIStyle(EditorStyles.helpBox);
             bigBlockStyle = EditorHelpers.GetBigBlockStyle();
-            
+
             partitionHeader = new GUIStyle(EditorStyles.boldLabel)
             {
                 fontSize = 16, richText = true, alignment = TextAnchor.UpperCenter,
@@ -108,8 +108,12 @@ namespace InsaneOne.Core.Development
 
         void DrawModulesInstall()
         {
-            var coreData = CoreData.Load();
-            
+            if (!CoreData.TryLoad(out var coreData))
+            {
+                EditorGUILayout.HelpBox($"No {nameof(CoreData)} asset found! Run \"Tools/InsaneOne/Initial setup...\" first.", MessageType.Warning);
+                return;
+            }
+
             var prevGUIEnabled = GUI.enabled;
             GUI.enabled = installRequest == null;
             
@@ -155,7 +159,7 @@ namespace InsaneOne.Core.Development
             GUILayout.EndVertical();
         }
 
-        void OpenUrl(string url) => Process.Start(url);
+        void OpenUrl(string url) => Application.OpenURL(url);
         
         void DrawChecklist()
         {

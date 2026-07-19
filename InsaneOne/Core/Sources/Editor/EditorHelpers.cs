@@ -31,10 +31,12 @@ namespace InsaneOne.Core.Development
 			for (var i = 0; i < assets.Length; i++)
 			{
 				var asset = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(assets[i]), type) as T;
-				target.Add(asset);
+
+				if (asset)
+					target.Add(asset);
 			}
 		}
-		
+
 		/// <summary> Loads all assets, found in project by search filter, in List of type T. </summary>
 		public static void LoadAssetsToList<T>(IList<T> target) where T : Object
 		{
@@ -46,7 +48,9 @@ namespace InsaneOne.Core.Development
 			for (var i = 0; i < assets.Length; i++)
 			{
 				var asset = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(assets[i]), type) as T;
-				target.Add(asset);
+
+				if (asset)
+					target.Add(asset);
 			}
 		}
 		

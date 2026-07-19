@@ -48,8 +48,16 @@ namespace InsaneOne.Core.Development
 
         static void CreateAnyFromTemplate(string templateName)
         {
+            var templateContent = GetTemplateContent(templateName);
+
+            if (templateContent == null)
+            {
+                EditorUtility.DisplayDialog("InsaneOne", $"Template '{templateName}' not found!", "Close");
+                return;
+            }
+
             var fileName = $"{GetSelectionPath()}/{templateName}.cs";
-            CreateAndRenameAsset(fileName, GetIcon(), name => CreateTemplateInternal(GetTemplateContent(templateName), name));
+            CreateAndRenameAsset(fileName, GetIcon(), name => CreateTemplateInternal(templateContent, name));
         }
 
         static string CreateFromTemplate(string template, string fileName) 
@@ -144,7 +152,7 @@ namespace InsaneOne.Core.Development
 
             var template = templates.Find(t => t && t.name == templateName);
 
-            return template ? template.text : "No template found";
+            return template ? template.text : null;
         }
 
         sealed class CustomEndNameAction : EndNameEditAction 
