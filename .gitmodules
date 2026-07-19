@@ -1,0 +1,3 @@
+[submodule "InsaneOne/Core/Sources/Architect/Injection"]
+	path = InsaneOne/Core/Sources/Architect/Injection
+	url = https://github.com/OlegDzhuraev/InsaneOne.Core.Injection.git
