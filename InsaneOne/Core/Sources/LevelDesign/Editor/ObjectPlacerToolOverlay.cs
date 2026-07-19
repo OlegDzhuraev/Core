@@ -37,7 +37,7 @@ namespace InsaneOne.Core.LevelDesign
 
 		public ObjectPlacerActiveToggle()
 		{
-			text = "Object Placer";
+			text = "Enable";
 			tooltip = "Toggles the Object Placer tool. While active, clicking a scene collider places the selected palette prefab.";
 
 			SetValueWithoutNotify(ObjectPlacerToolState.IsActive);
@@ -54,6 +54,7 @@ namespace InsaneOne.Core.LevelDesign
 			if (ev.newValue)
 				ObjectPlacerWindow.Open();
 		}
+
 		void OnStateActiveChanged(bool value) => SetValueWithoutNotify(value);
 	}
 }
