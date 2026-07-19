@@ -13,11 +13,23 @@ namespace InsaneOne.Core
 		[SerializeField, Min(0)] int startTeam;
 
 		int team = -1;
+		bool initialTeamAnnounced;
 
-		void Awake() => ChangeTeam(startTeam);
+		void Awake() => team = startTeam;
+
+		/// <summary> Announces the starting team once all Awake calls in the scene are done, so listeners that
+		/// subscribe to ChangedTeam in their own Awake don't miss it (Unity guarantees every Awake runs before any
+		/// Start). Skipped if ChangeTeam was already called - and so already announced - between Awake and Start. </summary>
+		void Start()
+		{
+			if (!initialTeamAnnounced)
+				ChangedTeam?.Invoke(team);
+		}
 
 		public void ChangeTeam(int newTeam)
 		{
+			initialTeamAnnounced = true;
+
 			if (newTeam == team)
 				return;
 

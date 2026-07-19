@@ -37,9 +37,7 @@ namespace InsaneOne.Core
 		/// <summary> Gets TeamsSettings asset from the CoreData asset. </summary>
 		public static TeamsSettings Get()
 		{
-			var coreData = CoreData.Load();
-
-			if (coreData && coreData.TeamsSettings)
+			if (CoreData.TryLoad(out var coreData) && coreData.TeamsSettings)
 				return coreData.TeamsSettings;
 
 			CoreUnityLogger.I.Log("No CoreData found! TeamsSettings not work correctly!", LogLevel.Error);

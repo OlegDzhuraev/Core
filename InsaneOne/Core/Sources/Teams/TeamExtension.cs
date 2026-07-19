@@ -22,7 +22,11 @@ namespace InsaneOne.Core
 			teamBehaviour.ChangeTeam(newTeam);
 		}
 
-		public static bool IsInSameTeam(this GameObject go, GameObject other) => go.GetTeam() == other.GetTeam();
+		public static bool IsInSameTeam(this GameObject go, GameObject other)
+		{
+			var team = go.GetTeam();
+			return team >= 0 && team == other.GetTeam();
+		}
 
 		/// <summary> Returns true if this object in team, which is enemy to other object. To use this method, you need to create asset TeamsSettings.
 		/// You can set up teams relations in this asset. </summary>

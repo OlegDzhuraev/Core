@@ -43,6 +43,16 @@ namespace InsaneOne.Core.Tests
 		}
 
 		[Test]
+		public void TestNoTeamIsNotSameTeamAsOtherNoTeam()
+		{
+			Prepare(out _, out _, out var goNoTeam);
+			var otherNoTeam = new GameObject("Test Object No Team 2");
+
+			var isSameTeam = goNoTeam.IsInSameTeam(otherNoTeam);
+			Assert.False(isSameTeam);
+		}
+
+		[Test]
 		public void TestIsEnemies()
 		{
 			Prepare(out var goTeamA, out var goTeamB, out _);
