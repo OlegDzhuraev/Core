@@ -1,77 +1,77 @@
-﻿using InsaneOne.Core.UI;
+using InsaneOne.Core.UI;
 using InsaneOne.Core.Utility;
 using TMPro;
 using UnityEngine;
 
 namespace InsaneOne.Core.Locales
 {
-    [DisallowMultipleComponent]
-    public sealed class LocalizedTMPText : Element<LocalizedTextViewModel>, ILocalized
-    {
-        [Header("Localized text settings")]
-        [SerializeField, Localized] string localizationId;
-        [SerializeField] bool addUiTextIfNotFound = true;
-        [SerializeField] bool initializeOnStart = true;
+	[DisallowMultipleComponent]
+	public sealed class LocalizedTMPText : Element<LocalizedTextViewModel>, ILocalized
+	{
+		[Header("Localized text settings")]
+		[SerializeField, Localized] string localizationId;
+		[SerializeField] bool addUiTextIfNotFound = true;
+		[SerializeField] bool initializeOnStart = true;
 
-        TMP_Text text;
+		TMP_Text text;
 
-        protected override void OnAwake()
-        {
-            if (!SelfObject.TryGetComponent(out text) && addUiTextIfNotFound)
-                text = SelfObject.AddComponent<TextMeshProUGUI>();
-        }
+		protected override void OnAwake()
+		{
+			if (!SelfObject.TryGetComponent(out text) && addUiTextIfNotFound)
+				text = SelfObject.AddComponent<TextMeshProUGUI>();
+		}
 
-        void Start()
-        {
-            if (ViewModel is { AutoReload: true } || initializeOnStart && ViewModel == null)
-                ReloadLocalization();
-        }
+		void Start()
+		{
+			if (ViewModel is { AutoReload: true } || initializeOnStart && ViewModel == null)
+				ReloadLocalization();
+		}
 
-        public void ReloadLocalization()
-        {
-            if (string.IsNullOrWhiteSpace(localizationId) && gameObject.activeSelf)
-            {
-                CoreUnityLogger.I.Log($"Empty localization id on text object [ {name} ]!", LogLevel.Warning);
-                return;
-            }
+		public void ReloadLocalization()
+		{
+			if (string.IsNullOrWhiteSpace(localizationId) && gameObject.activeSelf)
+			{
+				CoreUnityLogger.I.Log($"Empty localization id on text object [ {name} ]!", LogLevel.Warning);
+				return;
+			}
 
-            if (ViewModel == null)
-                SetViewModel(new LocalizedTextViewModel(localizationId));
+			if (ViewModel == null)
+				SetViewModel(new LocalizedTextViewModel(localizationId));
 
-            if (!Localization.IsLoaded)
-            {
-                CoreUnityLogger.I.Log($"No localization is loaded, can't apply localization on text object [ {name} ]!", LogLevel.Error);
-                return;
-            }
-            
-            if (text == null && !SelfObject.TryGetComponent(out text))
-            {
-                CoreUnityLogger.I.Log($"No localization TMP text on object [ {name} ]", LogLevel.Error);
-                return;
-            }
+			if (!Localization.IsLoaded)
+			{
+				CoreUnityLogger.I.Log($"No localization is loaded, can't apply localization on text object [ {name} ]!", LogLevel.Error);
+				return;
+			}
 
-            text.text = ViewModel!.LocalizedText;
-            text.parseCtrlCharacters = true;
-        }
+			if (text == null && !SelfObject.TryGetComponent(out text))
+			{
+				CoreUnityLogger.I.Log($"No localization TMP text on object [ {name} ]", LogLevel.Error);
+				return;
+			}
 
-        public override void OnViewModelChanged(LocalizedTextViewModel viewModel)
-        {
-            if (viewModel.AutoReload)
-                ReloadLocalization();
-        }
-    }
+			text.text = ViewModel!.LocalizedText;
+			text.parseCtrlCharacters = true;
+		}
 
-    public class LocalizedTextViewModel
-    {
-        public string LocalizedText => LocaleId.Localize();
+		public override void OnViewModelChanged(LocalizedTextViewModel viewModel)
+		{
+			if (viewModel.AutoReload)
+				ReloadLocalization();
+		}
+	}
 
-        public readonly string LocaleId;
-        public readonly bool AutoReload;
+	public class LocalizedTextViewModel
+	{
+		public string LocalizedText => LocaleId.Localize();
 
-        public LocalizedTextViewModel(string localeId, bool autoReload = false)
-        {
-            LocaleId = localeId;
-            AutoReload = autoReload;
-        }
-    }
+		public readonly string LocaleId;
+		public readonly bool AutoReload;
+
+		public LocalizedTextViewModel(string localeId, bool autoReload = false)
+		{
+			LocaleId = localeId;
+			AutoReload = autoReload;
+		}
+	}
 }

@@ -1,12 +1,16 @@
+using System.Text.RegularExpressions;
+
 namespace InsaneOne.Core.Locales
 {
 	/// <summary> Allows to replace special symbols in string with your text. </summary>
 	public sealed class LocalizationReplacer
 	{
+		static readonly Regex LocalizedIdRegex = new (@"#LOC_([\w.-]+)", RegexOptions.Compiled);
+
 		public string Result { get; private set; }
 		public string Preprocess { get; set; }
 		public string Postprocess { get; set; }
-		
+
 		readonly string replacementSymbol;
 		int changeId;
 
@@ -33,16 +37,20 @@ namespace InsaneOne.Core.Locales
 			Result = Result.Replace(key, $"{Preprocess}{replaceTo}{Postprocess}");
 		}
 		
-		/// <summary> Allows to replace occurrences of #LOC_someLocalizationId with other localization with same id. </summary>
+		/// <summary> Allows to replace occurrences of #LOC_someLocalizationId with other localization with same id.
+		/// Localization ids here are expected to only contain letters, digits, '.', '_' or '-'. </summary>
 		public void ReplaceLocalizedStrings()
 		{
 			const string symbol = "#LOC_";
 
 			if (!Result.Contains(symbol))
 				return;
-			
-			foreach (var (id, text) in Localization.CachedTexts)
-				Result = Result.Replace($"{symbol}{id}", $"{Preprocess}{text}{Postprocess}");
+
+			Result = LocalizedIdRegex.Replace(Result, match =>
+			{
+				var id = match.Groups[1].Value;
+				return Localization.CachedTexts.TryGetValue(id, out var text) ? $"{Preprocess}{text}{Postprocess}" : match.Value;
+			});
 		}
 
 		public void ResetChangeId() => changeId = 0;

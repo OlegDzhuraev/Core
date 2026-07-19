@@ -5,6 +5,9 @@ using System.Linq;
 using System.Text;
 using InsaneOne.Core.Utility;
 using UnityEngine;
+#if UNITY_ANDROID && !UNITY_EDITOR
+using UnityEngine.Networking;
+#endif
 using ILogger = InsaneOne.Core.Utility.ILogger;
 
 namespace InsaneOne.Core.Locales
@@ -13,11 +16,12 @@ namespace InsaneOne.Core.Locales
 	public static class Localization
 	{
 		const char SplitSymbol = ';';
+		const string DefaultLanguage = "English";
 		static readonly Encoding TextEncoding = Encoding.UTF8;
 
 		public static event Action WasInitialized;
 
-		public static string Language { get; private set; } = "English";
+		public static string Language { get; private set; } = DefaultLanguage;
 		public static List<string> Languages = new ();
 		public static bool IsLoaded { get; private set; }
 		public static bool IsLanguageSetAtLeastOnce { get; private set; }
@@ -44,12 +48,9 @@ namespace InsaneOne.Core.Locales
 
 			var path = Path.Combine(Application.streamingAssetsPath, fileName);
 
-			if (!File.Exists(path))
-				throw new Exception("Localization file not found at Streaming Assets folder!");
-
 			CachedTexts.Clear();
 
-			loadedLocalizationTexts = File.ReadAllLines(path, TextEncoding);
+			loadedLocalizationTexts = ReadAllLines(path);
 			var languages = LanguagesRow.Split(SplitSymbol, StringSplitOptions.RemoveEmptyEntries);
 
 			Languages = languages.TakeLast(languages.Length - 1).ToList();
@@ -68,24 +69,32 @@ namespace InsaneOne.Core.Locales
 			Language = lang;
 
 			var columnId = 1;
+			var isLanguageFound = false;
 
 			for (var i = 0; i < Languages.Count; i++)
 				if (Languages[i] == lang)
 				{
 					columnId = i + 1; // + 1 because Languages list doesn't contain first column
+					isLanguageFound = true;
 					break;
 				}
+
+			if (!isLanguageFound)
+				logger.Log($"Language '{lang}' was not found in the loaded localization file! Falling back to the first language column.", LogLevel.Warning);
 
 			for (int i = 1; i < loadedLocalizationTexts.Length; i++)
 			{
 				var str = loadedLocalizationTexts[i];
-				
-				if (str is "" or "\n")
+
+				if (str == "")
 					continue;
-				
+
 				var elements = str.Split(SplitSymbol, StringSplitOptions.RemoveEmptyEntries);
 
 				if (elements.Length is 0 || string.IsNullOrWhiteSpace(elements[0]))
+					continue;
+
+				if (elements.Length < 2) // row has no translations at all, not even for the fallback language
 					continue;
 
 				var translatedWord = elements.Length - 1 >= columnId ? elements[columnId] : elements[1]; // fallback to first language
@@ -107,9 +116,11 @@ namespace InsaneOne.Core.Locales
 
 		public static string GetLangName(int id) => Languages[GetSafeId(id)];
 
+		/// <summary> Reloads localization on all currently loaded (scene) objects implementing <see cref="ILocalized"/>,
+		/// including inactive ones. Unlike Resources.FindObjectsOfTypeAll, this doesn't touch assets/prefabs sitting in memory. </summary>
 		public static void ReloadLocalization()
 		{
-			var localizedTexts = GetAllObjectsOfType<MonoBehaviour>().OfType<ILocalized>();
+			var localizedTexts = UnityEngine.Object.FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None).OfType<ILocalized>();
 			foreach (var locText in localizedTexts)
 				locText.ReloadLocalization();
 		}
@@ -132,9 +143,32 @@ namespace InsaneOne.Core.Locales
 			CachedTexts.Clear();
 			IsLoaded = false;
 			IsLanguageSetAtLeastOnce = false;
+			Language = DefaultLanguage;
 		}
-		
-		/// <summary> Finds all objects of the desired type on the scene. It also returns objects from Resources. </summary>
-		static T[] GetAllObjectsOfType<T>() => Resources.FindObjectsOfTypeAll(typeof(T)) as T[];
+
+#if UNITY_ANDROID && !UNITY_EDITOR
+		/// <summary> On Android, Streaming Assets are packed inside the compressed APK/AAB, so plain System.IO calls
+		/// can't read them there - UnityWebRequest has to be used instead. </summary>
+		static string[] ReadAllLines(string path)
+		{
+			using var request = UnityWebRequest.Get(path);
+			request.SendWebRequest();
+
+			while (!request.isDone) { }
+
+			if (request.result != UnityWebRequest.Result.Success)
+				throw new Exception($"Localization file not found at Streaming Assets folder! ({request.error})");
+
+			return request.downloadHandler.text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+		}
+#else
+		static string[] ReadAllLines(string path)
+		{
+			if (!File.Exists(path))
+				throw new Exception("Localization file not found at Streaming Assets folder!");
+
+			return File.ReadAllLines(path, TextEncoding);
+		}
+#endif
 	}
 }
