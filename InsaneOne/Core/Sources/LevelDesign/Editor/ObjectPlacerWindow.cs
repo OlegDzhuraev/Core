@@ -61,6 +61,7 @@ namespace InsaneOne.Core.LevelDesign
 			var style = Resources.Load(StylesPath) as StyleSheet;
 			var root = rootVisualElement;
 			root.styleSheets.Add(style);
+			root.AddToClassList("core-init-root");
 
 			var infoBox = new VisualElement();
 			infoBox.AddToClassList(GroupStyleName);

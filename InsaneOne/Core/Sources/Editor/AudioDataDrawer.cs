@@ -13,15 +13,22 @@ namespace InsaneOne.Core
 		public override VisualElement CreatePropertyGUI(SerializedProperty property)
 		{
 			var style = Resources.Load(StylesPath) as StyleSheet;
-			var box = new Foldout { text = property.displayName, tooltip = property.tooltip, value = true };
+			var box = new VisualElement();
+			var header = new Label(property.displayName) { tooltip = property.tooltip, style = { unityFontStyleAndWeight = FontStyle.Bold } };
 			var noClipsLabel = new Label("No clips are set!") { style = { color = Color.yellow } };
 
 			box.styleSheets.Add(style);
-			box.AddToClassList("audio-bg");
+			box.AddToClassList("group-box");
 
+			box.Add(header);
 			box.Add(noClipsLabel);
 			var (clipsProp, clipsField) = AddPropField(property, "clipVariations");
 			clipsField.RegisterValueChangeCallback(evt => OnClipsFieldChanged(evt, noClipsLabel));
+
+			// Unity's array/list PropertyField ships with a built-in negative left margin, meant to compensate for
+			// the indent a real Foldout's content would add. Since this box isn't a Foldout, nothing offsets it,
+			// so the field sticks out past the left edge unless we counteract that margin here.
+			clipsField.style.marginLeft = 15;
 			AddPropField(property, "pitchRandom");
 			AddPropField(property, "volume");
 			AddPropField(property, "loop");

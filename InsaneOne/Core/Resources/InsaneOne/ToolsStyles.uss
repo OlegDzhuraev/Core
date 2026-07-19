@@ -2,16 +2,9 @@
     background-color: rgba(52, 52, 52, 1);
     border-radius: 4px;
     padding: 6px;
-    margin: 4px;
+    margin: 2px 0;
     border-color: rgba(30, 30, 30, 1);
     border-width: 1px;
-}
-
-.audio-bg
-{
-    background-color: rgba(0, 0, 0, 0.1);
-    border-radius: 4px;
-    padding: 6px;
 }
 
 .core-init-root

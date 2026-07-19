@@ -133,6 +133,10 @@ namespace InsaneOne.Core
 			return Play(layer, audioData.GetRandomClip(), position, audioData.Volume, audioData.PitchRandom, audioData.Loop);
 		}
 
+		/// <summary> Plays sound with parameters, specified in the AudioData stored inside the passed AudioDataAsset. </summary>
+		/// <returns>AudioSource, chosen to play. You can handle its changes manually by your code (stop after N seconds, for example, etc.). </returns>
+		public static AudioSource Play(int layer, AudioDataAsset audioDataAsset, Vector3 position = default) => Play(layer, audioDataAsset.Data, position);
+
 		public static bool TryGetFreeSource(int layer, out AudioSource audioSource)
 		{
 			audioSource = default;

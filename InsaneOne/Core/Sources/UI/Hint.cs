@@ -25,6 +25,7 @@ namespace InsaneOne.Core.UI
 	{
 		[SerializeField] Transform canvasTransform;
 		[SerializeField] TMP_Text nameText;
+		[SerializeField] AudioData data;
 
 		RectTransform rectTransform;
 
