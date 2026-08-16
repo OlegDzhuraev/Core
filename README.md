@@ -5,32 +5,32 @@
 </p>
 
 # Core
-My tools and extensions for Unity Engine, which I'm use in all my projects to speedup development. It allows to reduce amount of code — by implementing frequently used functionality. Mainly there stored tools, which is not enough big or good to move them in their own repos.
+My tools and extensions for Unity Engine, which I use in all my projects to speed up development. It allows reducing the amount of code by implementing frequently used functionality. Mainly, it stores tools which are not big or good enough to be moved into their own repos.
 
-This repo was exposed to public only just because I want to import it easily with Package Manager, but if you're interested, feel free to use it.
+This repo was made public only because I wanted to import it easily with Package Manager, but if you're interested, feel free to use it.
 
-List of the main included features you can read below. 
+You can find the list of main included features below.
 
 ## Tools
-Tools can be found in the top menu, the button named **Tools**.
+Tools can be found in the top menu, under the button named **Tools**.
 
 ### Setup Project Tool
-Tool allows to atuo-generate project folders structure and quckly tune most frequently needed for me Editor and Project settings.
+This tool allows you to auto-generate the project folder structure and quickly tune the Editor and Project settings I need most frequently.
 
 ## Level Design Tools
-These tools also can be found in the top menu in **Tools** menu item.
+These tools can also be found in the top menu, under the **Tools** menu item.
 
 ### Transform Randomize
-Allows to randomize rotation, scale and position of the scene-selected transforms.
+Allows you to randomize the rotation, scale and position of the transforms selected in the scene.
 
 ### Object Placer
-Places prefabs from an assigned palette onto scene colliders by clicking in the Scene view, with support for physics layer filtering, aligning to the surface normal, and randomizing position, rotation and scale. Can be toggled on/off from the tool window or from its own Scene view overlay toggle.
+Places prefabs from an assigned palette onto scene colliders by clicking in the Scene view, with support for physics layer filtering, aligning to the surface normal, and randomizing position, rotation and scale. It can be toggled on/off from the tool window or from its own Scene view overlay toggle.
 
 ## Extensions
 Contains some extensions for Transform, Color, Vectors, Random and other components. Some examples below.
 
 ### Random extensions
-Get random element from a list or array:
+Get a random element from a list or array:
 ```cs
 List<T> someList = new List<T>();
 
@@ -46,7 +46,7 @@ Vector3 vec = RandomExtensions.GetRandomizedVector3(-5f, 5f);
 ```
 
 ### Physics extensions
-You can quickly find objects of specific type T in sphere:
+You can quickly find objects of a specific type T within a sphere:
 ```cs
 PhysicsExtensions.GetObjectsOfTypeInSphere<T>(pos, radius);
 
@@ -55,7 +55,7 @@ PhysicsExtensions.GetObjectsOfTypeIn2DCircle<T>(pos, radius);
 ```
 
 ## Audio
-Allows to play audio directly from code without setting up AudioSources in prefabs.
+Allows you to play audio directly from code without setting up AudioSources in prefabs.
 
 Full initialization and usage example:
 ```cs
@@ -82,8 +82,8 @@ public class TestAudio : MonoBehaviour
       
     var data2DSound = new AudioGroupData() { Is3D = false };
 
-    // Setting up some different audio layers, both for 3d and 2d sounds. Audio layers is useful to limiting specific type sounds amount,
-    // also audio layer stores audio settings, for example Min/Max distance or Audio Mixer Group (see code for more info).
+    // Setting up some different audio layers, both for 3d and 2d sounds. Audio layers are useful for limiting the amount of a specific sound type,
+    // audio layers also store audio settings, for example Min/Max distance or Audio Mixer Group (see code for more info).
     Audio.AddLayer(AudioLayer.Interaction, data3DSound, 8);
     Audio.AddLayer(AudioLayer.Ambience, data3DSound, 3);
     Audio.AddLayer(AudioLayer.UI, data2DSound, 2);
@@ -91,13 +91,13 @@ public class TestAudio : MonoBehaviour
 
   void Update()
   {
-    // Playing 3D audio (Interaction audio layer was setup as 3d earlier) in specified layer with 50% volume and 10% pitch randomization at transform position.
+    // Playing 3D audio (Interaction audio layer was set up as 3d earlier) in the specified layer with 50% volume and 10% pitch randomization at transform position.
     if (Input.GetMouseButtonDown(0))
       Audio.Play(AudioLayer.Interaction, clip, transform.position, 0.5f, 0.1f);
   }
 }
 
-// Used just to make more readable code
+// Just used to make the code more readable
 public static class AudioLayer
 {
   public const int Ambience = 10;
@@ -106,14 +106,14 @@ public static class AudioLayer
 }
 ```
 ### AudioData
-Extension for AudioClip. Allows to setup more sound settings in the inspector:
+Extension for AudioClip. Allows you to set up more sound settings in the inspector:
 - Sound variations
 - Volume
 - Pitch random
 - Loop toggle
 
-Can be used with Audio system, described above.
-Main idea is to move sound setup from the prefab AudioSource settings to ScriptableObject or your own scripts. 
+Can be used with the Audio system described above.
+The main idea is to move sound setup from the prefab's AudioSource settings to a ScriptableObject or your own scripts.
 
 ```cs
 [SerializeField] AudioData data;
@@ -123,7 +123,7 @@ Audio.Play(AudioLayer.Interaction, data, transform.position);
 ```
 
 ### SoundMixer
-Allows to mix several AudioSources, driven by some mix paramter. For example, changing sound by Engine RPM change.
+Allows you to mix several AudioSources, driven by some mix parameter. For example, changing the sound based on the engine's RPM.
 
 ```cs
 using InsaneOne.Core;
@@ -135,13 +135,13 @@ public class TestSoundMix : MonoBehaviour
   
   void Start()
   {
-      // setup audio system before below code runs (see prev example), if you want to use this system
+      // set up the audio system before the code below runs (see the previous example), if you want to use this system
 
-      // get audio from the Audio system of previous example. You can use AudioSources directly, if you dont need this system
+      // get audio from the Audio system of the previous example. You can use AudioSources directly, if you don't need this system
       Audio.TryGetFreeSource(AudioLayer.Interaction, out var sourceA);
       Audio.TryGetFreeSource(AudioLayer.Interaction, out var sourceB);
 
-      // initialization of the sound mixer (you can pass any audio sources amount)
+      // initialization of the sound mixer (you can pass any number of audio sources)
       soundMixer = new SoundMixer(sourceA, sourceB);
   }
 
@@ -154,49 +154,49 @@ public class TestSoundMix : MonoBehaviour
     if (Input.GetKeyDown(KeyCode.Alpha2)) 
         soundMixer.UpdateMix(Random.Range(0f, 1f));
 
-    // you also can tween your value and pass it to the UpdateMix method
+    // you can also tween your value and pass it to the UpdateMix method
   }
 }
 ```
 
 ## Templates
-In the Project Manager window, in context menu now exist a new partition **InsaneOne/Templates**, which includes some ready code file templates, which are frequently used by me in gamedev. Possible, will be removed in future or reworked to smth better, actually not very useful.
+In the Project window, the context menu now has a new **InsaneOne/Templates** section, which includes some ready-made code file templates that I frequently use in game dev. This might be removed in the future or reworked into something better — honestly, not very useful as is.
 
 ## UI
-I've added some new elements and templates for UI, which is missing in Unity default package. Now it still very simple, but I want to improve it in the future.
+I've added some new elements and templates for UI that are missing from Unity's default package. It's still very simple for now, but I want to improve it in the future.
 
-- **Element** — base abstract component with show/hide functionality, WasShown/WasHidden events, with support of ViewModel. You can use it in code to implement your own UI elements.
-- **FloatingPanel** — allows to create floating in a 3d world (following some object) UI-panel with some info.
+- **Element** — base abstract component with show/hide functionality, WasShown/WasHidden events, with support for ViewModel. You can use it in code to implement your own UI elements.
+- **FloatingPanel** — allows you to create a UI panel floating in the 3d world (following some object) with some info.
 - **TabControl** — classic tab control element.
-- **PopupWindow** — allows to create a popup window with any title, text and Apply/Cancel buttons with apply callback.
-- **Fader** — commonly used in a game projects. Fades screen alpha into some color. Requires DOTween.
-- **Hint** — shows non-interactable pop-up with info text near cursor or some other element.
-- **ProgressBar** — component to automate usage of filled Image component.
-- **CircularLayout** — allows to automatically place elements on circle with specified radius. Alternative to **Horizontal/VerticalLayout**.
+- **PopupWindow** — allows you to create a popup window with any title, text and Apply/Cancel buttons with an apply callback.
+- **Fader** — commonly used in game projects. Fades the screen alpha into some color. Requires DOTween.
+- **Hint** — shows a non-interactable pop-up with info text near the cursor or some other element.
+- **ProgressBar** — component to automate the usage of a filled Image component.
+- **CircularLayout** — allows you to automatically place elements on a circle with a specified radius. Alternative to **Horizontal/VerticalLayout**.
 
 ## Localization
-Repo contains localization extension, which allows to read CSV-based localization and translate ingame texts for selected language.
+The repo contains a localization extension, which allows you to read CSV-based localization and translate in-game texts for the selected language.
 
 ```cs
 // firstly, you need to run this in some game initialization code:
 Localization.Initialize();
 
-// use SetLanguage to change game lang:
+// use SetLanguage to change the game's language:
 Localization.SetLanguage("English"); // id of the language
 
 // Get any localized text:
 var text = Localization.GetText("localeString");
 ```
 
-Also, there exist useful component for localization without code — **LocalizedTMPText**. Add it to your text object and write localeId in its text field.
+Also, there is a useful component for localization without code — **LocalizedTMPText**. Add it to your text object and write localeId in its text field.
 
-Localization uses **StreamingAssets** to contain a localization file — to allow modify it without game rebuild or allow modding of localization for players.
+Localization uses **StreamingAssets** to store the localization file — this allows you to modify it without rebuilding the game, or to allow players to mod the localization.
 
 ## Architect
-Some code architect ready-made things. Probably not the best ones :)
+Some ready-made architecture-related code. Probably not the best ones :)
 
 ### Context
-Context class allows you to semi-automatically provide some specific context data-class to any of your components.
+The Context class allows you to semi-automatically provide a specific context data class to any of your components.
 
 Initialization:
 ```cs
@@ -204,14 +204,14 @@ class GameBootstrap : MonoBehaviour
 {
   void Awake()
   {
-    var context = new YourContext(); // YourContext - it can be any your class with data, which should be shared
+    var context = new YourContext(); // YourContext can be any class of yours holding data that should be shared
     // setup here your context class with required data
-    Context<YourContext>.Initialize(context); // will initialize all objects on scene, which have components, deriven from the ContextBehaviour<YourContext> by injecting your context
+    Context<YourContext>.Initialize(context); // will initialize all objects in the scene that have components derived from ContextBehaviour<YourContext>, by injecting your context
   }
 }
 ```
 
-In order to provide context to a new spawned objects, use ContextSpawner.Spawn() instead of GameObject.Instantiate():
+In order to provide context to newly spawned objects, use ContextSpawner.Spawn() instead of GameObject.Instantiate():
 ```cs
 ContextSpawner.Spawn<YourContext>(prefab, new Vector3(15, 0, 25)); // you can pass position, rotation and parent like in the original GameObject.Instantiate
 // ContextSpawner.Spawn<T1, T2>(...), <T1, T2, T3>(...) etc. are also available, if the prefab needs several context types at once
@@ -237,12 +237,12 @@ class YourClass : MonoBehaviour, IContext<YourContextA>, IContext<YourContextB> 
 
   public void OnContextReload(YourContextB contextB)
   {
-   // do smth
+   // do something
   }
 
   void Start()
   {
-    Debug.Log(cachedContextA.SomeVariable); // if you're cached context in OnContextReload, you can access it in Start method too
+    Debug.Log(cachedContextA.SomeVariable); // if you cached the context in OnContextReload, you can access it in the Start method too
   }
 }
 
@@ -255,7 +255,7 @@ var context = Context<YourContext>.Get(); // returns null if not initialized yet
 
 **Note:** You need to initialize Context in **Awake** before any other components. Use **ScriptExecutionOrder** for this.
 
-Additional info: The **Context** class is implemented in this way to reduce the number of required actions on the developer's part. An alternative would be some kind of initialization of ContextBehaviour via Awake method of this abstract class, but I found it uneffective to override this method in your own classes every time.
+Additional info: The **Context** class is implemented in this way to reduce the number of required actions on the developer's part. An alternative would be some kind of initialization of ContextBehaviour via the Awake method of this abstract class, but I found it ineffective to override this method in your own classes every time.
 
 ### ServiceLocator
 Alternative to the Singleton.
@@ -271,18 +271,18 @@ var someClass = ServiceLocator.Get<SomeClass>();
 ```
 
 ## Components
-This library contains some built-in components. You can check it in the Sources/Components folder.
+This library contains some built-in components. You can check them in the Sources/Components folder.
 
-In this partition can be found info about some of these components.
+Info about some of these components can be found in this section.
 
 ### Teams
-A lot of games have teams for game players and NPCs. There is implementation for this functionality.
+A lot of games have teams for players and NPCs. There is an implementation of this functionality here.
 
-Currently, team represented by **int** value.
+Currently, a team is represented by an **int** value.
 
 **How to use:**
 
-First of all, there is extension for Unity's GameObjects to make work with teams easier. But to enable them, you need to add scripting define symbol `INSANE_TEAMS_EXTENSION` into the **Player Settings**.
+First of all, there is an extension for Unity's GameObjects to make working with teams easier. But to enable it, you need to add the scripting define symbol `INSANE_TEAMS_EXTENSION` to the **Player Settings**.
 After it's done, you can use this example code:
 
 ```cs
@@ -293,25 +293,25 @@ using InsaneOne.Core;
 
 void Start()
 {
-  gameObject.SetTeam(0); // set this object team
-  enemy.SetTeam(1); // set different team to the enemy object
+  gameObject.SetTeam(0); // set this object's team
+  enemy.SetTeam(1); // set a different team to the enemy object
 }
 
 void Update()
 {
-  var myTeam = gameObject.GetTeam(); // get team of this object
-  var enemyTeam = enemy.GetTeam(); // get Enemy object team
+  var myTeam = gameObject.GetTeam(); // get the team of this object
+  var enemyTeam = enemy.GetTeam(); // get the enemy object's team
 
   if (myTeam != enemyTeam)
-    DoAttack(enemy); // proceed some action if teams are different
+    DoAttack(enemy); // take some action if teams are different
 }
 ```
 
-Actually, this code works with custom **TeamBehaviour** component — adds it to any teamed objects, and stores actual object team in this component.
+Actually, this code relies on the custom **TeamBehaviour** component — add it to any teamed object, and it will store that object's actual team.
 
-You can also create TeamsSettings asset, and setup, which teams will be enemies to others. To create it, click **RMB** in **Project Window**, and in the context menu select **InsaneOne** -> **TeamsSettings**.
+You can also create a TeamsSettings asset and set up which teams will be enemies to others. To create it, click **RMB** in the **Project Window**, and in the context menu select **InsaneOne** -> **TeamsSettings**.
 
-After creation, drag'n'drop it to the field **Teams Settings** of the **CoreData** asset (which is created automatically).
+After creation, drag and drop it into the **Teams Settings** field of the **CoreData** asset (which is created automatically).
 
 To use your teams settings:
 
@@ -320,7 +320,7 @@ var isEnemies = gameObject.IsTeamEnemyTo(otherGameObject); // API can change
 ```
 
 ## Dependency Injection
-There are some tools to implement basic dependency injection. All dependencies will be injected in fields of the same type as dependency (or interface) and with `[Inject]` attribute in the dependency-receiver classes.
+There are some tools to implement basic dependency injection. All dependencies will be injected into fields of the same type as the dependency (or interface) that carry the `[Inject]` attribute in the dependency-receiver classes.
 
 ```cs
 var service = new SomeService(); // this is an example dependency
@@ -349,8 +349,8 @@ class SomeTarget()
 ## Utility
 
 ### Pause Utility
-Allows to pause game and use multiple pause source objects. 
-So, for example, two different objects wants to pause game. Next call of unpause will actually **not** unpause game until **both** affector objects call it. 
+Allows you to pause the game and use multiple pause source objects.
+So, for example, two different objects want to pause the game — the next call to unpause will actually **not** unpause the game until **both** affector objects call it.
 
 ```cs
 using InsaneOne.Core.Utility;
@@ -370,18 +370,18 @@ class SomePauserObject : MonoBehaviour, IPauseSource
 ```
 
 ### Timer
-Deltatime-based timer to speed up any timer-based features creation.
+Delta-time-based timer to speed up the creation of any timer-based features.
 ```cs
 Timer timer;
 
 void Start() 
 {
-  timer = new Timer(5f); // creating 5 secodns timer.
+  timer = new Timer(5f); // creating a 5 second timer.
 }
 
 void Update() 
 {
-  timer.DoTick(Time.deltaTime); // iterating timer in the update (for example, you can do it only with condition, to imitate some pause)
+  timer.DoTick(Time.deltaTime); // updating the timer every frame (for example, you can do this only under some condition, to imitate a pause)
   
   if (timer.IsReady())
   {
@@ -391,17 +391,17 @@ void Update()
 ```
 
 ### DelayedDestruction
-Allows to destroy a GameObject with attached component with the time delay.
+Allows you to destroy a GameObject with the attached component after a time delay.
 ```cs
 gameObject.DelayedDestroy(3f);
 ```
 
 ### MainCamera
-Most of the projects use only one camera, which can be received by calling `Camera.main`. But in the old Unity versions it is not cached and can cause performance issues. This utility helps to solve this problem by caching the Main Camera. 
+Most projects use only one camera, which can be retrieved by calling `Camera.main`. But in older Unity versions it is not cached and can cause performance issues. This utility helps solve this problem by caching the Main Camera.
 
 ```cs
 var cam = MainCamera.Cached;
 ```
 
 ## Shaders
-This repo contains some PBR shaders, mainly to allow load textures from one mask (Metal-Roughness-AO, etc).
+This repo contains some PBR shaders, mainly to allow loading textures from a single mask (Metal-Roughness-AO, etc).
