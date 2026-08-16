@@ -111,20 +111,22 @@ namespace InsaneOne.Core.LevelDesign
 
 			if (hasHit)
 			{
+				var previewPoint = !isEraseMode && brush.SnapToGrid ? SnapToGrid(hit.point, brush.GridSize) : hit.point;
+
 				Handles.color = canActHere ? (isEraseMode ? PreviewSphereEraseReadyColor : PreviewSphereReadyColor) : PreviewSphereNoEntryColor;
-				var size = HandleUtility.GetHandleSize(hit.point) * 0.15f;
-				Handles.SphereHandleCap(0, hit.point, Quaternion.identity, size, EventType.Repaint);
+				var size = HandleUtility.GetHandleSize(previewPoint) * 0.15f;
+				Handles.SphereHandleCap(0, previewPoint, Quaternion.identity, size, EventType.Repaint);
 
 				if (!isEraseMode && brush.AlignToNormal)
 				{
 					Handles.color = Color.cyan;
-					Handles.DrawLine(hit.point, hit.point + hit.normal * NormalPreviewLength);
+					Handles.DrawLine(previewPoint, previewPoint + hit.normal * NormalPreviewLength);
 				}
 
 				if (!isEraseMode && brush.RandomizePosition)
 				{
 					Handles.color = PositionScatterDiscColor;
-					Handles.DrawSolidDisc(hit.point, hit.normal, brush.MaxPositionOffset);
+					Handles.DrawSolidDisc(previewPoint, hit.normal, brush.MaxPositionOffset);
 				}
 			}
 
@@ -177,7 +179,7 @@ namespace InsaneOne.Core.LevelDesign
 
 		static (GameObject root, ObjectPlacerRegistry registry) FindPlacedRoot(GameObject hitObject)
 		{
-			var registries = Object.FindObjectsOfType<ObjectPlacerRegistry>();
+			var registries = FindObjectsByType<ObjectPlacerRegistry>(FindObjectsSortMode.None);
 			var current = hitObject.transform;
 
 			while (current)
@@ -210,7 +212,7 @@ namespace InsaneOne.Core.LevelDesign
 
 		static ObjectPlacerRegistry GetOrCreateRegistry()
 		{
-			var registry = Object.FindObjectOfType<ObjectPlacerRegistry>();
+			var registry = FindAnyObjectByType<ObjectPlacerRegistry>();
 			if (registry)
 				return registry;
 
