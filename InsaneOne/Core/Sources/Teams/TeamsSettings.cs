@@ -11,8 +11,19 @@ namespace InsaneOne.Core.Teams
 	{
 		static TeamsSettings fallbackInstance;
 
+		[Tooltip("Display name and color per team. A team's id is its index in this list - team 0 is teamInfos[0], team 1 is teamInfos[1], etc. Every team id you use must have a matching entry here.")]
+		[SerializeField]
+		TeamInfo[] teamInfos =
+		{
+			new (Color.red),
+			new (Color.blue),
+		};
+
 		[Tooltip("Setup ids of teams, which should recognize other team as enemy. Example: If you set teamA to 0, and teamB to 1, teams 0 and 1 will be enemies.")]
 		[SerializeField] TeamEnemyRule[] enemiesTeamsRules = Array.Empty<TeamEnemyRule>();
+
+		/// <summary> Number of teams configured in TeamInfos - valid team ids are 0..GetTeamCount()-1. </summary>
+		public int GetTeamCount() => teamInfos.Length;
 
 		public bool IsEnemies(int teamA, int teamB)
 		{
@@ -22,6 +33,35 @@ namespace InsaneOne.Core.Teams
 			foreach (var teamEnemyRule in enemiesTeamsRules)
 				if (teamEnemyRule.IsSame(teamA, teamB))
 					return true;
+
+			return false;
+		}
+
+		/// <summary> Returns the display name configured for the given team (its index in TeamInfos), or a generic fallback ("No Team" / "Team N") if it has no matching entry or the entry's name is empty. </summary>
+		public string GetTeamName(int team)
+		{
+			if (TryGetTeamInfo(team, out var info) && !string.IsNullOrEmpty(info.name))
+				return $"[{team}] {info.name}";
+
+			return team < 0 ? "No Team" : $"[{team}] Unnamed Team";
+		}
+
+		/// <summary> Returns the color configured for the given team (its index in TeamInfos), or white if it has no matching entry. </summary>
+		public Color GetTeamColor(int team) => TryGetTeamInfo(team, out var info) ? info.color : Color.white;
+
+		bool TryGetTeamInfo(int team, out TeamInfo info)
+		{
+			if (team >= 0 && team < teamInfos.Length)
+			{
+				info = teamInfos[team];
+				return true;
+			}
+
+			info = null;
+
+			// -1 is the "no team" sentinel, not a missing config - only warn about actual team ids that should have an entry.
+			if (team >= 0)
+				CoreUnityLogger.I.Log($"Team {team} has no matching entry in TeamInfos (list has {teamInfos.Length} entries) - add one at index {team} so its name/color are defined.", LogLevel.Warning);
 
 			return false;
 		}
@@ -42,33 +82,12 @@ namespace InsaneOne.Core.Teams
 			if (CoreData.TryLoad(out var coreData) && coreData.TeamsSettings)
 				return coreData.TeamsSettings;
 
-			CoreUnityLogger.I.Log("No CoreData found! TeamsSettings not work correctly!", LogLevel.Error);
+			CoreUnityLogger.I.Log($"No {nameof(CoreData)} found! {nameof(TeamsSettings)} not work correctly!", LogLevel.Error);
 
-			// Cached so a missing CoreData doesn't allocate a fresh throwaway instance on every single Get() call.
 			if (!fallbackInstance)
 				fallbackInstance = CreateInstance<TeamsSettings>();
 
 			return fallbackInstance;
-		}
-	}
-
-	[Serializable]
-	public class TeamEnemyRule
-	{
-		[Min(0)] public int teamA;
-		[Min(0)] public int teamB;
-
-		public bool IsSame(TeamEnemyRule otherRule) => IsSame(otherRule.teamA, otherRule.teamB);
-
-		public bool IsSame(int inTeamA, int inTeamB)
-		{
-			if (teamA == inTeamA && teamB == inTeamB)
-				return true;
-
-			if (teamB == inTeamA && teamA == inTeamB)
-				return true;
-
-			return false;
 		}
 	}
 }

@@ -49,3 +49,17 @@
 {
     border-color: rgba(80, 160, 255, 1);
 }
+
+/* Width must match CellWidth in TeamsSettingsEditor.cs. */
+.teams-matrix-cell
+{
+    width: 26px;
+    align-items: center;
+    justify-content: center;
+}
+
+.teams-matrix-toggle
+{
+    margin-left: 0;
+    margin-right: 0;
+}

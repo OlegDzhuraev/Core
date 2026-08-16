@@ -35,6 +35,12 @@ namespace InsaneOne.Core.Teams
 			return TeamsSettings.Get().IsEnemies(go.GetTeam(), other.GetTeam());
 		}
 
+		/// <summary> Returns the display name configured for this object's team in TeamsSettings, or a generic fallback if none is set up. </summary>
+		public static string GetTeamName(this GameObject go) => TeamsSettings.Get().GetTeamName(go.GetTeam());
+
+		/// <summary> Returns the color configured for this object's team in TeamsSettings, or white if none is set up. </summary>
+		public static Color GetTeamColor(this GameObject go) => TeamsSettings.Get().GetTeamColor(go.GetTeam());
+
 		/// <summary> Gets components of type T from all physical objects in radius, which are in a team enemy to origin. Provide list to output results. Note that it will be overridden with new values. </summary>
 		public static void GetEnemiesInSphere<T>(this GameObject origin, float radius, List<T> output, int layerMask = Physics.AllLayers) where T : Component
 		{
