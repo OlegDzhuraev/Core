@@ -101,13 +101,13 @@ namespace InsaneOne.Core
 
 		[Tooltip("Draws an extra sphere around the object - useful to mark a trigger/spawn/detection zone, independent of the main form above.")]
 		[SerializeField, Min(0f)] float radius = 2f;
-		[SerializeField] Color radiusColor = Color.red;
+		[SerializeField] Color radiusColor = Color.white;
 
 		[Header("Links")]
 		[Tooltip("Draws a connection from this object to each linked handle - useful for patrol paths, event chains, trigger sequences.")]
 		[SerializeField] GizmoHandle[] linkedTo = Array.Empty<GizmoHandle>();
 		[SerializeField] LinkStyle linkStyle = LinkStyle.Arrow;
-		[SerializeField] Color linkColor = Color.red;
+		[SerializeField] Color linkColor = Color.yellow;
 
 		[Header("Label")]
 		[SerializeField] bool showLabel;

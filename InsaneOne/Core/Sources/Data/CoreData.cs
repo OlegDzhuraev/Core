@@ -14,7 +14,7 @@ namespace InsaneOne.Core
 
         [Header("Features settings")]
 #if INSANE_TEAMS_EXTENSION
-        public TeamsSettings TeamsSettings;
+        public Teams.TeamsSettings TeamsSettings;
 #endif
         
         [Tooltip("Place here prefab, which will be used as UI fader.")]

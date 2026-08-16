@@ -1,7 +1,7 @@
 #if INSANE_TEAMS_EXTENSION
 using UnityEditor;
 
-namespace InsaneOne.Core.Development
+namespace InsaneOne.Core.Teams.Development
 {
 	[CustomEditor(typeof(TeamsSettings))]
 	public sealed class TeamsSettingsEditor : Editor

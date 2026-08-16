@@ -1,7 +1,7 @@
 #if INSANE_TEAMS_EXTENSION
 using System;
 
-namespace InsaneOne.Core.Architect
+namespace InsaneOne.Core.Teams
 {
 	public interface ITeamed
 	{

@@ -3,12 +3,14 @@ using System;
 using InsaneOne.Core.Utility;
 using UnityEngine;
 
-namespace InsaneOne.Core
+namespace InsaneOne.Core.Teams
 {
 	/// <summary> You can set up teams relations in this asset.  </summary>
 	[CreateAssetMenu(menuName = "InsaneOne/Teams Settings")]
 	public class TeamsSettings : ScriptableObject
 	{
+		static TeamsSettings fallbackInstance;
+
 		[Tooltip("Setup ids of teams, which should recognize other team as enemy. Example: If you set teamA to 0, and teamB to 1, teams 0 and 1 will be enemies.")]
 		[SerializeField] TeamEnemyRule[] enemiesTeamsRules = Array.Empty<TeamEnemyRule>();
 
@@ -41,7 +43,12 @@ namespace InsaneOne.Core
 				return coreData.TeamsSettings;
 
 			CoreUnityLogger.I.Log("No CoreData found! TeamsSettings not work correctly!", LogLevel.Error);
-			return CreateInstance<TeamsSettings>();
+
+			// Cached so a missing CoreData doesn't allocate a fresh throwaway instance on every single Get() call.
+			if (!fallbackInstance)
+				fallbackInstance = CreateInstance<TeamsSettings>();
+
+			return fallbackInstance;
 		}
 	}
 

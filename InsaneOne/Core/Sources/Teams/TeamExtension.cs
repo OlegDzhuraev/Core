@@ -1,8 +1,8 @@
 #if INSANE_TEAMS_EXTENSION
-using InsaneOne.Core.Architect;
+using System.Collections.Generic;
 using UnityEngine;
 
-namespace InsaneOne.Core
+namespace InsaneOne.Core.Teams
 {
 	public static class TeamExtension
 	{
@@ -33,6 +33,20 @@ namespace InsaneOne.Core
 		public static bool IsTeamEnemyTo(this GameObject go, GameObject other)
 		{
 			return TeamsSettings.Get().IsEnemies(go.GetTeam(), other.GetTeam());
+		}
+
+		/// <summary> Gets components of type T from all physical objects in radius, which are in a team enemy to origin. Provide list to output results. Note that it will be overridden with new values. </summary>
+		public static void GetEnemiesInSphere<T>(this GameObject origin, float radius, List<T> output, int layerMask = Physics.AllLayers) where T : Component
+		{
+			PhysicsExtensions.GetObjectsOfTypeInSphere(origin.transform.position, radius, output, layerMask);
+			output.RemoveAll(target => !origin.IsTeamEnemyTo(target.gameObject));
+		}
+
+		/// <summary> Gets components of type T from all physical objects in radius, which are in the same team as origin (origin itself excluded). Provide list to output results. Note that it will be overridden with new values. </summary>
+		public static void GetAlliesInSphere<T>(this GameObject origin, float radius, List<T> output, int layerMask = Physics.AllLayers) where T : Component
+		{
+			PhysicsExtensions.GetObjectsOfTypeInSphere(origin.transform.position, radius, output, layerMask);
+			output.RemoveAll(target => target.gameObject == origin || !origin.IsInSameTeam(target.gameObject));
 		}
 	}
 }

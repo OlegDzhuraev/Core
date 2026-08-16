@@ -1,5 +1,6 @@
 #if INSANE_TEAMS_EXTENSION
 
+using InsaneOne.Core.Teams;
 using NUnit.Framework;
 using UnityEngine;
 

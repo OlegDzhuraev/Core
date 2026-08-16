@@ -1,9 +1,9 @@
 #if INSANE_TEAMS_EXTENSION
 using System;
-using InsaneOne.Core.Architect;
+using InsaneOne.Core.Utility;
 using UnityEngine;
 
-namespace InsaneOne.Core
+namespace InsaneOne.Core.Teams
 {
 	/// <summary> Useful if your game have different teams for players/NPCs. GameObject class have extension methods GetTeam and SetTeam to simplify work with this component. </summary>
 	public class TeamBehaviour : MonoBehaviour, ITeamed
@@ -29,6 +29,9 @@ namespace InsaneOne.Core
 		public void ChangeTeam(int newTeam)
 		{
 			initialTeamAnnounced = true;
+
+			if (newTeam < -1)
+				CoreUnityLogger.I.Log($"ChangeTeam was called with an unexpected value ({newTeam}) on {name} - only -1 (no team) and 0+ are valid teams.", LogLevel.Warning);
 
 			if (newTeam == team)
 				return;
