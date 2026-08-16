@@ -4,7 +4,7 @@ Shader "PBR Pearl"
     {
         _Color ("Color", Color) = (0.9,0,0,1)
         _Color2 ("Color 2", Color) = (0,0.5,0.75,1)
-        _Mix("Colors Mix", Range(0, 10)) = 1
+        _Mix("Colors Mix", Range(0.01, 10)) = 1
         _Glossiness ("Smoothness", Range(0,1)) = 0.5
         _Metallic ("Metallic", Range(0,1)) = 0.0    
     }
@@ -16,7 +16,8 @@ Shader "PBR Pearl"
         CGPROGRAM
         #pragma surface surf Standard fullforwardshadows
         #pragma target 3.0
-        
+        #pragma multi_compile_instancing
+
         struct Input
         {
             float3 viewDir;
