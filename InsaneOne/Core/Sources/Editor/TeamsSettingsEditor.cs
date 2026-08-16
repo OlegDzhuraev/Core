@@ -61,6 +61,10 @@ namespace InsaneOne.Core.Teams.Development
 				return;
 			}
 
+			// Header + rows are grouped so the whole grid scrolls as one horizontal unit instead of each row scrolling
+			// independently, and so it never gets force-shrunk/wrapped when the Inspector is narrower than the grid.
+			var grid = new VisualElement();
+
 			var header = new VisualElement { style = { flexDirection = FlexDirection.Row } };
 			header.Add(new Label { style = { width = RowLabelWidth } });
 
@@ -70,10 +74,14 @@ namespace InsaneOne.Core.Teams.Development
 					style = { width = CellWidth, unityTextAlign = new StyleEnum<TextAnchor>(TextAnchor.MiddleCenter) },
 				});
 
-			matrixContainer.Add(header);
+			grid.Add(header);
 
 			for (var row = 0; row < teamCount; row++)
-				matrixContainer.Add(BuildRow(teamsSettings, row, teamCount));
+				grid.Add(BuildRow(teamsSettings, row, teamCount));
+
+			var scrollView = new ScrollView(ScrollViewMode.Horizontal);
+			scrollView.Add(grid);
+			matrixContainer.Add(scrollView);
 
 			AppendDuplicateWarnings(teamsSettings);
 		}
