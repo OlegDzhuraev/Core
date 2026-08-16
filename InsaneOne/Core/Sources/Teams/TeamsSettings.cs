@@ -76,6 +76,9 @@ namespace InsaneOne.Core.Teams
 		/// <summary> Recommended to use it only for test purposes. </summary>
 		public TeamEnemyRule[] GetAllRulesInternal() => enemiesTeamsRules;
 
+		/// <summary> Recommended to use it only for test purposes. </summary>
+		public TeamInfo[] GetAllTeamInfosInternal() => teamInfos;
+
 		/// <summary> Gets TeamsSettings asset from the CoreData asset. </summary>
 		public static TeamsSettings Get()
 		{

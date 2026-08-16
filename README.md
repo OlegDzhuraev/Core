@@ -211,9 +211,10 @@ class GameBootstrap : MonoBehaviour
 }
 ```
 
-In order to provide context to a new spawned objects, use Context.Spawn() instead of GameObject.Instantiate():
+In order to provide context to a new spawned objects, use ContextSpawner.Spawn() instead of GameObject.Instantiate():
 ```cs
-Context<YourContext>.Spawn(prefab, new Vector3(15, 0, 25)); // you can pass position, rotation and parent like in the original GameObject.Instantiate
+ContextSpawner.Spawn<YourContext>(prefab, new Vector3(15, 0, 25)); // you can pass position, rotation and parent like in the original GameObject.Instantiate
+// ContextSpawner.Spawn<T1, T2>(...), <T1, T2, T3>(...) etc. are also available, if the prefab needs several context types at once
 ```
 
 Context access in your component:
@@ -245,6 +246,11 @@ class YourClass : MonoBehaviour, IContext<YourContextA>, IContext<YourContextB> 
   }
 }
 
+```
+
+You can also read the current context value directly, without implementing `IContext<T>` (e.g. from a plain, non-MonoBehaviour class):
+```cs
+var context = Context<YourContext>.Get(); // returns null if not initialized yet
 ```
 
 **Note:** You need to initialize Context in **Awake** before any other components. Use **ScriptExecutionOrder** for this.
@@ -391,7 +397,7 @@ gameObject.DelayedDestroy(3f);
 ```
 
 ### MainCamera
-Most of the projects use only one camera, which can be received by calling Camera.main. But in the old Unity versions it is not cached and can cause performance issues. This utility helps to solve this problem by caching the Main Camera. 
+Most of the projects use only one camera, which can be received by calling `Camera.main`. But in the old Unity versions it is not cached and can cause performance issues. This utility helps to solve this problem by caching the Main Camera. 
 
 ```cs
 var cam = MainCamera.Cached;

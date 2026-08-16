@@ -58,32 +58,36 @@ namespace InsaneOne.Core.Teams.Development
 			if (teamCount < 2)
 			{
 				matrixContainer.Add(new HelpBox("Add at least 2 entries to Team Infos above to configure enemy relations.", HelpBoxMessageType.Info));
-				return;
+			}
+			else
+			{
+				// Header + rows are grouped so the whole grid scrolls as one horizontal unit instead of each row scrolling
+				// independently, and so it never gets force-shrunk/wrapped when the Inspector is narrower than the grid.
+				var grid = new VisualElement();
+
+				var header = new VisualElement { style = { flexDirection = FlexDirection.Row } };
+				header.Add(new Label { style = { width = RowLabelWidth } });
+
+				for (var col = 0; col < teamCount; col++)
+					header.Add(new Label(col.ToString())
+					{
+						style = { width = CellWidth, unityTextAlign = new StyleEnum<TextAnchor>(TextAnchor.MiddleCenter) },
+					});
+
+				grid.Add(header);
+
+				for (var row = 0; row < teamCount; row++)
+					grid.Add(BuildRow(teamsSettings, row, teamCount));
+
+				var scrollView = new ScrollView(ScrollViewMode.Horizontal);
+				scrollView.Add(grid);
+				matrixContainer.Add(scrollView);
 			}
 
-			// Header + rows are grouped so the whole grid scrolls as one horizontal unit instead of each row scrolling
-			// independently, and so it never gets force-shrunk/wrapped when the Inspector is narrower than the grid.
-			var grid = new VisualElement();
-
-			var header = new VisualElement { style = { flexDirection = FlexDirection.Row } };
-			header.Add(new Label { style = { width = RowLabelWidth } });
-
-			for (var col = 0; col < teamCount; col++)
-				header.Add(new Label(col.ToString())
-				{
-					style = { width = CellWidth, unityTextAlign = new StyleEnum<TextAnchor>(TextAnchor.MiddleCenter) },
-				});
-
-			grid.Add(header);
-
-			for (var row = 0; row < teamCount; row++)
-				grid.Add(BuildRow(teamsSettings, row, teamCount));
-
-			var scrollView = new ScrollView(ScrollViewMode.Horizontal);
-			scrollView.Add(grid);
-			matrixContainer.Add(scrollView);
-
+			// Run regardless of teamCount, so a rule left orphaned by shrinking Team Infos down to 0/1 entries still surfaces.
 			AppendDuplicateWarnings(teamsSettings);
+			AppendOrphanedRuleWarnings(teamsSettings);
+			AppendTeamInfoWarnings(teamsSettings);
 		}
 
 		VisualElement BuildRow(TeamsSettings teamsSettings, int row, int teamCount)
@@ -175,6 +179,41 @@ namespace InsaneOne.Core.Teams.Development
 
 				if (ruleA.teamA == ruleA.teamB)
 					matrixContainer.Add(new HelpBox($"Rule at index {index} refers to the same team twice.", HelpBoxMessageType.Warning));
+			}
+		}
+
+		// Catches rules left behind after Team Infos was shrunk - the matrix only ever offers ids up to the current
+		// team count, so a rule referencing a since-removed team becomes invisible in the grid rather than deleted.
+		void AppendOrphanedRuleWarnings(TeamsSettings teamsSettings)
+		{
+			var teamCount = teamsSettings.GetTeamCount();
+			var rules = teamsSettings.GetAllRulesInternal();
+
+			for (var index = 0; index < rules.Length; index++)
+			{
+				var rule = rules[index];
+
+				if (rule.teamA < 0 || rule.teamA >= teamCount || rule.teamB < 0 || rule.teamB >= teamCount)
+					matrixContainer.Add(new HelpBox(
+						$"Rule at index {index} references Team {rule.teamA} / Team {rule.teamB}, but only {teamCount} team(s) are configured. Remove it or add the missing Team Infos entries.",
+						HelpBoxMessageType.Warning));
+			}
+		}
+
+		// Flags teams that accidentally share a name - makes the matrix and any in-game team name/log harder to tell
+		// apart at a glance. Unnamed teams (empty name, falling back to "Team N") aren't flagged - that's a valid state.
+		void AppendTeamInfoWarnings(TeamsSettings teamsSettings)
+		{
+			var infos = teamsSettings.GetAllTeamInfosInternal();
+
+			for (var i = 0; i < infos.Length; i++)
+			{
+				if (string.IsNullOrEmpty(infos[i].name))
+					continue;
+
+				for (var j = i + 1; j < infos.Length; j++)
+					if (infos[j].name == infos[i].name)
+						matrixContainer.Add(new HelpBox($"Team {i} and Team {j} both use the name \"{infos[i].name}\".", HelpBoxMessageType.Warning));
 			}
 		}
 	}
