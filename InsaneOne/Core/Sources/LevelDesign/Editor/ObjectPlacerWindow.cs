@@ -24,18 +24,18 @@ namespace InsaneOne.Core.LevelDesign
 	/// <summary> Editor tool to place prefabs from an ObjectPalette onto scene colliders by clicking (or drag-scattering) in the Scene view. </summary>
 	public class ObjectPlacerWindow : EditorWindow
 	{
-		const string StylesPath = "InsaneOne/ToolsStyles";
-		const string GroupStyleName = "group-box";
 		const float RaycastMaxDistance = 1000f;
 		const string PlaceUndoGroupName = "Place Prefabs";
 		const string EraseUndoGroupName = "Erase Prefabs";
 
 		const float NormalPreviewLength = 1f;
+		const int GridPreviewCellRadius = 5;
 
 		static readonly Color PreviewSphereReadyColor = new (0.3f, 0.75f, 1f, 0.9f);
 		static readonly Color PreviewSphereEraseReadyColor = new (1f, 0.6f, 0.1f, 0.9f);
 		static readonly Color PreviewSphereNoEntryColor = new (1f, 0.3f, 0.3f, 0.9f);
 		static readonly Color PositionScatterDiscColor = new (0.3f, 0.75f, 1f, 0.15f);
+		static readonly Color GridPreviewColor = new (1f, 1f, 1f, 0.35f);
 
 		ObjectPlacerGeneralSection generalSection;
 		ObjectPlacerPaletteSection paletteSection;
@@ -61,13 +61,13 @@ namespace InsaneOne.Core.LevelDesign
 
 		void CreateGUI()
 		{
-			var style = Resources.Load(StylesPath) as StyleSheet;
+			var style = Resources.Load(LevelDesignToolStyles.StylesPath) as StyleSheet;
 			var root = rootVisualElement;
 			root.styleSheets.Add(style);
-			root.AddToClassList("core-init-root");
+			root.AddToClassList("custom-tool-root");
 
 			var infoBox = new VisualElement();
-			infoBox.AddToClassList(GroupStyleName);
+			infoBox.AddToClassList(LevelDesignToolStyles.GroupBoxClass);
 			infoBox.Add(new Label("Places a prefab from the palette onto scene colliders on click, while the tool is active.")
 			{
 				style = { unityTextAlign = new StyleEnum<TextAnchor>(TextAnchor.MiddleCenter), whiteSpace = WhiteSpace.Normal },
@@ -112,6 +112,9 @@ namespace InsaneOne.Core.LevelDesign
 			if (hasHit)
 			{
 				var previewPoint = !isEraseMode && brush.SnapToGrid ? SnapToGrid(hit.point, brush.GridSize) : hit.point;
+
+				if (!isEraseMode && brush.SnapToGrid)
+					DrawGridPreview(previewPoint, brush.GridSize);
 
 				Handles.color = canActHere ? (isEraseMode ? PreviewSphereEraseReadyColor : PreviewSphereReadyColor) : PreviewSphereNoEntryColor;
 				var size = HandleUtility.GetHandleSize(previewPoint) * 0.15f;
@@ -287,6 +290,27 @@ namespace InsaneOne.Core.LevelDesign
 				Mathf.Round(position.x / gridSize) * gridSize,
 				Mathf.Round(position.y / gridSize) * gridSize,
 				Mathf.Round(position.z / gridSize) * gridSize);
+		}
+
+		// Draws a flat XZ grid centered on the (already snapped) preview point, at its Y height, so the cell the
+		// cursor will snap into is visible in context, not just the single resulting point.
+		static void DrawGridPreview(Vector3 center, float gridSize)
+		{
+			if (gridSize <= 0f)
+				return;
+
+			Handles.color = GridPreviewColor;
+
+			var extent = GridPreviewCellRadius * gridSize;
+
+			for (var i = -GridPreviewCellRadius; i <= GridPreviewCellRadius; i++)
+			{
+				var x = center.x + i * gridSize;
+				Handles.DrawLine(new Vector3(x, center.y, center.z - extent), new Vector3(x, center.y, center.z + extent));
+
+				var z = center.z + i * gridSize;
+				Handles.DrawLine(new Vector3(center.x - extent, center.y, z), new Vector3(center.x + extent, center.y, z));
+			}
 		}
 
 		static Vector3 GetRandomTangentOffset(Vector3 normal, float maxDistance)

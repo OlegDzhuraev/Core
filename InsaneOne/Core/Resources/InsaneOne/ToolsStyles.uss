@@ -7,7 +7,7 @@
     border-width: 1px;
 }
 
-.core-init-root
+.custom-tool-root
 {
     padding: 4px;
 }
@@ -62,4 +62,44 @@
 {
     margin-left: 0;
     margin-right: 0;
+}
+
+.toggle-button-row
+{
+    flex-direction: row;
+}
+
+/* USS has no :first-child/:last-child selectors, so the outer-only rounding below is applied via explicit
+   toggle-button-first/toggle-button-last marker classes added in code, not a structural selector. */
+.toggle-button
+{
+    flex-grow: 1;
+    margin: 0;
+    border-left-width: 0;
+    border-radius: 0;
+}
+
+.toggle-button-first
+{
+    border-left-width: 1px;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+}
+
+.toggle-button-last
+{
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+.toggle-button-active
+{
+    background-color: rgba(70, 130, 180, 1);
+}
+
+.arrange-apply-button
+{
+    width: 180px;
+    height: 40px;
+    align-self: center;
 }

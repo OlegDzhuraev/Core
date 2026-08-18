@@ -34,7 +34,7 @@ namespace InsaneOne.Core.Development
 			root.styleSheets.Add(style);
 
 			content = new VisualElement();
-			content.AddToClassList("core-init-root");
+			content.AddToClassList("custom-tool-root");
 			root.Add(content);
 
 			var titleLabel = new Label($"{PackageName} Setup");

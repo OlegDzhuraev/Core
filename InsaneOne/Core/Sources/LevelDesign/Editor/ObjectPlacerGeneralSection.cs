@@ -25,7 +25,6 @@ namespace InsaneOne.Core.LevelDesign
 	/// Values are persisted in SessionState, so they survive domain reloads within the same Editor session. </summary>
 	public class ObjectPlacerGeneralSection : VisualElement
 	{
-		const string GroupStyleName = "group-box";
 		const string LayerMaskKey = "InsaneOne.ObjectPlacer.LayerMask";
 		const string ParentGlobalIdKey = "InsaneOne.ObjectPlacer.ParentGlobalId";
 		const string DragScatterSpacingKey = "InsaneOne.ObjectPlacer.DragScatterSpacing";
@@ -44,7 +43,7 @@ namespace InsaneOne.Core.LevelDesign
 
 		public ObjectPlacerGeneralSection()
 		{
-			AddToClassList(GroupStyleName);
+			AddToClassList(LevelDesignToolStyles.GroupBoxClass);
 
 			Add(new Label("General") { style = { unityFontStyleAndWeight = FontStyle.Bold } });
 

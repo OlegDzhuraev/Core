@@ -26,6 +26,9 @@ Allows you to randomize the rotation, scale and position of the transforms selec
 ### Object Placer
 Places prefabs from an assigned palette onto scene colliders by clicking in the Scene view, with support for physics layer filtering, aligning to the surface normal, and randomizing position, rotation and scale. It can be toggled on/off from the tool window or from its own Scene view overlay toggle.
 
+### Arrange On Scene
+Aligns, evenly distributes, arranges in a circle or stacks with fixed spacing the positions of the selected scene GameObjects relative to each other, similar to the align tools found in 3D editors. A Mode dropdown picks one operation at a time, showing only its settings and a matching live Scene view preview - align on any combination of X/Y/Z to the min, center, max or active object of the selection, spread selected objects evenly along one or more axes, lay them out evenly around a circle (auto or custom radius), or line them up with a fixed step in selection order.
+
 ## Extensions
 Contains some extensions for Transform, Color, Vectors, Random and other components. Some examples below.
 

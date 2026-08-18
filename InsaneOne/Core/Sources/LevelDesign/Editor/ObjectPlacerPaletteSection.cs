@@ -28,7 +28,6 @@ namespace InsaneOne.Core.LevelDesign
 	/// The assigned palette, selected entry and random-from-palette flag are persisted in SessionState, so they survive domain reloads within the same Editor session. </summary>
 	public class ObjectPlacerPaletteSection : VisualElement
 	{
-		const string GroupStyleName = "group-box";
 		const string PaletteGuidKey = "InsaneOne.ObjectPlacer.PaletteGuid";
 		const string SelectedEntryIndexKey = "InsaneOne.ObjectPlacer.SelectedEntryIndex";
 		const string RandomFromPaletteKey = "InsaneOne.ObjectPlacer.RandomFromPalette";
@@ -51,7 +50,7 @@ namespace InsaneOne.Core.LevelDesign
 
 		public ObjectPlacerPaletteSection()
 		{
-			AddToClassList(GroupStyleName);
+			AddToClassList(LevelDesignToolStyles.GroupBoxClass);
 
 			Add(new Label("Palette") { style = { unityFontStyleAndWeight = FontStyle.Bold } });
 

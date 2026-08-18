@@ -12,7 +12,6 @@ namespace InsaneOne.Core.LevelDesign
 	/// can still tweak them - those edits just aren't saved anywhere until an actual asset is assigned. </summary>
 	public class ObjectPlacerBrushSection : VisualElement
 	{
-		const string GroupStyleName = "group-box";
 		const string BrushGuidKey = "InsaneOne.ObjectPlacer.BrushGuid";
 
 		public Brush SelectedBrush => brush ? brush : GetOrCreateTemporaryBrush();
@@ -26,7 +25,7 @@ namespace InsaneOne.Core.LevelDesign
 
 		public ObjectPlacerBrushSection()
 		{
-			AddToClassList(GroupStyleName);
+			AddToClassList(LevelDesignToolStyles.GroupBoxClass);
 
 			Add(new Label("Brush") { style = { unityFontStyleAndWeight = FontStyle.Bold } });
 

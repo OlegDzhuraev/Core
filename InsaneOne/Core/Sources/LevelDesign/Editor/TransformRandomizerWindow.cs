@@ -25,9 +25,6 @@ namespace InsaneOne.Core.LevelDesign
 {
 	public class TransformRandomizerWindow : EditorWindow
 	{
-		const string StylesPath = "InsaneOne/ToolsStyles";
-		const string GroupStyleName = "group-box";
-
 		[Flags]
 		public enum Axes
 		{
@@ -57,7 +54,7 @@ namespace InsaneOne.Core.LevelDesign
 		void CreateGUI()
 		{
 			var defaultAxes = Axes.X | Axes.Y | Axes.Z;
-			var style = Resources.Load(StylesPath) as StyleSheet;
+			var style = Resources.Load(LevelDesignToolStyles.StylesPath) as StyleSheet;
 			var root = rootVisualElement;
 			root.styleSheets.Add(style);
 
@@ -67,11 +64,11 @@ namespace InsaneOne.Core.LevelDesign
 			};
 
 			var infoBox = new VisualElement();
-			infoBox.AddToClassList(GroupStyleName);
+			infoBox.AddToClassList(LevelDesignToolStyles.GroupBoxClass);
 			infoBox.Add(infoLabel);
 
 			var rotationBox = new VisualElement();
-			rotationBox.AddToClassList(GroupStyleName);
+			rotationBox.AddToClassList(LevelDesignToolStyles.GroupBoxClass);
 
 			rotationAxesField = new EnumFlagsField("Rotation Axes", defaultAxes);
 			rotationAxesField.RegisterValueChangedCallback(OnRotationAxisChanged);
@@ -81,7 +78,7 @@ namespace InsaneOne.Core.LevelDesign
 			rotationBox.Add(maxRotationAngleField);
 
 			var sizeBox = new Box();
-			sizeBox.AddToClassList(GroupStyleName);
+			sizeBox.AddToClassList(LevelDesignToolStyles.GroupBoxClass);
 
 			sizeAxesField = new EnumFlagsField("Size Axes",defaultAxes);
 			sizeAxesField.RegisterValueChangedCallback(OnSizeAxesChanged);
@@ -97,7 +94,7 @@ namespace InsaneOne.Core.LevelDesign
 			sizeBox.Add(sizeSlider);
 
 			var posBox = new Box();
-			posBox.AddToClassList(GroupStyleName);
+			posBox.AddToClassList(LevelDesignToolStyles.GroupBoxClass);
 
 			positionAxesField = new EnumFlagsField("Position Axes", defaultAxes);
 			positionAxesField.RegisterValueChangedCallback(OnPositionAxesChanged);

@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: GoalsConfig
   m_EditorClassIdentifier: 
   goals:
-  - id: task_id
-    title: Task title
+  - id: goal_id
+    title: Goal title
     requiredAmount: 100

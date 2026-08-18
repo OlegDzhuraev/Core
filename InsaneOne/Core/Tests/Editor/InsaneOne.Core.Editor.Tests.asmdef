@@ -5,7 +5,8 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "InsaneOne.Core",
-        "InsaneOne.Core.Editor"
+        "InsaneOne.Core.Editor",
+        "InsaneOne.Core.LD.Editor"
     ],
     "includePlatforms": [
         "Editor"
