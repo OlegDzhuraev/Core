@@ -33,5 +33,12 @@ namespace InsaneOne.Core.LevelDesign
 		}
 
 		public List<Entry> Entries = new ();
+
+		[Header("Constraints")]
+		[Tooltip("When enabled, prefabs from this palette ignore the active Brush's Randomize Rotation setting - only its Align To Normal rotation (if any) is applied.")]
+		public bool LockRotation;
+
+		[Tooltip("When enabled, prefabs from this palette ignore the active Brush's Randomize Scale setting and keep their prefab's original scale.")]
+		public bool LockScale;
 	}
 }

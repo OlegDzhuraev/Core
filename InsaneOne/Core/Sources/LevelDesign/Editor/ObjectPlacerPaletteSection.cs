@@ -33,6 +33,8 @@ namespace InsaneOne.Core.LevelDesign
 		const string SelectedEntryIndexKey = "InsaneOne.ObjectPlacer.SelectedEntryIndex";
 		const string RandomFromPaletteKey = "InsaneOne.ObjectPlacer.RandomFromPalette";
 
+		public ObjectPalette SelectedPalette => palette;
+
 		public ObjectPalette.Entry SelectedEntry => palette && selectedEntryIndex >= 0 && selectedEntryIndex < palette.Entries.Count
 			? palette.Entries[selectedEntryIndex]
 			: null;

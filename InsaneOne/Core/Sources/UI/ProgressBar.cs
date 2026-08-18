@@ -37,6 +37,13 @@ namespace InsaneOne.Core.UI
 
 			subscribedViewModel = viewModel;
 			viewModel.Changed += OnChanged;
+
+			if (titleText)
+				titleText.text = viewModel.Title;
+
+			// applied right away instead of waiting for the next Change() call, since Changed already fired during
+			// the view model's own construction, before anyone could have subscribed to it
+			OnChanged(viewModel.Progress);
 		}
 
 		void OnDestroy()
@@ -52,6 +59,14 @@ namespace InsaneOne.Core.UI
 
 			if (numberText)
 				numberText.text = ViewModel.MakeText();
+		}
+
+		/// <summary> Recommended to use it only for test purposes. </summary>
+		public void SetupInternal(Image fillBar, TMP_Text titleText, TMP_Text numberText)
+		{
+			this.fillBar = fillBar;
+			this.titleText = titleText;
+			this.numberText = numberText;
 		}
 	}
 

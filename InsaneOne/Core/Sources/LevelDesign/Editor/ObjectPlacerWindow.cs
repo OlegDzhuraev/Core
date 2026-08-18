@@ -246,6 +246,7 @@ namespace InsaneOne.Core.LevelDesign
 				return;
 
 			var brush = brushSection.SelectedBrush;
+			var palette = paletteSection.SelectedPalette;
 
 			var instance = (GameObject)PrefabUtility.InstantiatePrefab(entry.Prefab);
 			Undo.RegisterCreatedObjectUndo(instance, "Place Prefab");
@@ -264,12 +265,12 @@ namespace InsaneOne.Core.LevelDesign
 				position = SnapToGrid(position, brush.GridSize);
 
 			var rotation = brush.AlignToNormal ? Quaternion.FromToRotation(Vector3.up, hit.normal) : Quaternion.identity;
-			if (brush.RandomizeRotation)
+			if (brush.RandomizeRotation && !(palette && palette.LockRotation))
 				rotation *= Quaternion.Euler(0f, Random.Range(-brush.MaxRotationAngle, brush.MaxRotationAngle), 0f);
 
 			instance.transform.SetPositionAndRotation(position, rotation);
 
-			if (brush.RandomizeScale)
+			if (brush.RandomizeScale && !(palette && palette.LockScale))
 			{
 				var range = brush.ScaleRange;
 				var multiplier = Random.Range(range.x, range.y);
