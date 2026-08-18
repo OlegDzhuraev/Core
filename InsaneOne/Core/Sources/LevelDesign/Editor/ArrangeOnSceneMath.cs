@@ -62,6 +62,17 @@ namespace InsaneOne.Core.LevelDesign
 			LookAtNext
 		}
 
+		public enum RaycastDirection
+		{
+			Left,
+			Right,
+			Up,
+			Down,
+			Forward,
+			Backward,
+			DirectionToTarget
+		}
+
 		public static void AlignAxis(Transform[] transforms, AlignAnchor anchor, Transform alignTarget, int axisIndex)
 		{
 			var target = GetAlignTarget(transforms, anchor, alignTarget, axisIndex);
@@ -364,6 +375,67 @@ namespace InsaneOne.Core.LevelDesign
 				radius += Vector2.Distance(new Vector2(t.position.x, t.position.z), new Vector2(center.x, center.z));
 
 			return radius / transforms.Length;
+		}
+
+		// World-space direction to cast from a transform's own position, matching the world-axis convention the rest
+		// of this window's modes already use (Align/Distribute/Stack's Axes, Circle's XZ plane) rather than each
+		// object's local axes. DirectionToTarget points from the transform towards directionTarget instead, falling
+		// back to straight down (same as the Down option) if no target is assigned or the two positions coincide.
+		public static Vector3 GetRaycastDirection(Transform t, RaycastDirection direction, Transform directionTarget)
+		{
+			switch (direction)
+			{
+				case RaycastDirection.Left: return Vector3.left;
+				case RaycastDirection.Right: return Vector3.right;
+				case RaycastDirection.Up: return Vector3.up;
+				case RaycastDirection.Forward: return Vector3.forward;
+				case RaycastDirection.Backward: return Vector3.back;
+
+				case RaycastDirection.DirectionToTarget:
+					if (!directionTarget)
+						return Vector3.down;
+
+					var toTarget = directionTarget.position - t.position;
+					return toTarget.sqrMagnitude > 0.0001f ? toTarget.normalized : Vector3.down;
+
+				default: // Down
+					return Vector3.down;
+			}
+		}
+
+		// Casts from the transform's own current position, not from some external point (e.g. a camera) - so, unlike
+		// Object Placer's placement raycast, a transform whose own collider overlaps its position can end up
+		// self-hitting; picking a direction that starts outside the object's own geometry avoids that.
+		public static bool TryRaycastPlacement(Transform t, RaycastDirection direction, Transform directionTarget, LayerMask layerMask, float maxDistance, out Vector3 position, out Vector3 normal)
+		{
+			var rayDirection = GetRaycastDirection(t, direction, directionTarget);
+
+			if (Physics.Raycast(t.position, rayDirection, out var hit, maxDistance, layerMask))
+			{
+				position = hit.point;
+				normal = hit.normal;
+				return true;
+			}
+
+			position = t.position;
+			normal = Vector3.up;
+			return false;
+		}
+
+		// Objects that don't hit anything on the chosen layers are left exactly where they are, rather than moved
+		// to some fallback position - there's no sensible "no hit" position to invent for an arbitrary direction.
+		public static void ApplyRaycastPlacement(Transform[] transforms, RaycastDirection direction, Transform directionTarget, bool alignWithNormal, LayerMask layerMask, float maxDistance)
+		{
+			foreach (var t in transforms)
+			{
+				if (!TryRaycastPlacement(t, direction, directionTarget, layerMask, maxDistance, out var position, out var normal))
+					continue;
+
+				t.position = position;
+
+				if (alignWithNormal)
+					t.rotation = Quaternion.FromToRotation(Vector3.up, normal);
+			}
 		}
 
 		public static float GetAxisValue(Vector3 v, int axisIndex) => axisIndex switch { 0 => v.x, 1 => v.y, _ => v.z };

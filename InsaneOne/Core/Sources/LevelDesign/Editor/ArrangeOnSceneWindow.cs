@@ -37,6 +37,7 @@ namespace InsaneOne.Core.LevelDesign
 		const string DistributeUndoName = "Arrange On Scene - Distribute";
 		const string CircleUndoName = "Arrange On Scene - Circle";
 		const string StackUndoName = "Arrange On Scene - Stack";
+		const string RaycastUndoName = "Arrange On Scene - Raycast To Ground";
 
 		// Session-persisted (survives domain reload, not Editor restart) - see the level-design-editor-tools skill.
 		const string ModeKey = "InsaneOne.ArrangeOnScene.Mode";
@@ -52,6 +53,10 @@ namespace InsaneOne.Core.LevelDesign
 		const string CircleRotationModeKey = "InsaneOne.ArrangeOnScene.CircleRotationMode";
 		const string StackAxesKey = "InsaneOne.ArrangeOnScene.StackAxes";
 		const string StackSpacingKey = "InsaneOne.ArrangeOnScene.StackSpacing";
+		const string RaycastDirectionKey = "InsaneOne.ArrangeOnScene.RaycastDirection";
+		const string RaycastDirectionTargetGlobalIdKey = "InsaneOne.ArrangeOnScene.RaycastDirectionTargetGlobalId";
+		const string RaycastAlignWithNormalKey = "InsaneOne.ArrangeOnScene.RaycastAlignWithNormal";
+		const string RaycastLayerMaskKey = "InsaneOne.ArrangeOnScene.RaycastLayerMask";
 
 		const int MinObjectsToArrange = 2;
 		const float DefaultCircleRadius = 3f;
@@ -59,13 +64,15 @@ namespace InsaneOne.Core.LevelDesign
 		const float DefaultCircleAngleOffset = 0f;
 		const float MaxCircleAngleOffset = 359f;
 		const float DefaultStackSpacing = 2f;
+		const float RaycastMaxDistance = 1000f;
 
 		enum Mode
 		{
 			Align,
 			Distribute,
 			Circle,
-			Stack
+			Stack,
+			Raycast
 		}
 
 		Mode mode;
@@ -81,6 +88,10 @@ namespace InsaneOne.Core.LevelDesign
 		ArrangeOnSceneMath.CircleRotationMode circleRotationMode;
 		ArrangeOnSceneMath.Axes stackAxes;
 		float stackSpacing;
+		ArrangeOnSceneMath.RaycastDirection raycastDirection;
+		Transform raycastDirectionTarget;
+		bool raycastAlignWithNormal;
+		LayerMask raycastLayerMask;
 
 		HelpBox infoBox;
 
@@ -284,6 +295,56 @@ namespace InsaneOne.Core.LevelDesign
 			});
 			circleBox.Add(circleRotationModeField);
 
+			raycastDirection = (ArrangeOnSceneMath.RaycastDirection) SessionState.GetInt(RaycastDirectionKey, (int) ArrangeOnSceneMath.RaycastDirection.Down);
+			raycastAlignWithNormal = SessionState.GetBool(RaycastAlignWithNormalKey, false);
+			raycastLayerMask = SessionState.GetInt(RaycastLayerMaskKey, ~0);
+
+			var raycastBox = new VisualElement();
+			raycastBox.AddToClassList(LevelDesignToolStyles.GroupBoxClass);
+			raycastBox.Add(CreateSectionTitle("Raycast"));
+			raycastBox.Add(CreateDescription("Casts a ray from each selected object's own position in the chosen direction and moves it to the hit point. Objects that don't hit anything on the chosen layers are left where they are."));
+
+			var raycastDirectionTargetField = new ObjectField("Direction Target") { objectType = typeof(Transform), allowSceneObjects = true };
+			raycastDirectionTargetField.style.display = GetDisplay(raycastDirection == ArrangeOnSceneMath.RaycastDirection.DirectionToTarget);
+			raycastDirectionTargetField.RegisterValueChangedCallback(ev =>
+			{
+				raycastDirectionTarget = ev.newValue as Transform;
+				SaveTransform(RaycastDirectionTargetGlobalIdKey, raycastDirectionTarget);
+				SceneView.RepaintAll();
+			});
+			LoadPersistedTransform(RaycastDirectionTargetGlobalIdKey, raycastDirectionTargetField, t => raycastDirectionTarget = t);
+
+			var raycastDirectionField = new DropdownField("Direction",
+				new List<string> { "Left", "Right", "Up", "Down", "Forward", "Backward", "Direction To Target" }, (int) raycastDirection);
+			raycastDirectionField.RegisterValueChangedCallback(_ =>
+			{
+				raycastDirection = (ArrangeOnSceneMath.RaycastDirection) raycastDirectionField.index;
+				SessionState.SetInt(RaycastDirectionKey, (int) raycastDirection);
+				raycastDirectionTargetField.style.display = GetDisplay(raycastDirection == ArrangeOnSceneMath.RaycastDirection.DirectionToTarget);
+				SceneView.RepaintAll();
+			});
+			raycastBox.Add(raycastDirectionField);
+			raycastBox.Add(raycastDirectionTargetField);
+
+			var raycastAlignWithNormalToggle = new Toggle("Align With Normal") { value = raycastAlignWithNormal };
+			raycastAlignWithNormalToggle.RegisterValueChangedCallback(ev =>
+			{
+				raycastAlignWithNormal = ev.newValue;
+				SessionState.SetBool(RaycastAlignWithNormalKey, raycastAlignWithNormal);
+				SceneView.RepaintAll();
+			});
+			raycastBox.Add(raycastAlignWithNormalToggle);
+
+			// Same LayerMaskField used by Object Placer's own raycast layer filter, see ObjectPlacerGeneralSection.
+			var raycastLayerMaskField = new LayerMaskField("Layers", raycastLayerMask);
+			raycastLayerMaskField.RegisterValueChangedCallback(ev =>
+			{
+				raycastLayerMask = ev.newValue;
+				SessionState.SetInt(RaycastLayerMaskKey, raycastLayerMask);
+				SceneView.RepaintAll();
+			});
+			raycastBox.Add(raycastLayerMaskField);
+
 			var applyBtn = new Button(OnApplyClicked);
 			applyBtn.AddToClassList(ApplyButtonClass);
 
@@ -298,6 +359,7 @@ namespace InsaneOne.Core.LevelDesign
 				distributeBox.style.display = GetDisplay(mode == Mode.Distribute);
 				circleBox.style.display = GetDisplay(mode == Mode.Circle);
 				stackBox.style.display = GetDisplay(mode == Mode.Stack);
+				raycastBox.style.display = GetDisplay(mode == Mode.Raycast);
 				applyBtn.text = GetApplyButtonText(mode);
 			}
 
@@ -307,7 +369,7 @@ namespace InsaneOne.Core.LevelDesign
 			modeBox.AddToClassList(LevelDesignToolStyles.GroupBoxClass);
 			modeBox.Add(CreateSectionTitle("Mode"));
 
-			var modeField = new DropdownField("", new List<string> { "Align", "Distribute", "Circle", "Stack" }, (int) mode);
+			var modeField = new DropdownField("", new List<string> { "Align", "Distribute", "Circle", "Stack", "Raycast" }, (int) mode);
 			modeField.RegisterValueChangedCallback(_ =>
 			{
 				mode = (Mode) modeField.index;
@@ -326,6 +388,7 @@ namespace InsaneOne.Core.LevelDesign
 			scrollView.Add(distributeBox);
 			scrollView.Add(stackBox);
 			scrollView.Add(circleBox);
+			scrollView.Add(raycastBox);
 			scrollView.Add(applyBtn);
 
 			root.Add(scrollView);
@@ -365,6 +428,7 @@ namespace InsaneOne.Core.LevelDesign
 			Mode.Distribute => "Distribute Evenly",
 			Mode.Circle => "Arrange in Circle",
 			Mode.Stack => "Stack With Fixed Spacing",
+			Mode.Raycast => "Raycast To Ground",
 			_ => "Apply",
 		};
 
@@ -383,6 +447,9 @@ namespace InsaneOne.Core.LevelDesign
 					break;
 				case Mode.Stack:
 					OnStackClicked();
+					break;
+				case Mode.Raycast:
+					OnRaycastClicked();
 					break;
 			}
 		}
@@ -481,6 +548,9 @@ namespace InsaneOne.Core.LevelDesign
 				case Mode.Stack:
 					DrawStackPreview(transforms);
 					break;
+				case Mode.Raycast:
+					DrawRaycastPreview(transforms);
+					break;
 			}
 		}
 
@@ -549,6 +619,13 @@ namespace InsaneOne.Core.LevelDesign
 			ArrangePreviewDrawer.DrawEndpointMarker(transforms[order[0]].position, ArrangePreviewDrawer.StartMarkerColor);
 		}
 
+		void DrawRaycastPreview(Transform[] transforms)
+		{
+			foreach (var t in transforms)
+				if (ArrangeOnSceneMath.TryRaycastPlacement(t, raycastDirection, raycastDirectionTarget, raycastLayerMask, RaycastMaxDistance, out var position, out _))
+					ArrangePreviewDrawer.DrawPreviewPoint(t.position, position);
+		}
+
 		void OnAlignClicked()
 		{
 			if (alignAxes == ArrangeOnSceneMath.Axes.None)
@@ -614,6 +691,17 @@ namespace InsaneOne.Core.LevelDesign
 
 			for (var i = 0; i < transforms.Length; i++)
 				transforms[i].position = positions[i];
+		}
+
+		void OnRaycastClicked()
+		{
+			var transforms = Selection.transforms;
+			if (transforms.Length < MinObjectsToArrange)
+				return;
+
+			Undo.RecordObjects(transforms, RaycastUndoName);
+
+			ArrangeOnSceneMath.ApplyRaycastPlacement(transforms, raycastDirection, raycastDirectionTarget, raycastAlignWithNormal, raycastLayerMask, RaycastMaxDistance);
 		}
 	}
 }
