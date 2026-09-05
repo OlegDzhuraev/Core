@@ -450,5 +450,141 @@ namespace InsaneOne.Core.Tests
 
 			AssertQuaternion(Quaternion.Euler(10, 20, 30), transforms[0].rotation);
 		}
+
+		// --- Raycast: direction ---
+
+		[Test]
+		public void GetRaycastDirection_ReturnsWorldAxisVectors_ForCardinalOptions()
+		{
+			var t = CreateTransform(Vector3.zero);
+
+			AssertVector3(Vector3.left, ArrangeOnSceneMath.GetRaycastDirection(t, ArrangeOnSceneMath.RaycastDirection.Left, null));
+			AssertVector3(Vector3.right, ArrangeOnSceneMath.GetRaycastDirection(t, ArrangeOnSceneMath.RaycastDirection.Right, null));
+			AssertVector3(Vector3.up, ArrangeOnSceneMath.GetRaycastDirection(t, ArrangeOnSceneMath.RaycastDirection.Up, null));
+			AssertVector3(Vector3.down, ArrangeOnSceneMath.GetRaycastDirection(t, ArrangeOnSceneMath.RaycastDirection.Down, null));
+			AssertVector3(Vector3.forward, ArrangeOnSceneMath.GetRaycastDirection(t, ArrangeOnSceneMath.RaycastDirection.Forward, null));
+			AssertVector3(Vector3.back, ArrangeOnSceneMath.GetRaycastDirection(t, ArrangeOnSceneMath.RaycastDirection.Backward, null));
+		}
+
+		[Test]
+		public void GetRaycastDirection_DirectionToTarget_PointsTowardsTheTarget()
+		{
+			var t = CreateTransform(new Vector3(0, 0, 0));
+			var target = CreateTransform(new Vector3(0, 0, 10));
+
+			var direction = ArrangeOnSceneMath.GetRaycastDirection(t, ArrangeOnSceneMath.RaycastDirection.DirectionToTarget, target);
+
+			AssertVector3(Vector3.forward, direction);
+		}
+
+		[Test]
+		public void GetRaycastDirection_DirectionToTarget_FallsBackToDown_WhenTargetNotAssigned()
+		{
+			var t = CreateTransform(Vector3.zero);
+
+			var direction = ArrangeOnSceneMath.GetRaycastDirection(t, ArrangeOnSceneMath.RaycastDirection.DirectionToTarget, null);
+
+			AssertVector3(Vector3.down, direction);
+		}
+
+		[Test]
+		public void GetRaycastDirection_DirectionToTarget_FallsBackToDown_WhenTargetIsAtTheSamePosition()
+		{
+			var t = CreateTransform(new Vector3(5, 5, 5));
+			var target = CreateTransform(new Vector3(5, 5, 5));
+
+			var direction = ArrangeOnSceneMath.GetRaycastDirection(t, ArrangeOnSceneMath.RaycastDirection.DirectionToTarget, target);
+
+			AssertVector3(Vector3.down, direction);
+		}
+
+		// --- Raycast: hit test ---
+
+		// A flat box collider whose top face sits exactly at topY, wide enough to be hit by a straight-down ray
+		// from anywhere within +/-size/2 of the origin on X/Z.
+		GameObject CreateGroundCollider(float topY, float size = 10f)
+		{
+			var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+			go.transform.position = new Vector3(0, topY - 0.5f, 0);
+			go.transform.localScale = new Vector3(size, 1f, size);
+			spawned.Add(go);
+			return go;
+		}
+
+		[Test]
+		public void TryRaycastPlacement_Down_HitsGround_AndReturnsThePointAndNormal()
+		{
+			CreateGroundCollider(topY: 0f);
+			var t = CreateTransform(new Vector3(0, 5, 0));
+
+			var hit = ArrangeOnSceneMath.TryRaycastPlacement(t, ArrangeOnSceneMath.RaycastDirection.Down, null, ~0, 1000f, out var position, out var normal);
+
+			Assert.IsTrue(hit);
+			AssertVector3(new Vector3(0, 0, 0), position);
+			AssertVector3(Vector3.up, normal);
+		}
+
+		[Test]
+		public void TryRaycastPlacement_ReturnsFalse_WhenNothingOnTheChosenLayer()
+		{
+			var ground = CreateGroundCollider(topY: 0f);
+			ground.layer = 8;
+			var t = CreateTransform(new Vector3(0, 5, 0));
+
+			var hit = ArrangeOnSceneMath.TryRaycastPlacement(t, ArrangeOnSceneMath.RaycastDirection.Down, null, ~(1 << 8), 1000f, out _, out _);
+
+			Assert.IsFalse(hit);
+		}
+
+		[Test]
+		public void TryRaycastPlacement_ReturnsTrue_WhenTheGroundIsOnTheChosenLayer()
+		{
+			var ground = CreateGroundCollider(topY: 0f);
+			ground.layer = 8;
+			var t = CreateTransform(new Vector3(0, 5, 0));
+
+			var hit = ArrangeOnSceneMath.TryRaycastPlacement(t, ArrangeOnSceneMath.RaycastDirection.Down, null, 1 << 8, 1000f, out var position, out _);
+
+			Assert.IsTrue(hit);
+			AssertVector3(new Vector3(0, 0, 0), position);
+		}
+
+		// --- Raycast: apply ---
+
+		[Test]
+		public void ApplyRaycastPlacement_MovesHitObjects_AndLeavesMissedObjectsInPlace()
+		{
+			CreateGroundCollider(topY: 0f, size: 4f); // doesn't reach under the second object
+			var transforms = CreateTransforms(new Vector3(0, 5, 0), new Vector3(100, 5, 0));
+
+			ArrangeOnSceneMath.ApplyRaycastPlacement(transforms, ArrangeOnSceneMath.RaycastDirection.Down, null, false, ~0, 1000f);
+
+			AssertVector3(new Vector3(0, 0, 0), transforms[0].position);
+			AssertVector3(new Vector3(100, 5, 0), transforms[1].position); // missed - left in place
+		}
+
+		[Test]
+		public void ApplyRaycastPlacement_AlignWithNormal_RotatesHitObjectsToMatchTheSurface()
+		{
+			CreateGroundCollider(topY: 0f);
+			var transforms = CreateTransforms(new Vector3(0, 5, 0));
+			transforms[0].rotation = Quaternion.Euler(45, 30, 60); // starts tilted, so a passing test proves the align actually ran
+
+			ArrangeOnSceneMath.ApplyRaycastPlacement(transforms, ArrangeOnSceneMath.RaycastDirection.Down, null, true, ~0, 1000f);
+
+			AssertVector3(Vector3.up, transforms[0].up); // rotated so the object's up matches the flat ground's normal
+		}
+
+		[Test]
+		public void ApplyRaycastPlacement_WithoutAlignWithNormal_LeavesRotationUntouched()
+		{
+			CreateGroundCollider(topY: 0f);
+			var transforms = CreateTransforms(new Vector3(0, 5, 0));
+			transforms[0].rotation = Quaternion.Euler(10, 20, 30);
+
+			ArrangeOnSceneMath.ApplyRaycastPlacement(transforms, ArrangeOnSceneMath.RaycastDirection.Down, null, false, ~0, 1000f);
+
+			AssertQuaternion(Quaternion.Euler(10, 20, 30), transforms[0].rotation);
+		}
 	}
 }

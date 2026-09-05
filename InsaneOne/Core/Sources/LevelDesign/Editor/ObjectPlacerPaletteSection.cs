@@ -202,7 +202,11 @@ namespace InsaneOne.Core.LevelDesign
 				return false;
 
 			foreach (var entry in palette.Entries)
+#if UNITY_6000_3_OR_NEWER
+				if (entry.Prefab && !entry.Icon && AssetPreview.IsLoadingAssetPreview(entry.Prefab.GetEntityId()))
+#else
 				if (entry.Prefab && !entry.Icon && AssetPreview.IsLoadingAssetPreview(entry.Prefab.GetInstanceID()))
+#endif
 					return true;
 
 			return false;

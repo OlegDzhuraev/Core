@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using InsaneOne.Core.Editor;
 using InsaneOne.Core.Utility;
 using UnityEditor;
 using UnityEditor.PackageManager;
@@ -44,7 +45,7 @@ namespace InsaneOne.Core.Development
         [MenuItem("Tools/InsaneOne/Update")]
         public static void UpdatePlugin()
         {
-            AddPackage($"https://github.com/{CoreData.RepoName}/Core.git");
+            AddPackage($"https://github.com/{SetupProjectPaths.RepoName}/Core.git");
         }
 
         // OnEnable (not just a manually-called Init) so styles are recreated after every domain reload -
@@ -100,7 +101,7 @@ namespace InsaneOne.Core.Development
                 if (foldersStyle == FoldersGenerationStyle.FeatureOriented)
                     GenerateProjectFoldersFeatures(dimension == 0);
                 else if (foldersStyle is FoldersGenerationStyle.Classic or FoldersGenerationStyle.ClassicECS)
-                    GenereteProjectFolders(dimension == 0, foldersStyle is FoldersGenerationStyle.ClassicECS);
+                    GenerateProjectFolders(dimension == 0, foldersStyle is FoldersGenerationStyle.ClassicECS);
             }
 
             GUILayout.EndVertical();
@@ -108,21 +109,15 @@ namespace InsaneOne.Core.Development
 
         void DrawModulesInstall()
         {
-            if (!CoreData.TryLoad(out var coreData))
-            {
-                EditorGUILayout.HelpBox($"No {nameof(CoreData)} asset found! Run \"Tools/InsaneOne/Initial setup...\" first.", MessageType.Warning);
-                return;
-            }
-
             var prevGUIEnabled = GUI.enabled;
             GUI.enabled = installRequest == null;
             
             GUILayout.BeginVertical(bigBlockStyle);
             DrawPartitionHeader("Packages and Assets");
             
-            DrawAddModule("Frequently used modules - add/update", coreData.GitPackages);
-            DrawAddModule("Frequently used packages - add/update", coreData.Packages);
-            DrawAddModule("Frequently used assets - open in browser", coreData.AssetLinks, true);
+            DrawAddModule("Frequently used modules - add/update", SetupProjectPaths.GitPackages);
+            DrawAddModule("Frequently used packages - add/update", SetupProjectPaths.Packages);
+            DrawAddModule("Frequently used assets - open in browser", SetupProjectPaths.AssetLinks, true);
             GUILayout.EndVertical();
             
             GUI.enabled = prevGUIEnabled;
@@ -353,8 +348,11 @@ namespace InsaneOne.Core.Development
                 new ($"{sharedFolderPath}/UI", "Templates"),
                 new (sharedFolderPath, "Scenes"),
                 new (sharedFolderPath, "Sources"),
-                new (sharedFolderPath, "Resources"),
-                new ($"{sharedFolderPath}/Resources", "Data")
+                new (sharedFolderPath, "Rendering"),
+                new ($"{sharedFolderPath}/Rendering", "Shaders"),
+
+                //new (sharedFolderPath, "Resources"),
+                //new ($"{sharedFolderPath}/Resources", "Data")  // not storing data assets in resources folder anymore
             };
             
             foreach (var folderData in foldersToCreate)
@@ -371,26 +369,30 @@ namespace InsaneOne.Core.Development
             }
         }
         
-        void GenereteProjectFolders(bool is3D, bool isEcs)
+        void GenerateProjectFolders(bool is3D, bool isEcs)
         {
             var contentPath = $"Assets/{contentFolder}";
 
             var foldersToCreate = new List<FolderData>
             {
-                new ("Assets", "Resources"),
-                new ("Assets/Resources", "Data"),
+                //new ("Assets", "Resources"),
+                //new ("Assets/Resources", "Data"), // not storing data assets in resources folder anymore
                 new ("Assets", contentFolder),
                 new (contentPath, "Sounds"),
+                new (contentPath, "Data"),
                 new (contentPath, "Materials"),
                 new (contentPath, "Animations"),
                 new (contentPath, "Scenes"),
                 new (contentPath, "Prefabs"),
-                new ($"{contentPath}/Prefabs", "Effects"),
+                new ($"{contentPath}/Prefabs", "VFX"),
                 new ($"{contentPath}/Prefabs", "Environment"),
             
                 new (contentPath, "Sources"),
                 new ($"{contentPath}/Sources", "Editor"),
                 new ($"{contentPath}/Sources", "Data"),
+
+                new (contentPath, "Rendering"),
+                new ($"{contentPath}/Rendering", "Shaders"),
             };
 
             if (isEcs)
@@ -403,7 +405,7 @@ namespace InsaneOne.Core.Development
             if (separateUiInClassicStyle)
             {
                 var uiPath = "Assets/UI";
-                foldersToCreate.AddRange(new List<FolderData>()
+                foldersToCreate.AddRange(new List<FolderData>
                 {
                     new($"Assets", "UI"),
                     new(uiPath, "Sources"),
@@ -415,7 +417,7 @@ namespace InsaneOne.Core.Development
             }
             else
             {
-                foldersToCreate.AddRange(new List<FolderData>()
+                foldersToCreate.AddRange(new List<FolderData>
                 {
                     new (contentPath, "UI"),
                     new ($"{contentPath}/UI", "Fonts"),

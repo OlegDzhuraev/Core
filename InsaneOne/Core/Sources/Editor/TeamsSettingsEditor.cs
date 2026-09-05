@@ -7,7 +7,7 @@ using UnityEngine.UIElements;
 namespace InsaneOne.Core.Teams.Development
 {
 	[CustomEditor(typeof(TeamsSettings))]
-	public sealed class TeamsSettingsEditor : Editor
+	public sealed class TeamsSettingsEditor : UnityEditor.Editor
 	{
 		const string StylesPath = "InsaneOne/ToolsStyles";
 		const string GroupStyleName = "group-box";

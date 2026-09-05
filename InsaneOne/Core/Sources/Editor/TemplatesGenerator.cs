@@ -142,7 +142,7 @@ namespace InsaneOne.Core.Development
         {
             var action = ScriptableObject.CreateInstance<CustomEndNameAction>();
             action.Callback = onSuccess;
-            ProjectWindowUtil.StartNameEditingIfProjectWindowExists(0, action, fileName, icon, null);
+            ProjectWindowUtil.StartNameEditingIfProjectWindowExists(EntityId.None, action, fileName, icon, null);
         }
         
         static string GetTemplateContent(string templateName)
@@ -154,7 +154,17 @@ namespace InsaneOne.Core.Development
 
             return template ? template.text : null;
         }
+#if UNITY_6000_3_OR_NEWER
+        sealed class CustomEndNameAction : AssetCreationEndAction
+        {
+            [NonSerialized] public Action<string> Callback;
 
+            public override void Action(EntityId entityId, string pathName, string resourceFile)
+            {
+                Callback?.Invoke(pathName);
+            }
+        }
+#else
         sealed class CustomEndNameAction : EndNameEditAction 
         {
             [NonSerialized] public Action<string> Callback;
@@ -164,5 +174,6 @@ namespace InsaneOne.Core.Development
                 Callback?.Invoke(pathName);
             }
         }
+#endif
     }
 }
