@@ -142,7 +142,14 @@ namespace InsaneOne.Core.Development
         {
             var action = ScriptableObject.CreateInstance<CustomEndNameAction>();
             action.Callback = onSuccess;
-            ProjectWindowUtil.StartNameEditingIfProjectWindowExists(EntityId.None, action, fileName, icon, null);
+
+            ProjectWindowUtil.StartNameEditingIfProjectWindowExists(
+#if UNITY_6000_3_OR_NEWER
+                EntityId.None,
+#else
+                0,
+#endif
+                action, fileName, icon, null);
         }
         
         static string GetTemplateContent(string templateName)
