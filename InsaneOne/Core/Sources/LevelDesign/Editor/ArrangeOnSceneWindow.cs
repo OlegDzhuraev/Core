@@ -40,7 +40,8 @@ namespace InsaneOne.Core.LevelDesign
 		const string RaycastUndoName = "Arrange On Scene - Raycast To Ground";
 
 		// Session-persisted (survives domain reload, not Editor restart) - see the level-design-editor-tools skill.
-		const string ModeKey = "InsaneOne.ArrangeOnScene.Mode";
+		// Mode itself is persisted by ArrangeOnSceneToolState instead (under the same key), since it's also driven
+		// by the Scene view overlay dropdown and needs to stay in sync between both.
 		const string AlignAxesKey = "InsaneOne.ArrangeOnScene.AlignAxes";
 		const string AlignAnchorKey = "InsaneOne.ArrangeOnScene.AlignAnchor";
 		const string AlignTargetGlobalIdKey = "InsaneOne.ArrangeOnScene.AlignTargetGlobalId";
@@ -66,16 +67,7 @@ namespace InsaneOne.Core.LevelDesign
 		const float DefaultStackSpacing = 2f;
 		const float RaycastMaxDistance = 1000f;
 
-		enum Mode
-		{
-			Align,
-			Distribute,
-			Circle,
-			Stack,
-			Raycast
-		}
-
-		Mode mode;
+		ArrangeOnSceneMode mode;
 		ArrangeOnSceneMath.Axes alignAxes;
 		ArrangeOnSceneMath.AlignAnchor alignAnchor;
 		Transform alignTarget;
@@ -94,9 +86,12 @@ namespace InsaneOne.Core.LevelDesign
 		LayerMask raycastLayerMask;
 
 		HelpBox infoBox;
+		VisualElement alignBox, distributeBox, circleBox, stackBox, raycastBox;
+		DropdownField modeField;
+		Button applyBtn;
 
 		[MenuItem("Tools/InsaneOne/Level Design/Arrange On Scene...")]
-		static void Init()
+		internal static void Init()
 		{
 			var window = (ArrangeOnSceneWindow)GetWindow(typeof(ArrangeOnSceneWindow), false, "Arrange On Scene", true);
 			window.Show();
@@ -106,12 +101,24 @@ namespace InsaneOne.Core.LevelDesign
 		{
 			SceneView.duringSceneGui += OnSceneGUI;
 			Selection.selectionChanged += UpdateInfoBoxVisibility;
+			ArrangeOnSceneToolState.ModeChanged += OnToolStateModeChanged;
 		}
 
 		void OnDisable()
 		{
 			SceneView.duringSceneGui -= OnSceneGUI;
 			Selection.selectionChanged -= UpdateInfoBoxVisibility;
+			ArrangeOnSceneToolState.ModeChanged -= OnToolStateModeChanged;
+		}
+
+		// Keeps this window's Mode dropdown and previewed mode in sync with the Scene view overlay's own Mode
+		// dropdown (ArrangeOnSceneModeDropdown), whichever of the two the user actually changes.
+		void OnToolStateModeChanged(ArrangeOnSceneMode value)
+		{
+			mode = value;
+			modeField?.SetValueWithoutNotify(modeField.choices[(int) value]);
+			ApplyModeVisibility();
+			SceneView.RepaintAll();
 		}
 
 		// Selection.selectionChanged doesn't reach here until CreateGUI has run at least once.
@@ -136,7 +143,7 @@ namespace InsaneOne.Core.LevelDesign
 			alignAxes = (ArrangeOnSceneMath.Axes) SessionState.GetInt(AlignAxesKey, (int) ArrangeOnSceneMath.Axes.None);
 			alignAnchor = (ArrangeOnSceneMath.AlignAnchor) SessionState.GetInt(AlignAnchorKey, (int) ArrangeOnSceneMath.AlignAnchor.Center);
 
-			var alignBox = new VisualElement();
+			alignBox = new VisualElement();
 			alignBox.AddToClassList(LevelDesignToolStyles.GroupBoxClass);
 			alignBox.Add(CreateSectionTitle("Align"));
 			alignBox.Add(CreateDescription("Aligns the selection on the chosen axes to the min, center, max or a chosen target object."));
@@ -179,7 +186,7 @@ namespace InsaneOne.Core.LevelDesign
 
 			distributeAxes = (ArrangeOnSceneMath.Axes) SessionState.GetInt(DistributeAxesKey, (int) ArrangeOnSceneMath.Axes.None);
 
-			var distributeBox = new VisualElement();
+			distributeBox = new VisualElement();
 			distributeBox.AddToClassList(LevelDesignToolStyles.GroupBoxClass);
 			distributeBox.Add(CreateSectionTitle("Distribute"));
 			distributeBox.Add(CreateDescription("Spreads the selection evenly between its current min and max on the chosen axes, ordered by its current spread on the other axes (e.g. left-to-right on X before distributing upward on Y)."));
@@ -197,7 +204,7 @@ namespace InsaneOne.Core.LevelDesign
 			stackAxes = (ArrangeOnSceneMath.Axes) SessionState.GetInt(StackAxesKey, (int) ArrangeOnSceneMath.Axes.None);
 			stackSpacing = SessionState.GetFloat(StackSpacingKey, DefaultStackSpacing);
 
-			var stackBox = new VisualElement();
+			stackBox = new VisualElement();
 			stackBox.AddToClassList(LevelDesignToolStyles.GroupBoxClass);
 			stackBox.Add(CreateSectionTitle("Stack"));
 			stackBox.Add(CreateDescription("Lines the selection up with a fixed step, ordered by its current spread on the other axes (e.g. left-to-right on X before stacking upward on Y) - instead of spreading it across the current range like Distribute does."));
@@ -227,7 +234,7 @@ namespace InsaneOne.Core.LevelDesign
 			circleAngleOffset = Mathf.Clamp(SessionState.GetFloat(CircleAngleOffsetKey, DefaultCircleAngleOffset), 0f, MaxCircleAngleOffset);
 			circleRotationMode = (ArrangeOnSceneMath.CircleRotationMode) SessionState.GetInt(CircleRotationModeKey, (int) ArrangeOnSceneMath.CircleRotationMode.None);
 
-			var circleBox = new VisualElement();
+			circleBox = new VisualElement();
 			circleBox.AddToClassList(LevelDesignToolStyles.GroupBoxClass);
 			circleBox.Add(CreateSectionTitle("Circle"));
 			circleBox.Add(CreateDescription("Spreads the selection evenly around a circle on the XZ plane, centered on the current selection or on a chosen target object. Each object takes whichever spot on the circle is closest to its current position."));
@@ -299,7 +306,7 @@ namespace InsaneOne.Core.LevelDesign
 			raycastAlignWithNormal = SessionState.GetBool(RaycastAlignWithNormalKey, false);
 			raycastLayerMask = SessionState.GetInt(RaycastLayerMaskKey, ~0);
 
-			var raycastBox = new VisualElement();
+			raycastBox = new VisualElement();
 			raycastBox.AddToClassList(LevelDesignToolStyles.GroupBoxClass);
 			raycastBox.Add(CreateSectionTitle("Raycast"));
 			raycastBox.Add(CreateDescription("Casts a ray from each selected object's own position in the chosen direction and moves it to the hit point. Objects that don't hit anything on the chosen layers are left where they are."));
@@ -345,38 +352,20 @@ namespace InsaneOne.Core.LevelDesign
 			});
 			raycastBox.Add(raycastLayerMaskField);
 
-			var applyBtn = new Button(OnApplyClicked);
+			applyBtn = new Button(OnApplyClicked);
 			applyBtn.AddToClassList(ApplyButtonClass);
 
-			// Only the box for the currently selected Mode is shown - its settings and description double as "what
-			// will happen" preview info, and OnSceneGUI always previews that same mode (see below), so picking a
-			// mode is enough to see both its block and its Scene view preview without a separate preview toggle.
-			// The single Apply button below replaces what used to be one button per block, its label switching to
-			// match whichever mode is currently active.
-			void ApplyModeVisibility()
-			{
-				alignBox.style.display = GetDisplay(mode == Mode.Align);
-				distributeBox.style.display = GetDisplay(mode == Mode.Distribute);
-				circleBox.style.display = GetDisplay(mode == Mode.Circle);
-				stackBox.style.display = GetDisplay(mode == Mode.Stack);
-				raycastBox.style.display = GetDisplay(mode == Mode.Raycast);
-				applyBtn.text = GetApplyButtonText(mode);
-			}
-
-			mode = (Mode) SessionState.GetInt(ModeKey, (int) Mode.Align);
+			mode = ArrangeOnSceneToolState.Mode;
 
 			var modeBox = new VisualElement();
 			modeBox.AddToClassList(LevelDesignToolStyles.GroupBoxClass);
 			modeBox.Add(CreateSectionTitle("Mode"));
 
-			var modeField = new DropdownField("", new List<string> { "Align", "Distribute", "Circle", "Stack", "Raycast" }, (int) mode);
-			modeField.RegisterValueChangedCallback(_ =>
-			{
-				mode = (Mode) modeField.index;
-				SessionState.SetInt(ModeKey, (int) mode);
-				ApplyModeVisibility();
-				SceneView.RepaintAll();
-			});
+			modeField = new DropdownField("", new List<string> { "Align", "Distribute", "Circle", "Stack", "Raycast" }, (int) mode);
+			// Only sets the shared state - OnToolStateModeChanged (subscribed in OnEnable) is what actually applies
+			// the new mode here, so this window and the Scene view overlay's own Mode dropdown stay in sync however
+			// either one is changed.
+			modeField.RegisterValueChangedCallback(_ => ArrangeOnSceneToolState.SetMode((ArrangeOnSceneMode) modeField.index));
 			modeBox.Add(modeField);
 
 			ApplyModeVisibility();
@@ -392,6 +381,25 @@ namespace InsaneOne.Core.LevelDesign
 			scrollView.Add(applyBtn);
 
 			root.Add(scrollView);
+		}
+
+		// Only the box for the currently selected Mode is shown - its settings and description double as "what
+		// will happen" preview info, and OnSceneGUI always previews that same mode (see below), so picking a
+		// mode is enough to see both its block and its Scene view preview without a separate preview toggle.
+		// The single Apply button below replaces what used to be one button per block, its label switching to
+		// match whichever mode is currently active. Also called from OnToolStateModeChanged, so guard against
+		// running before CreateGUI has built these boxes yet.
+		void ApplyModeVisibility()
+		{
+			if (alignBox == null)
+				return;
+
+			alignBox.style.display = GetDisplay(mode == ArrangeOnSceneMode.Align);
+			distributeBox.style.display = GetDisplay(mode == ArrangeOnSceneMode.Distribute);
+			circleBox.style.display = GetDisplay(mode == ArrangeOnSceneMode.Circle);
+			stackBox.style.display = GetDisplay(mode == ArrangeOnSceneMode.Stack);
+			raycastBox.style.display = GetDisplay(mode == ArrangeOnSceneMode.Raycast);
+			applyBtn.text = GetApplyButtonText(mode);
 		}
 
 		// Same GlobalObjectId-based persistence as ObjectPlacerGeneralSection's Auto-Parent field - a scene object
@@ -422,13 +430,13 @@ namespace InsaneOne.Core.LevelDesign
 			SessionState.SetString(key, globalId.ToString());
 		}
 
-		static string GetApplyButtonText(Mode value) => value switch
+		static string GetApplyButtonText(ArrangeOnSceneMode value) => value switch
 		{
-			Mode.Align => "Align",
-			Mode.Distribute => "Distribute Evenly",
-			Mode.Circle => "Arrange in Circle",
-			Mode.Stack => "Stack With Fixed Spacing",
-			Mode.Raycast => "Raycast To Ground",
+			ArrangeOnSceneMode.Align => "Align",
+			ArrangeOnSceneMode.Distribute => "Distribute Evenly",
+			ArrangeOnSceneMode.Circle => "Arrange in Circle",
+			ArrangeOnSceneMode.Stack => "Stack With Fixed Spacing",
+			ArrangeOnSceneMode.Raycast => "Raycast To Ground",
 			_ => "Apply",
 		};
 
@@ -436,19 +444,19 @@ namespace InsaneOne.Core.LevelDesign
 		{
 			switch (mode)
 			{
-				case Mode.Align:
+				case ArrangeOnSceneMode.Align:
 					OnAlignClicked();
 					break;
-				case Mode.Distribute:
+				case ArrangeOnSceneMode.Distribute:
 					OnDistributeClicked();
 					break;
-				case Mode.Circle:
+				case ArrangeOnSceneMode.Circle:
 					OnArrangeCircleClicked();
 					break;
-				case Mode.Stack:
+				case ArrangeOnSceneMode.Stack:
 					OnStackClicked();
 					break;
-				case Mode.Raycast:
+				case ArrangeOnSceneMode.Raycast:
 					OnRaycastClicked();
 					break;
 			}
@@ -536,19 +544,19 @@ namespace InsaneOne.Core.LevelDesign
 
 			switch (mode)
 			{
-				case Mode.Align:
+				case ArrangeOnSceneMode.Align:
 					DrawAlignPreview(transforms);
 					break;
-				case Mode.Distribute:
+				case ArrangeOnSceneMode.Distribute:
 					DrawDistributePreview(transforms);
 					break;
-				case Mode.Circle:
+				case ArrangeOnSceneMode.Circle:
 					DrawCirclePreview(transforms);
 					break;
-				case Mode.Stack:
+				case ArrangeOnSceneMode.Stack:
 					DrawStackPreview(transforms);
 					break;
-				case Mode.Raycast:
+				case ArrangeOnSceneMode.Raycast:
 					DrawRaycastPreview(transforms);
 					break;
 			}
