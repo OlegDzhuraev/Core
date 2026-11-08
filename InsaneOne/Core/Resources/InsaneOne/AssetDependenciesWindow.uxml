@@ -1,0 +1,39 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:Style src="AssetDependenciesWindow.uss" />
+    <ui:VisualElement class="asset-dependencies">
+        <ui:VisualElement class="header">
+            <ui:VisualElement class="heading">
+                <ui:Label text="Asset Dependencies" class="title" />
+                <ui:Label text="Explore connections between assets" class="subtitle" />
+            </ui:VisualElement>
+            <ui:Button name="rebuild" text="↻  Rebuild" class="secondary-button" tooltip="Rebuild the dependency index from scratch." />
+        </ui:VisualElement>
+        <ui:VisualElement class="asset-card">
+            <ui:VisualElement class="card-heading">
+                <ui:Label text="SELECTED ASSET" class="eyebrow" />
+                <ui:Toggle name="locked" label="Lock selection" class="compact-toggle" tooltip="Keep this asset when Project selection changes." />
+            </ui:VisualElement>
+            <uie:ObjectField name="asset" class="selected-asset" />
+        </ui:VisualElement>
+        <ui:VisualElement class="direction-tabs">
+            <ui:Button name="outgoing" class="direction-tab" tooltip="Assets this file uses. Project counts show direct dependencies." />
+            <ui:Button name="incoming" class="direction-tab" tooltip="Assets referencing this file. Project counts show direct references." />
+        </ui:VisualElement>
+        <ui:VisualElement class="filter-row">
+            <uie:ToolbarSearchField name="search" class="asset-search" tooltip="Search by name or path." />
+            <ui:Toggle name="recursive" label="Include indirect" class="compact-toggle" tooltip="Follow dependencies recursively. Project counters always show direct links." />
+        </ui:VisualElement>
+        <ui:VisualElement class="results-card">
+            <ui:VisualElement class="results-heading">
+                <ui:Label name="summary" class="summary" />
+                <ui:Label name="scope" class="scope" />
+            </ui:VisualElement>
+            <ui:VisualElement class="list-area">
+                <ui:ListView name="results" class="results" />
+                <ui:Label name="empty" class="empty-state" picking-mode="Ignore" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:Label text="Click to locate  ·  Double-click to open  ·  Right-click to copy path" class="footer-hint" />
+        <ui:Label name="status" class="status" tooltip="Indexes Assets and Packages. Self, folders and built-in resources are excluded. String-based runtime loads are not tracked." />
+    </ui:VisualElement>
+</ui:UXML>
