@@ -103,25 +103,46 @@ namespace InsaneOne.Core.Development
 					ScanSceneGameObjects(root, openScene.path, found);
 			}
 
+			var skippedPackageScenes = new List<string>();
+
 			foreach (var guid in AssetDatabase.FindAssets("t:SceneAsset"))
 			{
 				var path = AssetDatabase.GUIDToAssetPath(guid);
 
-				if (string.IsNullOrEmpty(path) || openPaths.Contains(path))
+				if (string.IsNullOrEmpty(path))
 					continue;
 
-				var scene = EditorSceneManager.OpenScene(path, OpenSceneMode.Additive);
+				if (path.StartsWith("Packages/"))
+				{
+					skippedPackageScenes.Add(path); // scenes inside packages can't be opened by EditorSceneManager and shouldn't be patched in the consuming project anyway
+					continue;
+				}
+
+				if (openPaths.Contains(path))
+					continue;
 
 				try
 				{
-					foreach (var root in scene.GetRootGameObjects())
-						ScanSceneGameObjects(root, path, found);
+					var scene = EditorSceneManager.OpenScene(path, OpenSceneMode.Additive);
+
+					try
+					{
+						foreach (var root in scene.GetRootGameObjects())
+							ScanSceneGameObjects(root, path, found);
+					}
+					finally
+					{
+						EditorSceneManager.CloseScene(scene, true);
+					}
 				}
-				finally
+				catch (Exception ex)
 				{
-					EditorSceneManager.CloseScene(scene, true);
+					CoreUnityLogger.I.Log($"[SerializeReference Migrator] Could not scan scene [ {path} ]: {ex.Message}", LogLevel.Warning);
 				}
 			}
+
+			if (skippedPackageScenes.Count > 0)
+				CoreUnityLogger.I.Log($"[SerializeReference Migrator] Skipped {skippedPackageScenes.Count} scene(s) inside Packages - such scenes can't be opened for scanning and should be fixed in their own repository.", LogLevel.Info);
 		}
 
 		static void ScanSceneGameObjects(Object root, string path, List<MissingType> found)
@@ -163,6 +184,13 @@ namespace InsaneOne.Core.Development
 
 			foreach (var (assetPath, assetFixes) in fixesByAsset)
 			{
+				if (assetPath.StartsWith("Packages/"))
+				{
+					result.Errors.Add($"Asset [ {assetPath} ] is inside a package - fix it in the package's own repository instead, otherwise the change would be lost on the next package update.");
+					result.FailedCount += assetFixes.Count;
+					continue;
+				}
+
 				if (IsSceneOpenInEditor(assetPath))
 				{
 					result.Errors.Add($"Scene [ {assetPath} ] is open in the editor - close it before applying, otherwise the next scene save would overwrite the fix.");

@@ -139,7 +139,9 @@ changes, need one focus to load), or has compile errors in the Console. Ask the 
 the Unity window and retry. A `ping` first is the cheapest way to check the bridge is alive
 (also use it after any script change to confirm the editor recompiled successfully). The
 bridge works on the main thread inside the editor, so scans of large projects can take a few
-seconds to answer.
+seconds to answer. Scenes located inside `Packages/` can't be opened by EditorSceneManager
+and are skipped with an Info log; `apply` also refuses assets inside packages (patching them
+in the consuming project would be lost on the next package update).
 
 ## Tests
 
