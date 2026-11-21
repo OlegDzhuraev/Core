@@ -6,7 +6,7 @@ namespace InsaneOne.Core
 	/// <summary> Runtime only. Not serialized. </summary>
 	public sealed class SoundMixer
 	{
-		/// <summary> How strong will be mixed two audiosources, if MixValue is centered between them. 1 will give 50% volume, 0 will give 0%. </summary>
+		/// <summary> How strong will be mixed two audiosources, if MixValue is centered between them. 1 gives 50% volume, 0 gives 0%, 2 gives about 67%. </summary>
 		public float OverMix { get; private set; }
 		public float MixValue { get; private set; }
 		public float MaxVolume { get; set; } = 1f;
@@ -62,9 +62,9 @@ namespace InsaneOne.Core
 				var source = mixedSources[q];
 				
 				if (Mathf.Abs(position - start) <= threshold)
-					source.volume = Mathf.Lerp(1f, 0, progress);
+					source.volume = Mathf.Lerp(1f, 0, progress) * MaxVolume;
 				else if (Math.Abs(position - target) <= threshold)
-					source.volume = Mathf.Lerp(0f, 1f, progress);
+					source.volume = Mathf.Lerp(0f, 1f, progress) * MaxVolume;
 				else
 					source.volume = 0;
 			}

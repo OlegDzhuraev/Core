@@ -11,6 +11,8 @@ namespace InsaneOne.Core
 		[SerializeField] KeyCode defaultActionKey = KeyCode.E;
 		[SerializeField] string tagForCheck = "Player";
 
+		int targetsInsideCount;
+
 		void Update()
 		{
 			if (interactOnEnter || !IsTargetNear)
@@ -25,6 +27,8 @@ namespace InsaneOne.Core
 			if (!other.gameObject.CompareTag(tagForCheck))
 				return;
 
+			targetsInsideCount++;
+
 			IsTargetNear = true;
 
 			if (interactOnEnter)
@@ -33,8 +37,11 @@ namespace InsaneOne.Core
 
 		protected override void OnTriggerExit2D(Collider2D other)
 		{
-			if (other.gameObject.CompareTag(tagForCheck))
-				IsTargetNear = false;
+			if (!other.gameObject.CompareTag(tagForCheck))
+				return;
+
+			targetsInsideCount = Mathf.Max(0, targetsInsideCount - 1);
+			IsTargetNear = targetsInsideCount > 0; // one collider exit doesn't mean the target left - it may have several colliders inside
 		}
 	}
 }

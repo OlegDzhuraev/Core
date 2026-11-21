@@ -35,6 +35,8 @@ namespace InsaneOne.Core.UI
 
 		public override void OnViewModelChanged(HintViewModel viewModel)
 		{
+			enabled = true; // can be disabled by Update below when the ViewModel was missing - re-enable on a valid one
+
 			var finalPos = Vector2.zero;
 
 			if (viewModel.ShowOnCursor)
@@ -42,8 +44,11 @@ namespace InsaneOne.Core.UI
 			else
 				finalPos = viewModel.Position;
 
-			rectTransform.anchoredPosition = finalPos * canvasTransform.localScale.x;
-			nameText.text = viewModel.Text;
+			var canvasScale = canvasTransform ? canvasTransform.localScale.x : 1f;
+			rectTransform.anchoredPosition = finalPos / canvasScale;
+
+			if (nameText)
+				nameText.text = viewModel.Text;
 		}
 
 		void Update()
@@ -54,8 +59,11 @@ namespace InsaneOne.Core.UI
 				throw new NullReferenceException($"[{nameof(Hint)}] ViewModel is not set on object [{name}]! Disabling Update to stop the crash loop.");
 			}
 
-			if (ViewModel.ShowOnCursor)
-				rectTransform.anchoredPosition = Input.mousePosition;
+			if (!ViewModel.ShowOnCursor)
+				return;
+
+			var canvasScale = canvasTransform ? canvasTransform.localScale.x : 1f;
+			rectTransform.anchoredPosition = ((Vector2) Input.mousePosition + ViewModel.CursorOffset) / canvasScale;
 		}
 	}
 

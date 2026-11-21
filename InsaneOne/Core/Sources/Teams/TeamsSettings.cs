@@ -10,6 +10,7 @@ namespace InsaneOne.Core.Teams
 	public class TeamsSettings : ScriptableObject
 	{
 		static TeamsSettings fallbackInstance;
+		static bool loggedMissingSettings;
 
 		[Tooltip("Display name and color per team. A team's id is its index in this list - team 0 is teamInfos[0], team 1 is teamInfos[1], etc. Every team id you use must have a matching entry here.")]
 		[SerializeField]
@@ -85,7 +86,11 @@ namespace InsaneOne.Core.Teams
 			if (CoreData.TryLoad(out var coreData) && coreData.TeamsSettings)
 				return coreData.TeamsSettings;
 
-			CoreUnityLogger.I.Log($"No {nameof(CoreData)} found! {nameof(TeamsSettings)} not work correctly!", LogLevel.Error);
+			if (!loggedMissingSettings) // IsTeamEnemyTo and similar can be called every frame - warn only once instead of spamming
+			{
+				CoreUnityLogger.I.Log($"No {nameof(CoreData)} found! {nameof(TeamsSettings)} not work correctly!", LogLevel.Error);
+				loggedMissingSettings = true;
+			}
 
 			if (!fallbackInstance)
 				fallbackInstance = CreateInstance<TeamsSettings>();

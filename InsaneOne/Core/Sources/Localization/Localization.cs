@@ -51,6 +51,10 @@ namespace InsaneOne.Core.Locales
 			CachedTexts.Clear();
 
 			loadedLocalizationTexts = ReadAllLines(path);
+
+			if (loadedLocalizationTexts.Length == 0 || string.IsNullOrWhiteSpace(LanguagesRow))
+				throw new Exception("Localization file is empty or has no languages header row!");
+
 			var languages = LanguagesRow.Split(SplitSymbol, StringSplitOptions.None);
 
 			Languages = languages.TakeLast(languages.Length - 1).ToList();
@@ -151,6 +155,8 @@ namespace InsaneOne.Core.Locales
 			IsLoaded = false;
 			IsLanguageSetAtLeastOnce = false;
 			Language = DefaultLanguage;
+			loadedLocalizationTexts = null;
+			WasInitialized = null;
 		}
 
 #if (UNITY_ANDROID || UNITY_WEBGL) && !UNITY_EDITOR

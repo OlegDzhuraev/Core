@@ -38,6 +38,11 @@ namespace InsaneOne.Core.UI
             RectTransform.anchorMax = Vector3.zero;
         }
 
+        public override void OnViewModelChanged(FloatingPanelViewModel viewModel)
+        {
+            enabled = true; // can be disabled by Update below when the ViewModel was missing - re-enable on a valid one
+        }
+
         void Update()
         {
             if (ViewModel == null)
@@ -49,10 +54,22 @@ namespace InsaneOne.Core.UI
             if (!ViewModel.IsTargetExist)
                 return;
 
-            var worldTargetPos = ViewModel.FollowTarget.transform.position;
-            var screenPos = MainCamera.Cached.WorldToScreenPoint(worldTargetPos + Vector3.up * ViewModel.VerticalOffset);
+            var camera = MainCamera.Cached;
 
-            RectTransform.anchoredPosition = screenPos / CanvasTransform.localScale.x;
+            if (camera == null)
+                return;
+
+            var worldTargetPos = ViewModel.FollowTarget.transform.position;
+            var screenPos = camera.WorldToScreenPoint(worldTargetPos + Vector3.up * ViewModel.VerticalOffset);
+
+            if (screenPos.z <= 0) // target is behind the camera - don't draw a mirrored panel, keep it offscreen until it's visible again
+            {
+                RectTransform.anchoredPosition = new Vector2(-10000f, -10000f);
+                return;
+            }
+
+            var canvasScale = CanvasTransform ? CanvasTransform.localScale.x : 1f;
+            RectTransform.anchoredPosition = screenPos / canvasScale;
         }
     }
 

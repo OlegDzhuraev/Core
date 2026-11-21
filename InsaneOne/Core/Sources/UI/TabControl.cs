@@ -34,16 +34,25 @@ namespace InsaneOne.Core.UI
 
 		void Start()
 		{
-			Debug.Assert(tabs.Count == buttons.Count, $"[{nameof(TabControl)}] tabs and buttons count mismatch on [{name}]!");
+			if (tabs.Count != buttons.Count)
+				CoreUnityLogger.I.Log($"[{nameof(TabControl)}] tabs and buttons count mismatch on [{name}]!", LogLevel.Warning);
 
 			for (var i = 0; i < buttons.Count; i++)
 			{
 				var cachedIndex = i;
-				buttons[i].onClick.AddListener(() => ShowTab(cachedIndex));
+
+				if (buttons[i])
+					buttons[i].onClick.AddListener(() => ShowTab(cachedIndex));
 			}
 
 			for (var i = 1; i < tabs.Count; i++)
-				tabs[i].SetActive(false);
+			{
+				if (tabs[i])
+					tabs[i].SetActive(false);
+			}
+
+			if (tabs.Count > 0 && tabs[0])
+				tabs[0].SetActive(true); // make sure the first tab is actually visible - shownTab is 0 by default
 		}
 
 		public void ShowTab(int number)
@@ -54,7 +63,12 @@ namespace InsaneOne.Core.UI
 				return;
 			}
 
-			tabs[shownTab].SetActive(false);
+			if (number == shownTab) // avoid the hide/show churn and spurious events when re-clicking the already shown tab
+				return;
+
+			if (tabs[shownTab])
+				tabs[shownTab].SetActive(false);
+
 			tabs[number].SetActive(true);
 
 			shownTab = number;

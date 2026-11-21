@@ -26,7 +26,7 @@ namespace InsaneOne.Core
         public static CoreData Load()
         {
             if (!TryLoad(out var result))
-                throw new NullReferenceException("Possible, InsaneOne.Core initialization was failed, no CoreData found!");
+                throw new InvalidOperationException("InsaneOne.Core initialization failed - no CoreData asset found! Create it via the Create Asset menu (InsaneOne/Core Data) and place it at Resources/InsaneOne.");
             
             return result;
         }

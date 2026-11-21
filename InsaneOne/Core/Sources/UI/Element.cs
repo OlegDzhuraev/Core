@@ -58,19 +58,19 @@ namespace InsaneOne.Core.UI
 
 		public virtual void Show()
 		{
-			if (selfObject.activeSelf)
+			if (SelfObject.activeSelf)
 				return;
 
-			selfObject.SetActive(true);
+			SelfObject.SetActive(true);
 			WasShown?.Invoke();
 		}
 
 		public virtual void Hide()
 		{
-			if (!selfObject.activeSelf)
+			if (!SelfObject.activeSelf)
 				return;
 
-			selfObject.SetActive(false);
+			SelfObject.SetActive(false);
 			WasHidden?.Invoke();
 		}
 	}

@@ -44,7 +44,7 @@ namespace InsaneOne.Core.Goals
 
 		public GoalsService(GoalsConfig config)
 		{
-			this.config = config;
+			this.config = config ?? throw new ArgumentNullException(nameof(config), "GoalsService requires a GoalsConfig asset.");
 		}
 
 		/// <summary> Called automatically by ServiceLocator.Register - fills progress of all configured goals with zero. </summary>

@@ -349,6 +349,33 @@ class SomeTarget()
 }
 ```
 
+## Goals
+A lightweight achievements/objectives system. Configure goals in a **GoalsConfig** asset (context menu: **InsaneOne → Goals Config**), track their runtime progress with a **GoalsService**, and show progress updates with the ready-made **GoalNotificationPopup** UI component.
+
+```cs
+using InsaneOne.Core.Architect;
+using InsaneOne.Core.Goals;
+
+// at game init: each goal in the config has an id, title and required amount
+ServiceLocator.Register(new GoalsService(goalsConfig)); // Init() is called automatically
+
+// from gameplay code:
+var progress = goalsService.AddProgress("kills", 1); // returns a GoalProgress snapshot
+if (progress.IsCompleted)
+  Debug.Log($"{progress.Title} done!");
+
+// UI: add a GoalNotificationPopup to your canvas and bind it — it queues and shows
+// a popup (title + progress bar) whenever any goal gets progress:
+notificationPopup.Bind(goalsService);
+```
+
+You can also read progress for UI lists (`TryGetProgress` / `GetAllProgress`), react to changes via the `ProgressChanged`/`Completed` events, and persist progress as a json file under `Application.persistentDataPath`:
+
+```cs
+goalsService.Save();
+goalsService.Load(); // call it right after registering the service, before anything reads progress
+```
+
 ## Utility
 
 ### Pause Utility

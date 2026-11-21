@@ -7,35 +7,44 @@ namespace InsaneOne.Core
 {
 	public static class RandomExtensions
 	{
-		/// <summary>Gets random element from list of objects of any type.</summary>
-		public static T Random<T>(this List<T> list) => list[URnd.Range(0, list.Count)];
+		/// <summary>Gets random element from list of objects of any type. Returns default if the list is null or empty.</summary>
+		public static T Random<T>(this List<T> list) => list != null && list.Count > 0 ? list[URnd.Range(0, list.Count)] : default;
 
-		/// <summary>Gets random element from array of objects of any type.</summary>
-		public static T Random<T>(this T[] array) => array[URnd.Range(0, array.Length)];
+		/// <summary>Gets random element from array of objects of any type. Returns default if the array is null or empty.</summary>
+		public static T Random<T>(this T[] array) => array != null && array.Length > 0 ? array[URnd.Range(0, array.Length)] : default;
 
-		/// <summary>Gets random element from array of objects of any type. Random index limited by maxLength param.</summary>
-		public static T Random<T>(this T[] array, int maxLength) => array[URnd.Range(0, Math.Min(array.Length, maxLength))];
+		/// <summary>Gets random element from array of objects of any type. Random index limited by maxLength param. Returns default if there are no elements.</summary>
+		public static T Random<T>(this T[] array, int maxLength)
+		{
+			var count = Math.Min(array?.Length ?? 0, maxLength);
+			return count > 0 ? array[URnd.Range(0, count)] : default;
+		}
 
-		/// <summary>Gets random element from list of objects of any type. Random index limited by maxCount param.</summary>
-		public static T Random<T>(this List<T> list, int maxCount) => list[URnd.Range(0, Math.Min(list.Count, maxCount))];
+		/// <summary>Gets random element from list of objects of any type. Random index limited by maxCount param. Returns default if there are no elements.</summary>
+		public static T Random<T>(this List<T> list, int maxCount)
+		{
+			var count = Math.Min(list?.Count ?? 0, maxCount);
+			return count > 0 ? list[URnd.Range(0, count)] : default;
+		}
 
 		/// <summary>Gets random element from list of objects of any type, only from elements, for which condition is true.</summary>
 		public static bool TryRandom<T>(this IEnumerable<T> collection, Func<T, bool> condition, out T result)
 		{
-			var matches = new List<T>();
+			result = default;
+			var matchesCount = 0;
 
 			foreach (var e in collection)
-				if (condition(e))
-					matches.Add(e);
-
-			if (matches.Count == 0)
 			{
-				result = default;
-				return false;
+				if (!condition(e))
+					continue;
+
+				matchesCount++;
+
+				if (URnd.Range(0, matchesCount) == 0) // reservoir sampling - each matching element has an equal chance, no allocations
+					result = e;
 			}
 
-			result = matches.Random();
-			return true;
+			return matchesCount > 0;
 		}
 
 		/// <summary>Randomly fills Vector3 values.</summary>
@@ -72,7 +81,7 @@ namespace InsaneOne.Core
 			return new Vector2(x, y);
 		}
 
-		/// <summary> Get item from dictionary by weighted random. </summary>
+		/// <summary> Get item from dictionary by weighted random. Items with zero or negative weight are never picked. Returns default if all weights are zero. </summary>
 		/// <param name="items">Structure - key: item, value: its weight</param>
 		public static T GetWeightedItem<T>(this Dictionary<T, float> items)
 		{
@@ -81,18 +90,24 @@ namespace InsaneOne.Core
 			foreach (var (_, weight) in items)
 				totalWeight += weight;
 
-			var randomNumber = URnd.Range(0f, totalWeight);
+			if (totalWeight <= 0)
+				return default;
 
+			var randomNumber = URnd.Range(0f, totalWeight);
 			T selectedItem = default;
+
 			foreach (var (item, weight) in items)
 			{
-				if (randomNumber < weight)
+				if (weight <= 0)
+					continue;
+
+				randomNumber -= weight;
+
+				if (randomNumber <= 0)
 				{
 					selectedItem = item;
 					break;
 				}
-
-				randomNumber -= weight;
 			}
 
 			return selectedItem;

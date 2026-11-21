@@ -21,6 +21,12 @@ namespace InsaneOne.Core.Architect
 		/// <summary> Used to first initialize on loaded scene. Needed to be called once on level load (support multi-scenes, but should be called after all of them are loaded). </summary>
 		public static void Initialize(T newContext, int capacity = 1024)
 		{
+			if (newContext == null)
+			{
+				Debug.LogWarning($"[Context<{typeof(T).Name}>] Can't initialize with a null context - Initialize call ignored.");
+				return;
+			}
+
 			if (context != null)
 			{
 				Debug.LogWarning($"[Context<{typeof(T).Name}>] Already initialized, ignoring repeated Initialize call - call Dispose() first if you need to reinitialize with a new context.");

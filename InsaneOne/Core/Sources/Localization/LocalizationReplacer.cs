@@ -24,7 +24,8 @@ namespace InsaneOne.Core.Locales
 		/// <summary> Replaces non-unique keys, for which is numbers used to. For example, #0, #1, #2, etc. Every replace increases counter by 1. </summary>
 		public void ReplaceNext(string replaceTo)
 		{
-			Result = Result.Replace($"{replacementSymbol}{changeId}", $"{Preprocess}{replaceTo}{Postprocess}");
+			// (?!\d) - don't eat longer tokens, so replacing #1 doesn't damage #10, #11, etc.
+			Result = Regex.Replace(Result, Regex.Escape(replacementSymbol + changeId) + @"(?!\d)", _ => $"{Preprocess}{replaceTo}{Postprocess}");
 			changeId++;
 		}
 

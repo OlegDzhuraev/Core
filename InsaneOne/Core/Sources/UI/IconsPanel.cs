@@ -46,6 +46,12 @@ namespace InsaneOne.Core.UI
 		{
 			ClearDrawn();
 
+			if (iconTemplate == null)
+			{
+				CoreUnityLogger.I.Log($"No icon template set on the [{gameObject.name}] IconsPanel! Nothing was drawn.", LogLevel.Error);
+				return;
+			}
+
 			foreach (var data in datas)
 			{
 				if (data == null)
@@ -56,7 +62,14 @@ namespace InsaneOne.Core.UI
 				
 				var iconGo = Instantiate(iconTemplate, panel);
 				var icon = iconGo.GetComponent<TIcon>();
-				
+
+				if (icon == null)
+				{
+					CoreUnityLogger.I.Log($"Icon template has no {typeof(TIcon).Name} component on the [{gameObject.name}] IconsPanel! Skipped.", LogLevel.Warning);
+					Destroy(iconGo);
+					continue;
+				}
+
 				drawnIcons.Add(icon);
 				InitIcon(icon, data);
 			}

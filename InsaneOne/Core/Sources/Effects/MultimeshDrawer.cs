@@ -18,6 +18,7 @@ namespace InsaneOne.Core.Effects
 		[SerializeField] bool registerAsService;
 
 		readonly List<DrawerRenderPart> drawerParts = new ();
+		readonly List<Material> clonedMaterials = new ();
 
 		static readonly int colorId = Shader.PropertyToID("_Color");
 
@@ -61,11 +62,22 @@ namespace InsaneOne.Core.Effects
 				Destroy(transform.GetChild(i).gameObject);
 
 			drawerParts.Clear();
+
+			foreach (var material in clonedMaterials)
+				Destroy(material);
+
+			clonedMaterials.Clear();
 		}
 
 		/// <summary> Enable with renderers from passed in prefab template. </summary>
 		public void Enable(GameObject templatePrefab, MaterialUsageMode materialUsageMode = MaterialUsageMode.None)
 		{
+			if (!drawerPartTemplate)
+			{
+				Debug.LogError($"[{nameof(MultimeshDrawer)}] No drawer part template assigned on '{name}' - assign a renderer template first.", this);
+				return;
+			}
+
 			Cleanup();
 			gameObject.SetActive(true);
 
@@ -107,8 +119,16 @@ namespace InsaneOne.Core.Effects
 					var originalRenderer = templatePart.GetComponent<Renderer>();
 					if (originalRenderer)
 					{
-						var cloneMat = materialUsageMode == MaterialUsageMode.CloneMaterial;
-						part.MeshRenderer.material = cloneMat ? Instantiate(originalRenderer.sharedMaterial) : originalRenderer.sharedMaterial;
+						if (materialUsageMode == MaterialUsageMode.CloneMaterial)
+						{
+							var clonedMaterial = Instantiate(originalRenderer.sharedMaterial);
+							clonedMaterials.Add(clonedMaterial); // destroyed in Cleanup to not leak a material per Enable call
+							part.MeshRenderer.material = clonedMaterial;
+						}
+						else
+						{
+							part.MeshRenderer.material = originalRenderer.sharedMaterial;
+						}
 					}
 				}
 

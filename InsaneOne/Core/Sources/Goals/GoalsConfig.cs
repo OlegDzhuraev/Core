@@ -30,5 +30,21 @@ namespace InsaneOne.Core.Goals
 
 		/// <summary> Recommended to use it only for test purposes. </summary>
 		public void AddGoalInternal(GoalDefinition goal) => goals.Add(goal);
+
+#if UNITY_EDITOR
+		void OnValidate()
+		{
+			var seenIds = new HashSet<string>();
+
+			foreach (var goal in goals)
+			{
+				if (goal == null || string.IsNullOrWhiteSpace(goal.Id))
+					continue;
+
+				if (!seenIds.Add(goal.Id))
+					Debug.LogWarning($"[{nameof(GoalsConfig)}] Duplicate goal id '{goal.Id}' - goal ids must be unique, both goals will share one progress entry!", this);
+			}
+		}
+#endif
 	}
 }

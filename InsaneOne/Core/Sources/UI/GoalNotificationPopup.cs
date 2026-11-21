@@ -16,6 +16,7 @@
 
 using System.Collections.Generic;
 using InsaneOne.Core.Goals;
+using InsaneOne.Core.Utility;
 using UnityEngine;
 
 namespace InsaneOne.Core.UI
@@ -60,6 +61,12 @@ namespace InsaneOne.Core.UI
 		public void Bind(GoalsService service)
 		{
 			Unbind();
+
+			if (service == null)
+			{
+				CoreUnityLogger.I.Log($"[{nameof(GoalNotificationPopup)}] Can't bind to a null {nameof(GoalsService)}!", LogLevel.Warning);
+				return;
+			}
 
 			subscribedService = service;
 			subscribedService.ProgressChanged += Enqueue;

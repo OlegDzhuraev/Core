@@ -18,7 +18,15 @@ namespace InsaneOne.Core
 		/// <summary> Casts a ray to mouse position from camera (for 3d only). </summary>
 		public static bool CastCameraToMouseRay(int layerMask, out RaycastHit hit, int distance = 1000)
 		{
-			var ray = MainCamera.Cached.ScreenPointToRay(Input.mousePosition);
+			var camera = MainCamera.Cached;
+
+			if (camera == null)
+			{
+				hit = default;
+				return false;
+			}
+
+			var ray = camera.ScreenPointToRay(Input.mousePosition);
 			return Physics.Raycast(ray.origin, ray.direction, out hit, distance, layerMask);
 		}
 

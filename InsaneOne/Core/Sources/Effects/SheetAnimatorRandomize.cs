@@ -18,6 +18,12 @@ namespace InsaneOne.Core.Effects
 
 		public void PlayRandom()
 		{
+			if (!animator || animator.Animations == null || animator.Animations.Length == 0)
+			{
+				Debug.LogWarning($"[{nameof(SheetAnimatorRandomize)}] No animator or no animations set on [{name}] - nothing to play.", this);
+				return;
+			}
+
 			var random = animator.Animations.Random();
 			animator.PlayAnimation(random.Name);
 		}

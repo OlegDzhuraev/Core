@@ -54,17 +54,24 @@ namespace InsaneOne.Core
 			transform.rotation = Quaternion.RotateTowards(transform.rotation, rotation, delta);
 		}
 
-		/// <summary> Returns look to the position in 2D. </summary>
+		/// <summary> Returns look to the position in 2D. Keeps the current rotation if the positions coincide. </summary>
 		public static Quaternion GetLook2D(this Transform transform, Vector2 position)
 		{
+			if (((Vector2) position - (Vector2) transform.position).sqrMagnitude < Mathf.Epsilon)
+				return transform.rotation;
+
 			return GetLook2D(transform.position, position);
 		}
 		
 		/// <summary> Returns look to the position in 2D. </summary>
 		public static Quaternion GetLook2D(Vector2 positionA, Vector2 positionB)
 		{
-			var direction = (positionB - positionA).normalized;
-			var result = Quaternion.LookRotation(Vector3.forward, direction);
+			var direction = positionB - positionA;
+
+			if (direction.sqrMagnitude < Mathf.Epsilon) // no direction - avoid LookRotation errors with a zero vector
+				return Quaternion.identity;
+
+			var result = Quaternion.LookRotation(Vector3.forward, direction.normalized);
 			
 			if (RightAxisIsForwardInTwoD)
 				result *= Quaternion.Euler(new Vector3(0, 0, 90));

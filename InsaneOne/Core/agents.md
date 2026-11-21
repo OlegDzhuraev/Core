@@ -29,6 +29,7 @@ Sources/
   Editor/               EditorWindow tools, custom drawers, template generator
   Effects/              sprite animation, camera shake, line renderer, etc.
   Extensions/           static extension methods (Transform, Color, Physics, Random...)
+  Goals/                achievements/objectives: GoalsConfig asset, GoalsService (json saves), GoalNotificationPopup
   LevelDesign/           gizmo handles + an Editor/ subfolder with its own asmdef
   Localization/         CSV-based localization + Localization/UI (LocalizedTMPText)
   Teams/                team mechanic, enabled via the INSANE_TEAMS_EXTENSION flag
@@ -79,6 +80,13 @@ assembly and don't grow its dependencies unnecessarily:
   `Context<T>`) are the main architectural pattern for "global" systems; each one has an
   explicit `Init`/`Initialize` and often a `Reset`/`Dispose`/`Unload` to clear state between
   game runs or tests.
+- Static systems holding runtime state (`Audio`, `Localization`, `PauseUtility`,
+  `ServiceLocator`) also reset themselves on play-mode start via
+  `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]`, so they
+  stay correct when the consuming project uses Enter Play Mode Options with domain reload
+  disabled — follow the same pattern when adding a new static system.
+- Runtime components use the legacy `Input` class — consuming projects on the new Input
+  System package need Active Input Handling set to "Both" (or "Input Manager (Old)").
 - Optional features are compiled via `#if INSANE_<FEATURE>` scripting define symbols — that's
   how the entire `Teams` module is gated (`INSANE_TEAMS_EXTENSION`). When adding a new optional
   subsystem, follow the same pattern rather than a runtime flag.

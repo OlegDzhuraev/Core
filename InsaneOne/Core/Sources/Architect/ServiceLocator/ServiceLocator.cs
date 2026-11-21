@@ -132,13 +132,16 @@ namespace InsaneOne.Core.Architect
 			if (TryGet(type, out var value))
 				return (T)value;
 
-			throw new NullReferenceException($"No service of type '{type}' registered!");
+			throw new InvalidOperationException($"No service of type '{type}' registered! Call ServiceLocator.Register first.");
 		}
 
 		public static void Unregister<T>() => Unregister(typeof(T));
 
 		static void Unregister(Type type)
 		{
+			if (aliases.TryGetValue(type, out var canonicalType)) // unregistering by an alias type removes the canonical service
+				type = canonicalType;
+
 			services.Remove(type);
 			RemoveAliasesOf(type);
 		}
@@ -161,8 +164,15 @@ namespace InsaneOne.Core.Architect
 
 			foreach (var field in targetType.GetFields(BindingAttribute))
 			{
-				if (Attribute.IsDefined(field, locateAttributeType) && TryGet(field.FieldType, out var service))
+				if (!Attribute.IsDefined(field, locateAttributeType))
+					continue;
+
+				if (TryGet(field.FieldType, out var service))
 					field.SetValue(target, service);
+#if UNITY_5_3_OR_NEWER
+				else
+					UnityEngine.Debug.LogWarning($"[ServiceLocator] No service of type {field.FieldType} found for [Locate] field '{field.Name}' on {targetType.Name}.");
+#endif
 			}
 		}
 

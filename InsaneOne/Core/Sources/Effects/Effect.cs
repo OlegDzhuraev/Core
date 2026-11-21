@@ -39,6 +39,12 @@ namespace InsaneOne.Core.Effects
 		public static GameObject Create(GameObject vfxPrefab, Vector3 position,
 			Quaternion rotation = default, Transform parent = null, float destructionDelay = DefaultDestructionDelay)
 		{
+			if (!vfxPrefab)
+			{
+				Debug.LogWarning($"[{nameof(Effect)}] Can't create an effect from a null prefab!");
+				return null;
+			}
+
 #if PERSEIDS_POOLING
 			var vfx = Pool.Spawn(vfxPrefab);
 			vfx.transform.position = position;

@@ -9,7 +9,7 @@ namespace InsaneOne.Core
         {
             get
             {
-                if (!cachedCamera)
+                if (!cachedCamera || !cachedCamera.isActiveAndEnabled) // also refresh when the cached camera was disabled or replaced by another main camera
                     cachedCamera = Camera.main;
 
                 return cachedCamera;

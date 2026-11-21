@@ -30,7 +30,10 @@ namespace InsaneOne.Core.Components
 		void Update()
 		{
 			if (!PhysicsExtensions.CastCameraToMouseRay(layerMask, out var hit))
+			{
+				RemoveFocus();
 				return;
+			}
 
 			if (hit.distance > interactDistance)
 			{
@@ -41,7 +44,10 @@ namespace InsaneOne.Core.Components
 			if (hit.collider && hit.collider.TryGetComponent<Interactable>(out var interactable))
 			{
 				if (focusedInteractable != interactable)
+				{
+					RemoveFocus();
 					Focused?.Invoke(interactable);
+				}
 
 				focusedInteractable = interactable;
 			}

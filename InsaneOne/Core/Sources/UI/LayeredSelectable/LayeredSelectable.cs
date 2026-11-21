@@ -23,13 +23,19 @@ namespace InsaneOne.Core.UI
 	/// <summary> Layered selectable is a simpler version of toggle group, which is not require extra mono component, using layer value for grouping. </summary>
 	public sealed class LayeredSelectable : Element<object>, IPointerClickHandler // TODO InsaneOne: support not only ui?..
 	{
-		static readonly Dictionary<byte, LayeredSelectable> layerSelectedObj = new(); // TODO InsaneOne: support destruction of selectables
+		static readonly Dictionary<byte, LayeredSelectable> layerSelectedObj = new();
 		
 		[SerializeField] byte layer;
 		
 		ISelectionReceiver[] receivers;
 		
 		protected override void OnAwake() => receivers = GetComponents<ISelectionReceiver>();
+
+		void OnDestroy()
+		{
+			if (layerSelectedObj.TryGetValue(layer, out var current) && current == this)
+				layerSelectedObj.Remove(layer);
+		}
 
 		public void Select() => SetSelected(true);
 

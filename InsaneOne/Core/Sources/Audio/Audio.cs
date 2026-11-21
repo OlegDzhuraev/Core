@@ -134,7 +134,7 @@ namespace InsaneOne.Core
 			source.transform.position = position;
 			source.pitch = 1f + Random.Range(-pitchRandom, pitchRandom);
 			source.clip = clip;
-			source.volume = volume;
+			source.volume = Mathf.Clamp(volume, 0f, 1f);
 			source.loop = loop;
 			source.Play();
 
