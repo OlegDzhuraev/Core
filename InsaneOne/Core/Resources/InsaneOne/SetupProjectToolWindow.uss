@@ -1,0 +1,160 @@
+.setup-project
+{
+    --surface: #2b2b2b;
+    --card: #383838;
+    --card-nested: #444444;
+    --line: #4d4d4d;
+    --control: #4a4a4a;
+    --control-hover: #5c5c5c;
+    --control-line: #666666;
+    --text: #e4e4e4;
+    --muted: #aaaaaa;
+    --accent: #86baff;
+    --warning: #e0c26a;
+    --hover: #505050;
+    flex-grow: 1;
+    padding: 12px;
+    background-color: var(--surface);
+    color: var(--text);
+}
+
+.setup-project.light-theme
+{
+    --surface: #ededed;
+    --card: #ffffff;
+    --card-nested: #f2f2f2;
+    --line: #bfbfbf;
+    --control: #efefef;
+    --control-hover: #e2e2e2;
+    --control-line: #a9a9a9;
+    --text: #292929;
+    --muted: #5f5f5f;
+    --accent: #225ba3;
+    --warning: #8a6d00;
+    --hover: #e4e4e4;
+}
+
+.tool-scroll { flex-grow: 1; }
+.tool-body { flex-direction: column; }
+
+.header { margin-bottom: 10px; }
+.title { font-size: 18px; -unity-font-style: bold; margin: 0; }
+.subtitle { color: var(--muted); font-size: 11px; margin: 2px 0 0 0; white-space: normal; }
+
+.tool-block
+{
+    background-color: var(--card);
+    border-width: 1px;
+    border-color: var(--line);
+    border-radius: 7px;
+    margin-bottom: 8px;
+    padding: 8px 10px;
+}
+.tool-block.nested
+{
+    background-color: var(--card-nested);
+    border-radius: 5px;
+    margin: 8px 0 0 0;
+    padding: 6px 8px;
+}
+.tool-block > .unity-foldout__content { margin-top: 6px; }
+.tool-block > .unity-foldout__toggle { font-size: 14px; -unity-font-style: bold; color: var(--text); }
+.tool-block.nested > .unity-foldout__toggle { font-size: 12px; color: var(--muted); }
+.tool-block.nested > .unity-foldout__toggle:hover { color: var(--text); }
+
+.section-title
+{
+    -unity-font-style: bold;
+    color: var(--muted);
+    font-size: 11px;
+    margin: 10px 0 4px 0;
+}
+
+.fields { margin-bottom: 8px; }
+.fields > .unity-base-field { margin: 0 0 4px 0; }
+.fields > .unity-base-field > .unity-base-field__label { min-width: 150px; }
+
+/* Tighten and lighten the input controls so they stand out from the cards. */
+.tool-control .unity-base-field__input
+{
+    background-color: var(--control);
+    border-color: var(--control-line);
+    color: var(--text);
+    min-height: 20px;
+}
+.tool-control .unity-base-field__label { color: var(--muted); }
+
+.rows { flex-direction: column; }
+
+.row
+{
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 24px;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+.row:hover { background-color: var(--hover); }
+
+.row-title
+{
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -unity-font-style: bold;
+    margin: 0;
+}
+
+.row-actions { flex-direction: row; flex-shrink: 0; align-items: center; }
+
+.row-button
+{
+    width: 62px;
+    margin: 2px 0 2px 6px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border-width: 1px;
+    border-color: var(--control-line);
+    background-color: var(--control);
+    color: var(--text);
+}
+.row-button:hover { background-color: var(--control-hover); }
+.row-button:disabled { opacity: 0.4; }
+.row-button.is-accent { color: var(--accent); }
+
+.checklist-item
+{
+    flex-direction: column;
+    background-color: var(--card-nested);
+    border-width: 1px;
+    border-color: var(--line);
+    border-radius: 5px;
+    padding: 6px 8px;
+    margin-bottom: 6px;
+}
+.checklist-item.is-wrong { border-color: var(--warning); border-left-width: 3px; }
+.checklist-text { margin: 0; white-space: normal; }
+.checklist-item.is-fine .checklist-text { color: var(--muted); }
+
+.primary-button
+{
+    align-self: flex-start;
+    margin-top: 6px;
+    padding: 5px 12px;
+    border-radius: 5px;
+    border-width: 1px;
+    border-color: var(--control-line);
+    background-color: var(--control);
+    color: var(--text);
+}
+.primary-button:hover { background-color: var(--control-hover); }
+.primary-button:disabled { opacity: 0.4; }
+
+/* Keep input fields away from the text above them. */
+.checklist-item > .unity-base-field { margin: 4px 0 0 0; }
+
+.warning { color: var(--warning); font-size: 11px; margin: 0 0 6px 0; white-space: normal; }
+.hidden { display: none; }

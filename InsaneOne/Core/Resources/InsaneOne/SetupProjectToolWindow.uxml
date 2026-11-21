@@ -1,0 +1,39 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="SetupProjectToolWindow.uss" />
+    <ui:VisualElement class="setup-project">
+        <ui:ScrollView name="scroll" class="tool-scroll">
+            <ui:VisualElement class="tool-body">
+                <ui:VisualElement class="header">
+                    <ui:Label text="Setup Project Tool" class="title" />
+                    <ui:Label text="Generate project structure, install modules and apply recommended settings" class="subtitle" />
+                </ui:VisualElement>
+
+                <ui:Foldout name="folders-block" text="Project folders" value="true" class="tool-block">
+                    <ui:VisualElement name="folders-fields" class="fields" />
+                    <ui:Label name="folders-warning" class="warning hidden"
+                              text="Wrong naming for content folder. Using &quot;Resources&quot; name is not recommended." />
+                    <ui:Button name="generate-folders" text="Generate project folders" class="primary-button" />
+                </ui:Foldout>
+
+                <ui:Foldout name="packages-block" text="Packages and Assets" value="true" class="tool-block">
+                    <ui:Foldout name="modules-block" text="Frequently used modules - add/update" value="true" class="tool-block nested">
+                        <ui:VisualElement name="modules-rows" class="rows" />
+                    </ui:Foldout>
+                    <ui:Foldout name="registry-block" text="Frequently used packages - add/update" value="true" class="tool-block nested">
+                        <ui:VisualElement name="registry-rows" class="rows" />
+                    </ui:Foldout>
+                    <ui:Foldout name="assets-block" text="Frequently used assets - open in browser" value="true" class="tool-block nested">
+                        <ui:VisualElement name="assets-rows" class="rows" />
+                    </ui:Foldout>
+                </ui:Foldout>
+
+                <ui:Foldout name="checklist-block" text="Setup Checklist" value="true" class="tool-block">
+                    <ui:Label text="Graphics settings" class="section-title" />
+                    <ui:VisualElement name="graphics-items" class="rows" />
+                    <ui:Label text="Other settings" class="section-title" />
+                    <ui:VisualElement name="other-items" class="rows" />
+                </ui:Foldout>
+            </ui:VisualElement>
+        </ui:ScrollView>
+    </ui:VisualElement>
+</ui:UXML>

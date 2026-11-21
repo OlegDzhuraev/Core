@@ -1,306 +1,281 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text.RegularExpressions;
 using InsaneOne.Core.Editor;
 using InsaneOne.Core.Utility;
 using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
+using UnityEngine.UIElements;
 using LogLevel = InsaneOne.Core.Utility.LogLevel;
 
 namespace InsaneOne.Core.Development
 {
     public sealed class SetupProjectToolWindow : EditorWindow
     {
+        const string LayoutPath = "InsaneOne/SetupProjectToolWindow";
         const string OriginPlacePrefName = "Create3DObject.PlaceAtWorldOrigin";
 
         static readonly string[] foldersDisplayOptions = {"Classic", "Classic ECS", "Feature-oriented"};
         static readonly string[] dimensionDisplayOptions = {"3D", "2D"};
 
-        static AddRequest installRequest;
-        
-        readonly Color checklistBadColor = Color.yellow;
-        
-        /// <summary> Resources folder name. Should be NOT Resources, any other naming. </summary>
-        string contentFolder = "Game";
+        static Request activePackageRequest;
 
-        int dimension;
-        FoldersGenerationStyle foldersStyle;
-        
-        Vector2 scroll;
-        
-        string selectedNamespace = "Game";
-        string companyName = "InsaneOne";
+        static readonly Dictionary<string, string> manifestDependencies = new Dictionary<string, string>();
+        static readonly Regex manifestDependencyRegex = new Regex("\"([^\"]+)\"\\s*:\\s*\"([^\"]*)\"");
+        static DateTime manifestWriteTime;
 
-        GUIStyle richText, partitionHeader, blockStyle, bigBlockStyle;
+        [SerializeField] string contentFolder = "Game";
+        [SerializeField] int dimension;
+        [SerializeField] FoldersGenerationStyle foldersStyle;
+        [SerializeField] bool separateUiInClassicStyle;
+        [SerializeField] string selectedNamespace = "Game";
+        [SerializeField] string companyName = "InsaneOne";
 
-        bool separateUiInClassicStyle;
-        
+        readonly List<PackageRow> packageRows = new List<PackageRow>();
+
+        PopupField<string> dimensionField;
+        PopupField<string> foldersStyleField;
+        TextField contentFolderField;
+        Toggle separateUiToggle;
+        Label foldersWarning;
+        Button generateButton;
+        VisualElement graphicsItems;
+        VisualElement otherItems;
+
         [MenuItem("Tools/InsaneOne/Setup Project Tool...")]
-        public static void ShowWindow()
-        {
-            GetWindow<SetupProjectToolWindow>(false, "Setup Project Tool", true);
-        }
+        public static void ShowWindow() => GetWindow<SetupProjectToolWindow>("Setup Project Tool");
 
         [MenuItem("Tools/InsaneOne/Update")]
-        public static void UpdatePlugin()
-        {
-            AddPackage($"https://github.com/{SetupProjectPaths.RepoName}/Core.git");
-        }
+        public static void UpdatePlugin() => AddPackage($"https://github.com/{SetupProjectPaths.RepoName}/Core.git");
 
-        // OnEnable (not just a manually-called Init) so styles are recreated after every domain reload -
-        // Unity keeps the window instance across recompiles, but GUIStyle fields don't survive it.
-        void OnEnable()
+        public void CreateGUI()
         {
             minSize = new Vector2(532, 532);
             maxSize = new Vector2(798, 798);
-            richText = new GUIStyle(EditorStyles.label) { richText = true, wordWrap = true };
-            blockStyle = new GUIStyle(EditorStyles.helpBox);
-            bigBlockStyle = EditorHelpers.GetBigBlockStyle();
 
-            partitionHeader = new GUIStyle(EditorStyles.boldLabel)
-            {
-                fontSize = 16, richText = true, alignment = TextAnchor.UpperCenter,
-            };
+            packageRows.Clear();
+
+            rootVisualElement.Clear();
+            Resources.Load<VisualTreeAsset>(LayoutPath).CloneTree(rootVisualElement);
+
+            rootVisualElement.Q(className: "setup-project")
+                .EnableInClassList("light-theme", !EditorGUIUtility.isProSkin);
+
+            rootVisualElement.Q<ScrollView>("scroll").horizontalScrollerVisibility = ScrollerVisibility.Hidden;
+
+            BuildFoldersBlock();
+            BuildPackagesBlock();
+            BuildChecklistBlock();
+
+            RefreshPackageRows();
         }
 
-        void OnGUI()
+        void BuildFoldersBlock()
         {
-            scroll = GUILayout.BeginScrollView(scroll);
+            var fields = rootVisualElement.Q<VisualElement>("folders-fields");
 
-            DrawGenerateFolders();
-            DrawModulesInstall();
-            DrawChecklist();
-            
-            GUILayout.EndScrollView();
+            dimensionField = new PopupField<string>("Project dimensions", new List<string>(dimensionDisplayOptions), dimension);
+            dimensionField.AddToClassList("tool-control");
+            dimensionField.RegisterValueChangedCallback(e => dimension = Array.IndexOf(dimensionDisplayOptions, e.newValue));
+
+            foldersStyleField = new PopupField<string>("Folders style", new List<string>(foldersDisplayOptions), (int)foldersStyle);
+            foldersStyleField.AddToClassList("tool-control");
+            foldersStyleField.RegisterValueChangedCallback(e =>
+            {
+                foldersStyle = (FoldersGenerationStyle)Array.IndexOf(foldersDisplayOptions, e.newValue);
+                UpdateFolderFields();
+            });
+
+            contentFolderField = new TextField("Content folder name") { value = contentFolder };
+            contentFolderField.AddToClassList("tool-control");
+            contentFolderField.RegisterValueChangedCallback(e =>
+            {
+                contentFolder = e.newValue;
+                UpdateFolderWarning();
+            });
+
+            separateUiToggle = new Toggle("Separate UI folder") { value = separateUiInClassicStyle };
+            separateUiToggle.RegisterValueChangedCallback(e => separateUiInClassicStyle = e.newValue);
+
+            fields.Add(dimensionField);
+            fields.Add(foldersStyleField);
+            fields.Add(contentFolderField);
+            fields.Add(separateUiToggle);
+
+            foldersWarning = rootVisualElement.Q<Label>("folders-warning");
+
+            generateButton = rootVisualElement.Q<Button>("generate-folders");
+            generateButton.clicked += GenerateProjectFolders;
+
+            UpdateFolderFields();
+            UpdateFolderWarning();
         }
 
-        void DrawGenerateFolders()
+        void UpdateFolderFields()
         {
-            GUILayout.BeginVertical(bigBlockStyle);
-            
-            DrawPartitionHeader("Project folders");
-            
-            dimension = EditorGUILayout.Popup("Project dimensions", dimension, dimensionDisplayOptions);
-            foldersStyle = (FoldersGenerationStyle)EditorGUILayout.Popup("Folders style", (int)foldersStyle, foldersDisplayOptions);
+            var isClassic = foldersStyle is FoldersGenerationStyle.Classic or FoldersGenerationStyle.ClassicECS;
+            contentFolderField.style.display = isClassic ? DisplayStyle.Flex : DisplayStyle.None;
+            separateUiToggle.style.display = isClassic ? DisplayStyle.Flex : DisplayStyle.None;
+        }
 
-            if (foldersStyle is FoldersGenerationStyle.Classic or FoldersGenerationStyle.ClassicECS)
+        void UpdateFolderWarning()
+        {
+            var isInvalid = contentFolder is "" or "Resources";
+
+            foldersWarning.EnableInClassList("hidden", !isInvalid);
+            generateButton.SetEnabled(!isInvalid);
+        }
+
+        void GenerateProjectFolders()
+        {
+            if (foldersStyle == FoldersGenerationStyle.FeatureOriented)
+                GenerateProjectFoldersFeatures(dimension == 0);
+            else if (foldersStyle is FoldersGenerationStyle.Classic or FoldersGenerationStyle.ClassicECS)
+                GenerateProjectFoldersClassic(dimension == 0, foldersStyle is FoldersGenerationStyle.ClassicECS);
+        }
+
+        void BuildPackagesBlock()
+        {
+            BuildPackageRows(rootVisualElement.Q<VisualElement>("modules-rows"), SetupProjectPaths.GitPackages, false);
+            BuildPackageRows(rootVisualElement.Q<VisualElement>("registry-rows"), SetupProjectPaths.Packages, false);
+            BuildPackageRows(rootVisualElement.Q<VisualElement>("assets-rows"), SetupProjectPaths.AssetLinks, true);
+        }
+
+        void BuildPackageRows(VisualElement container, List<LinkHolder> links, bool openUrl)
+        {
+            foreach (var link in links)
+                container.Add(CreatePackageRow(link, openUrl));
+        }
+
+        VisualElement CreatePackageRow(LinkHolder holder, bool openUrl)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("row");
+
+            var title = new Label(holder.Name);
+            title.AddToClassList("row-title");
+            row.Add(title);
+
+            var actions = new VisualElement();
+            actions.AddToClassList("row-actions");
+            row.Add(actions);
+
+            if (openUrl)
             {
-                contentFolder = EditorGUILayout.TextField("Content folder name", contentFolder);
-                separateUiInClassicStyle = EditorGUILayout.Toggle("Separate UI folder", separateUiInClassicStyle);
+                var open = new Button(() => OpenUrl(holder.Link)) { text = "Open" };
+                open.AddToClassList("row-button");
+                open.AddToClassList("is-accent");
+                actions.Add(open);
+
+                return row;
             }
 
-            if (contentFolder is "" or "Resources")
+            var add = new Button(() => { AddPackage(holder.Link); RefreshPackageRows(); }) { text = "Add" };
+            add.AddToClassList("row-button");
+
+            var remove = new Button(() => { RemovePackage(holder.Link); RefreshPackageRows(); }) { text = "Remove" };
+            remove.AddToClassList("row-button");
+
+            actions.Add(add);
+            actions.Add(remove);
+            packageRows.Add(new PackageRow(holder.Link, add, remove));
+
+            return row;
+        }
+
+        void RefreshPackageRows()
+        {
+            var isIdle = activePackageRequest == null;
+
+            foreach (var row in packageRows)
             {
-                GUILayout.Label("Wrong naming for content folder. Do not recommended to use \"Resources\" name.");
-                GUI.enabled = false;
+                var isInstalled = IsPackageInstalled(row.Link);
+                row.Add.SetEnabled(isIdle && !isInstalled);
+                row.Remove.SetEnabled(isIdle && isInstalled);
             }
-
-            if (GUILayout.Button("Generate project folders"))
-            {
-                if (foldersStyle == FoldersGenerationStyle.FeatureOriented)
-                    GenerateProjectFoldersFeatures(dimension == 0);
-                else if (foldersStyle is FoldersGenerationStyle.Classic or FoldersGenerationStyle.ClassicECS)
-                    GenerateProjectFolders(dimension == 0, foldersStyle is FoldersGenerationStyle.ClassicECS);
-            }
-
-            GUILayout.EndVertical();
         }
 
-        void DrawModulesInstall()
+        void BuildChecklistBlock()
         {
-            var prevGUIEnabled = GUI.enabled;
-            GUI.enabled = installRequest == null;
-            
-            GUILayout.BeginVertical(bigBlockStyle);
-            DrawPartitionHeader("Packages and Assets");
-            
-            DrawAddModule("Frequently used modules - add/update", SetupProjectPaths.GitPackages);
-            DrawAddModule("Frequently used packages - add/update", SetupProjectPaths.Packages);
-            DrawAddModule("Frequently used assets - open in browser", SetupProjectPaths.AssetLinks, true);
-            GUILayout.EndVertical();
-            
-            GUI.enabled = prevGUIEnabled;
+            graphicsItems = rootVisualElement.Q<VisualElement>("graphics-items");
+            otherItems = rootVisualElement.Q<VisualElement>("other-items");
+            RebuildChecklist();
         }
 
-        void DrawAddModule(string blockTitle, List<LinkHolder> links, bool openUrl = false)
-        { 
-            GUILayout.Space(5);
-            
-            GUILayout.BeginVertical(blockStyle);
-            DrawHeader(blockTitle, false);
-            GUILayout.BeginHorizontal();
-            
-            for (var q = 0; q < links.Count; q++)
-            {
-                if (q % 4 == 0)
-                {
-                    GUILayout.EndHorizontal();
-                    GUILayout.BeginHorizontal();
-                }
-                
-                var assetOrPackage = links[q];
-                
-                if (GUILayout.Button(assetOrPackage.Name))
-                {
-                    if (openUrl)
-                        OpenUrl(assetOrPackage.Link);
-                    else
-                        AddPackage(assetOrPackage.Link);
-                }
-            }
-
-            GUILayout.EndHorizontal();
-            GUILayout.EndVertical();
-        }
-
-        void OpenUrl(string url) => Application.OpenURL(url);
-        
-        void DrawChecklist()
+        void RebuildChecklist()
         {
-            GUILayout.BeginVertical(bigBlockStyle);
-            DrawPartitionHeader("Setup Checklist");
-            
-            DrawHeader("Graphics settings", false);
-            DrawFixColorSpace();
-            DrawFixSpritePacker();
-            
-            DrawHeader("Other settings");
-            DrawFixPhysicsTimeStep();
-            DrawFixNamespace();
-            DrawFixCompanyName();
-            DrawFixCreateAtOrigin();
-            DrawFixReloadDomain();
-            DrawFixNamings();
+            graphicsItems.Clear();
+            otherItems.Clear();
 
-            GUILayout.EndVertical();
-        }
-
-        void DrawChecklistToggle(bool isFine, string fineLabel, string wrongLabel, string fineButtonText, string wrongButtonText, Action fixAction, Action innerDraw = null)
-        {
-            var buttonText = isFine ? fineButtonText : wrongButtonText;
-            var previousGuiColor = GUI.color;
-
-            GUI.color = isFine ? previousGuiColor : checklistBadColor;
-            GUILayout.BeginVertical(blockStyle);
-            GUILayout.Label(isFine ? fineLabel : wrongLabel, richText);
-
-            innerDraw?.Invoke();
-
-            if (!string.IsNullOrEmpty(buttonText) && GUILayout.Button(buttonText))
-                fixAction.Invoke();
-
-            GUILayout.EndVertical();
-            GUI.color = previousGuiColor;
-        }
-
-        void DrawFixColorSpace()
-        {
-            var isFine = PlayerSettings.colorSpace == ColorSpace.Linear;
-
-            DrawChecklistToggle(isFine,
+            var colorSpaceFine = PlayerSettings.colorSpace == ColorSpace.Linear;
+            AddChecklistItem(graphicsItems, colorSpaceFine,
                 "Color space set to <b>Linear</b>. It is preferred. But you can reset to <b>Gamma</b>.",
                 "Color space set to <b>Gamma</b>. For PC preferred is <b>Linear</b>.",
-                "Set to Gamma",
-                "Set to Linear",
-                () => { PlayerSettings.colorSpace = isFine ? ColorSpace.Gamma : ColorSpace.Linear; });
-        }
-        
-        void DrawFixSpritePacker()
-        {
-            var isFine = EditorSettings.spritePackerMode is SpritePackerMode.SpriteAtlasV2;
-            var neededResult = isFine ? SpritePackerMode.Disabled : SpritePackerMode.SpriteAtlasV2;
+                colorSpaceFine ? "Set to Gamma" : "Set to Linear",
+                () => PlayerSettings.colorSpace = colorSpaceFine ? ColorSpace.Gamma : ColorSpace.Linear);
 
-            DrawChecklistToggle(isFine,
+            var spritePackerFine = EditorSettings.spritePackerMode is SpritePackerMode.SpriteAtlasV2;
+            AddChecklistItem(graphicsItems, spritePackerFine,
                 "Sprite packer V2 is enabled. It is preferred. But you can disable.",
                 "Sprite packer V2 is disabled. Preferred is Enabled",
-                "Disable",
-                "Enable",
-                () => { EditorSettings.spritePackerMode = neededResult; });
-        }
+                spritePackerFine ? "Disable" : "Enable",
+                () => EditorSettings.spritePackerMode = spritePackerFine ? SpritePackerMode.Disabled : SpritePackerMode.SpriteAtlasV2);
 
-        void DrawFixPhysicsTimeStep()
-        {
-            /*
-            var timeManager = AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TimeManager.asset")[0];
-            var serializedObject = new SerializedObject(timeManager);
-            var property = serializedObject.FindProperty("Fixed Timestep"); // TODO: InsaneOne.Core not correct to access like this
-
-            DrawChecklistToggle(Mathf.Approximately(property.floatValue, 0.0167f),
-                "Physics fixed time step now being called 60 times per second",
-                "Physics fixed time step set to be called 50 times a second. It can cause laggy physics view, if no interpolation used. Setting to 60 frames can fix this.",
-                "",
-                "Set to 60 frames",
-                () =>
-                {
-                    property.floatValue = 0.0167f;
-                    serializedObject.ApplyModifiedProperties();
-                });
-                */
-        }
-
-        void DrawFixNamespace()
-        {
-            var actualNamespace = EditorSettings.projectGenerationRootNamespace;
-
-            DrawChecklistToggle(actualNamespace != string.Empty,
-                $"Project root namespace is set. Current namespace is <b>{actualNamespace}</b>.",
+            var namespaceFine = EditorSettings.projectGenerationRootNamespace != string.Empty;
+            AddChecklistItem(otherItems, namespaceFine,
+                $"Project root namespace is set. Current namespace is <b>{EditorSettings.projectGenerationRootNamespace}</b>.",
                 "Project root namespace isn't set. Fix?",
                 "Set",
-                "Set",
-                () => { EditorSettings.projectGenerationRootNamespace = selectedNamespace; },
-                () => { selectedNamespace = EditorGUILayout.TextField("Namespace", selectedNamespace); });
-        }
+                () => EditorSettings.projectGenerationRootNamespace = selectedNamespace,
+                () =>
+                {
+                    var field = new TextField("Namespace") { value = selectedNamespace };
+                    field.AddToClassList("tool-control");
+                    field.RegisterValueChangedCallback(e => selectedNamespace = e.newValue);
+                    return field;
+                });
 
-        void DrawFixCompanyName()
-        {
-            var isFine = PlayerSettings.companyName != "DefaultCompany" && PlayerSettings.companyName != String.Empty;
-
-            DrawChecklistToggle(isFine,
+            var companyFine = PlayerSettings.companyName != "DefaultCompany" && PlayerSettings.companyName != string.Empty;
+            AddChecklistItem(otherItems, companyFine,
                 $"Company name is set. Current company name is <b>{PlayerSettings.companyName}</b>",
                 $"Developer Company is not set. Set to value below ({companyName})?",
                 "Set",
-                "Set",
-                () => { PlayerSettings.companyName = companyName; },
-                () => { companyName = GUILayout.TextField(companyName); });
-        }
+                () => PlayerSettings.companyName = companyName,
+                () =>
+                {
+                    var field = new TextField { value = companyName };
+                    field.AddToClassList("tool-control");
+                    field.RegisterValueChangedCallback(e => companyName = e.newValue);
+                    return field;
+                });
 
-        void DrawFixCreateAtOrigin()
-        {
-            DrawChecklistToggle(EditorPrefs.GetBool(OriginPlacePrefName),
+            var originFine = EditorPrefs.GetBool(OriginPlacePrefName);
+            AddChecklistItem(otherItems, originFine,
                 "Create objects at origin is <b>enabled</b>.",
                 "Create objects at origin is <b>disabled</b>. It is recommended to <b>enable</b>.",
-                "",
-                "Fix",
-                () => { EditorPrefs.SetBool(OriginPlacePrefName, true); });
-        }
+                originFine ? string.Empty : "Fix",
+                () => EditorPrefs.SetBool(OriginPlacePrefName, true));
 
-        void DrawFixReloadDomain()
-        {
-            var correctValue = EnterPlayModeOptions.DisableDomainReload | EnterPlayModeOptions.DisableSceneReload;
-            var isFine = EditorSettings.enterPlayModeOptionsEnabled && EditorSettings.enterPlayModeOptions == correctValue;
-
-            DrawChecklistToggle(isFine,
+            var correctPlayMode = EnterPlayModeOptions.DisableDomainReload | EnterPlayModeOptions.DisableSceneReload;
+            var playModeFine = EditorSettings.enterPlayModeOptionsEnabled && EditorSettings.enterPlayModeOptions == correctPlayMode;
+            AddChecklistItem(otherItems, playModeFine,
                 "Enter Play Mode options: Reload domain settings are correct.",
                 "Enter Play Mode options: Reload domain and scene is <b>enabled</b>. It slows down reload time after every recompile. Recommended is to <b>disable</b> these settings.",
-                "",
-                "Fix",
+                playModeFine ? string.Empty : "Fix",
                 () =>
                 {
                     EditorSettings.enterPlayModeOptionsEnabled = true;
-                    EditorSettings.enterPlayModeOptions = correctValue;
+                    EditorSettings.enterPlayModeOptions = correctPlayMode;
                 });
-        }
 
-        void DrawFixNamings()
-        {
-            var isFine = EditorSettings.gameObjectNamingScheme == EditorSettings.NamingScheme.Underscore;
-
-            DrawChecklistToggle(isFine,
+            var namingFine = EditorSettings.gameObjectNamingScheme == EditorSettings.NamingScheme.Underscore;
+            AddChecklistItem(otherItems, namingFine,
                 "Namings scheme is correct.",
                 "Namings scheme is not set to <b>underscore</b> with 2 digits (Prefab_01). It is recommended to use <b>underscore</b> and several digits for better consistent naming.",
-                "",
-                "Fix",
+                namingFine ? string.Empty : "Fix",
                 () =>
                 {
                     EditorSettings.gameObjectNamingScheme = EditorSettings.NamingScheme.Underscore;
@@ -308,28 +283,93 @@ namespace InsaneOne.Core.Development
                     EditorSettings.assetNamingUsesSpace = false;
                 });
         }
-        
-        void DrawPartitionHeader(string text)
+
+        void AddChecklistItem(VisualElement container, bool isFine, string fineText, string wrongText,
+            string buttonText, Action fix, Func<VisualElement> extraContent = null)
         {
-            GUILayout.Label(text, partitionHeader);
-            EditorGUILayout.Space(5);
+            var item = new VisualElement();
+            item.AddToClassList("checklist-item");
+            item.EnableInClassList("is-fine", isFine);
+            item.EnableInClassList("is-wrong", !isFine);
+
+            var text = new Label(isFine ? fineText : wrongText) { enableRichText = true };
+            text.AddToClassList("checklist-text");
+            item.Add(text);
+
+            if (extraContent != null)
+                item.Add(extraContent());
+
+            if (!string.IsNullOrEmpty(buttonText))
+            {
+                var button = new Button(() => { fix?.Invoke(); RebuildChecklist(); }) { text = buttonText };
+                button.AddToClassList("primary-button");
+                item.Add(button);
+            }
+
+            container.Add(item);
         }
-        
-        void DrawHeader(string text, bool addUpSpace = true)
+
+        static void OpenUrl(string url) => Application.OpenURL(url);
+
+        static bool IsPackageInstalled(string nameOrUrl) => FindInstalledPackageName(nameOrUrl) != null;
+
+        // Registry packages are stored as "name": "version", git packages as "name": "url",
+        // so a package can be matched either by its name or by its link.
+        static string FindInstalledPackageName(string nameOrUrl)
         {
-            if (addUpSpace)
-                EditorGUILayout.Space(15);
-            
-            GUILayout.Label(text, EditorStyles.boldLabel);
-            EditorGUILayout.Space(5);
+            foreach (var dependency in GetManifestDependencies())
+            {
+                if (string.Equals(dependency.Key, nameOrUrl, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(dependency.Value, nameOrUrl, StringComparison.OrdinalIgnoreCase))
+                    return dependency.Key;
+            }
+
+            return null;
         }
-        
+
+        // Reading Packages/manifest.json directly is cheaper and simpler than an async Client.List request,
+        // and it gives the installed state synchronously while building the rows.
+        static Dictionary<string, string> GetManifestDependencies()
+        {
+            var manifestPath = Path.Combine("Packages", "manifest.json");
+
+            if (!File.Exists(manifestPath))
+                return manifestDependencies;
+
+            var writeTime = File.GetLastWriteTime(manifestPath);
+
+            if (writeTime == manifestWriteTime && manifestDependencies.Count > 0)
+                return manifestDependencies;
+
+            manifestWriteTime = writeTime;
+            manifestDependencies.Clear();
+
+            var content = File.ReadAllText(manifestPath);
+            var dependenciesStart = content.IndexOf("\"dependencies\"", StringComparison.Ordinal);
+
+            if (dependenciesStart < 0)
+                return manifestDependencies;
+
+            var blockStart = content.IndexOf('{', dependenciesStart);
+            var blockEnd = content.IndexOf('}', blockStart);
+
+            if (blockStart < 0 || blockEnd < 0)
+                return manifestDependencies;
+
+            var block = content.Substring(blockStart, blockEnd - blockStart);
+
+            foreach (Match match in manifestDependencyRegex.Matches(block))
+                manifestDependencies[match.Groups[1].Value] = match.Groups[2].Value;
+
+            return manifestDependencies;
+        }
+
         void GenerateProjectFoldersFeatures(bool is3D)
         {
             var featuresFolderName = "Features";
             var featuresFolderPath = $"Assets/{featuresFolderName}";
             var sharedFolderPath = $"{featuresFolderPath}/Shared";
-            
+
             var foldersToCreate = new List<FolderData>
             {
                 new ("Assets", featuresFolderName),
@@ -350,11 +390,8 @@ namespace InsaneOne.Core.Development
                 new (sharedFolderPath, "Sources"),
                 new (sharedFolderPath, "Rendering"),
                 new ($"{sharedFolderPath}/Rendering", "Shaders"),
-
-                //new (sharedFolderPath, "Resources"),
-                //new ($"{sharedFolderPath}/Resources", "Data")  // not storing data assets in resources folder anymore
             };
-            
+
             foreach (var folderData in foldersToCreate)
                 CreateFolderIfNotExist(folderData.Path, folderData.FolderName);
 
@@ -368,15 +405,13 @@ namespace InsaneOne.Core.Development
                 CreateFolderIfNotExist(sharedFolderPath, "Sprites");
             }
         }
-        
-        void GenerateProjectFolders(bool is3D, bool isEcs)
+
+        void GenerateProjectFoldersClassic(bool is3D, bool isEcs)
         {
             var contentPath = $"Assets/{contentFolder}";
 
             var foldersToCreate = new List<FolderData>
             {
-                //new ("Assets", "Resources"),
-                //new ("Assets/Resources", "Data"), // not storing data assets in resources folder anymore
                 new ("Assets", contentFolder),
                 new (contentPath, "Sounds"),
                 new (contentPath, "Data"),
@@ -386,7 +421,7 @@ namespace InsaneOne.Core.Development
                 new (contentPath, "Prefabs"),
                 new ($"{contentPath}/Prefabs", "VFX"),
                 new ($"{contentPath}/Prefabs", "Environment"),
-            
+
                 new (contentPath, "Sources"),
                 new ($"{contentPath}/Sources", "Editor"),
                 new ($"{contentPath}/Sources", "Data"),
@@ -407,12 +442,12 @@ namespace InsaneOne.Core.Development
                 var uiPath = "Assets/UI";
                 foldersToCreate.AddRange(new List<FolderData>
                 {
-                    new($"Assets", "UI"),
-                    new(uiPath, "Sources"),
-                    new(uiPath, "Prefabs"),
-                    new(uiPath, "Sprites"),
-                    new(uiPath, "Fonts"),
-                    new(uiPath, "Animations"),
+                    new ("Assets", "UI"),
+                    new (uiPath, "Sources"),
+                    new (uiPath, "Prefabs"),
+                    new (uiPath, "Sprites"),
+                    new (uiPath, "Fonts"),
+                    new (uiPath, "Animations"),
                 });
             }
             else
@@ -449,27 +484,67 @@ namespace InsaneOne.Core.Development
 
         static void AddPackage(string nameOrUrl)
         {
-            if (installRequest != null)
+            if (activePackageRequest != null)
                 return;
-            
-            installRequest = Client.Add(nameOrUrl);
-            EditorApplication.update += InstallProgress;
-    
+
+            activePackageRequest = Client.Add(nameOrUrl);
+            EditorApplication.update += PackageRequestProgress;
+
             CoreUnityLogger.I.Log("Started installing " + nameOrUrl);
         }
 
-        static void InstallProgress()
+        static void RemovePackage(string nameOrUrl)
         {
-            if (!installRequest.IsCompleted)
+            if (activePackageRequest != null)
                 return;
 
-            if (installRequest.Status == StatusCode.Success)
-                CoreUnityLogger.I.Log($"Installed: {installRequest.Result.packageId}");
-            else if (installRequest.Status >= StatusCode.Failure)
-                CoreUnityLogger.I.Log(installRequest.Error.message, LogLevel.Error);
+            var packageName = FindInstalledPackageName(nameOrUrl) ?? nameOrUrl;
 
-            EditorApplication.update -= InstallProgress;
-            installRequest = null;
+            activePackageRequest = Client.Remove(packageName);
+            EditorApplication.update += PackageRequestProgress;
+
+            CoreUnityLogger.I.Log("Started removing " + packageName);
+        }
+
+        static void PackageRequestProgress()
+        {
+            if (!activePackageRequest.IsCompleted)
+                return;
+
+            if (activePackageRequest.Status == StatusCode.Success)
+            {
+                if (activePackageRequest is AddRequest addRequest)
+                    CoreUnityLogger.I.Log($"Installed: {addRequest.Result.packageId}");
+                else
+                    CoreUnityLogger.I.Log("Package removed.");
+            }
+            else if (activePackageRequest.Status >= StatusCode.Failure)
+            {
+                CoreUnityLogger.I.Log(activePackageRequest.Error.message, LogLevel.Error);
+            }
+
+            EditorApplication.update -= PackageRequestProgress;
+            activePackageRequest = null;
+
+            // Force the manifest cache to be re-read, then refresh the open window if any.
+            manifestWriteTime = default;
+
+            if (HasOpenInstances<SetupProjectToolWindow>())
+                GetWindow<SetupProjectToolWindow>().RefreshPackageRows();
+        }
+
+        readonly struct PackageRow
+        {
+            public readonly string Link;
+            public readonly Button Add;
+            public readonly Button Remove;
+
+            public PackageRow(string link, Button add, Button remove)
+            {
+                Link = link;
+                Add = add;
+                Remove = remove;
+            }
         }
 
         readonly struct FolderData
