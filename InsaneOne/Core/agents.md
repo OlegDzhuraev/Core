@@ -100,6 +100,43 @@ assembly and don't grow its dependencies unnecessarily:
 - `// todo InsaneOne.Core: ...` comments are used as explicit tech-debt markers — don't
   touch/remove them in passing without the user asking.
 
+## SerializeReference Migrator AI bridge
+
+`Sources/Editor/SerializeReferenceMigratorAiBridge.cs` lets an AI agent drive the
+SerializeReference Migrator while the Unity Editor has the project open — no batch mode and
+no editor restart needed. The bridge (auto-loaded via `[InitializeOnLoad]`) polls a command
+file and answers with a result file, both under `Library/InsaneOne/SerializeReferenceMigrator/`
+(never imported, never committed):
+
+```
+Library/InsaneOne/SerializeReferenceMigrator/command.json   <- agent writes a command here
+Library/InsaneOne/SerializeReferenceMigrator/result.json    <- editor writes the answer here
+```
+
+Flow for the agent: write a command with a unique `id` into `command.json`, then poll
+`result.json` until its `id` matches — `command.json` is picked up within ~0.5s and deleted
+once processed, so it never re-runs. Supported commands:
+
+- `{"id":"1","command":"ping"}` — health check, replies with `editorVersion`.
+- `{"id":"2","command":"scan"}` — lists every broken SerializeReference type found in the
+  project: `entries: [{assetPath, referenceId, oldAssemblyName, oldNamespaceName, oldClassName}]`.
+- `{"id":"3","command":"apply","fixes":[{"assetPath":"Assets/X.asset","referenceId":1000,"className":"New","namespace":"New.Ns","assembly":"New.Asm"}]}`
+  — remaps the listed references to their new types and returns `appliedCount`, `failedCount`,
+  `errors`, and `entries` = the remaining broken references after a re-scan (use it to verify).
+
+`referenceId` values come from a previous scan result; assets must be text-serialized (Force
+Binary projects get an error in `errors`). The scan/apply logic itself lives in the headless
+static core `SerializeReferenceMigrator` (unit-tested in `Tests/Editor`) — the EditorWindow and
+the AI bridge are both thin wrappers around it, so they always stay in sync.
+
+Operational notes: if `result.json` never picks up your `id`, the editor is most likely not
+running, is unfocused (it refreshes/compiles only when focused — new scripts, including bridge
+changes, need one focus to load), or has compile errors in the Console. Ask the user to focus
+the Unity window and retry. A `ping` first is the cheapest way to check the bridge is alive
+(also use it after any script change to confirm the editor recompiled successfully). The
+bridge works on the main thread inside the editor, so scans of large projects can take a few
+seconds to answer.
+
 ## Tests
 
 - `Tests/*.cs` — NUnit (`[TestFixture]`/`[Test]`), only runnable inside the Unity Test Runner

@@ -1,0 +1,136 @@
+.srm-root
+{
+    padding: 6px;
+    flex-grow: 1;
+}
+
+.srm-title
+{
+    font-size: 14px;
+    -unity-font-style: bold;
+    margin-bottom: 2px;
+}
+
+.srm-description
+{
+    white-space: normal;
+    font-size: 11px;
+    color: rgb(170, 170, 170);
+    margin-bottom: 8px;
+}
+
+.srm-scan-button
+{
+    margin-bottom: 4px;
+}
+
+.srm-status
+{
+    -unity-font-style: bold;
+    margin-bottom: 6px;
+}
+
+.srm-status-clean
+{
+    color: rgb(120, 200, 120);
+}
+
+.srm-status-broken
+{
+    color: rgb(255, 153, 51);
+}
+
+.srm-bulk-box
+{
+    background-color: rgba(52, 52, 52, 1);
+    border-radius: 4px;
+    padding: 6px;
+    margin: 2px 0 6px 0;
+    border-color: rgba(30, 30, 30, 1);
+    border-width: 1px;
+}
+
+.srm-bulk-caption
+{
+    font-size: 11px;
+    white-space: normal;
+    color: rgb(180, 180, 180);
+    margin-bottom: 4px;
+}
+
+.srm-bulk-row
+{
+    flex-direction: row;
+}
+
+.srm-bulk-field
+{
+    flex-grow: 1;
+    margin-right: 4px;
+}
+
+.srm-bulk-button
+{
+    align-self: center;
+}
+
+.srm-list
+{
+    flex-grow: 1;
+}
+
+.srm-empty-state
+{
+    white-space: normal;
+    align-self: center;
+    margin-top: 24px;
+    color: rgb(150, 150, 150);
+}
+
+.srm-apply-button
+{
+    height: 32px;
+    margin-top: 6px;
+    -unity-font-style: bold;
+    background-color: rgba(50, 101, 50, 1);
+}
+
+.srm-apply-button:hover
+{
+    background-color: rgba(70, 145, 60, 1);
+}
+
+/* Entry rows are built in code (the list is dynamic), but styled with these classes -
+   the stylesheet is attached to the window root, so it also applies to elements created after CloneTree. */
+.srm-entry
+{
+    margin-bottom: 6px;
+    padding: 4px;
+}
+
+.srm-entry-header
+{
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.srm-entry-path
+{
+    -unity-font-style: bold;
+}
+
+.srm-ping-button
+{
+    height: 18px;
+    margin: 0;
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
+.srm-broken-type
+{
+    color: rgb(255, 153, 51);
+    white-space: normal;
+    margin-bottom: 4px;
+}

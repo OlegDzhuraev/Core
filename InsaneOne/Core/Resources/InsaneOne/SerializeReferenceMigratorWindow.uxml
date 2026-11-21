@@ -1,0 +1,21 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="SerializeReferenceMigratorWindow.uss" />
+    <ui:VisualElement class="srm-root">
+        <ui:Label text="SerializeReference rename migrator" class="srm-title" />
+        <ui:Label text="Finds ScriptableObject assets with [SerializeReference] fields whose stored type can't be found anymore (renamed namespace/assembly/class), and lets you point them at the new type.&#10;Requires assets to be serialized as text (Edit > Project Settings > Editor > Asset Serialization, not Force Binary)." class="srm-description" />
+        <ui:Button name="scan-button" text="Scan Project" class="srm-scan-button" />
+        <ui:Label name="status-label" class="srm-status" />
+        <ui:VisualElement class="srm-bulk-box">
+            <ui:Label text="Bulk remap - filled values are applied to ALL found references at once. An empty field keeps each entry's own value." class="srm-bulk-caption" />
+            <ui:VisualElement class="srm-bulk-row">
+                <ui:TextField name="bulk-assembly" label="Assembly (all)" class="srm-bulk-field"
+                              tooltip="Fill to set the assembly for ALL found references at once. Leave empty to keep each entry's own value." />
+                <ui:TextField name="bulk-namespace" label="Namespace (all)" class="srm-bulk-field"
+                              tooltip="Fill to set the namespace for ALL found references at once. Leave empty to keep each entry's own value." />
+                <ui:Button name="apply-to-all-button" text="Apply to All" class="srm-bulk-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:ScrollView name="list-container" class="srm-list" />
+        <ui:Button name="apply-button" text="Apply Fixes" class="srm-apply-button" />
+    </ui:VisualElement>
+</ui:UXML>

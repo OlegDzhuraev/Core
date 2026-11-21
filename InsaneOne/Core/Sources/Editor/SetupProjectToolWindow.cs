@@ -163,15 +163,10 @@ namespace InsaneOne.Core.Development
             actions.AddToClassList("row-actions");
             row.Add(actions);
 
-            if (openUrl)
-            {
-                var open = new Button(() => OpenUrl(holder.Link)) { text = "Open" };
-                open.AddToClassList("row-button");
-                open.AddToClassList("is-accent");
-                actions.Add(open);
+            actions.Add(CreateOpenButton(holder.Link));
 
+            if (openUrl)
                 return row;
-            }
 
             var add = new Button(() => { AddPackage(holder.Link); RefreshPackageRows(); }) { text = "Add" };
             add.AddToClassList("row-button");
@@ -271,10 +266,13 @@ namespace InsaneOne.Core.Development
                     EditorSettings.enterPlayModeOptions = correctPlayMode;
                 });
 
-            var namingFine = EditorSettings.gameObjectNamingScheme == EditorSettings.NamingScheme.Underscore;
+            var namingFine = EditorSettings.gameObjectNamingScheme == EditorSettings.NamingScheme.Underscore &&
+                             EditorSettings.gameObjectNamingDigits == 2;
+
             AddChecklistItem(otherItems, namingFine,
-                "Namings scheme is correct.",
-                "Namings scheme is not set to <b>underscore</b> with 2 digits (Prefab_01). It is recommended to use <b>underscore</b> and several digits for better consistent naming.",
+                $"Numbering scheme is set to <b>Prefab_1</b> with <b>2</b> digits. Example: Clap → <b>{GetSampleObjectName("Clap")}</b>.",
+                $"Numbering scheme is set to <b>{EditorSettings.gameObjectNamingScheme}</b> with <b>{EditorSettings.gameObjectNamingDigits}</b> digits. " +
+                $"Recommended is <b>underscore</b> with <b>2</b> digits: Clap → <b>{GetSampleObjectName("Clap")}</b> now, <b>Clap_01</b> after fixing.",
                 namingFine ? string.Empty : "Fix",
                 () =>
                 {
@@ -310,6 +308,48 @@ namespace InsaneOne.Core.Development
         }
 
         static void OpenUrl(string url) => Application.OpenURL(url);
+
+        static Button CreateOpenButton(string link)
+        {
+            var url = GetBrowserUrl(link);
+            var open = new Button(() => OpenUrl(url)) { text = "Open", tooltip = url };
+            open.AddToClassList("row-button");
+            open.AddToClassList("is-accent");
+
+            return open;
+        }
+
+        // Mirrors Unity's numbering preview: the second instance of "Clap" becomes "Clap_01" for underscore + 2 digits.
+        static string GetSampleObjectName(string baseName)
+        {
+            var digits = Mathf.Max(1, EditorSettings.gameObjectNamingDigits);
+            var number = "1".PadLeft(digits, '0');
+
+            return EditorSettings.gameObjectNamingScheme switch
+            {
+                EditorSettings.NamingScheme.Dot => $"{baseName}.{number}",
+                EditorSettings.NamingScheme.SpaceParenthesis => $"{baseName} ({number})",
+                _ => $"{baseName}_{number}",
+            };
+        }
+
+        // Git dependencies open their repository page, registry packages open the Unity docs page.
+        static string GetBrowserUrl(string link)
+        {
+            if (!link.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                return $"https://docs.unity3d.com/Packages/{link}@latest";
+
+            var url = link;
+
+            var pathIndex = url.IndexOf("?path=", StringComparison.Ordinal);
+            if (pathIndex >= 0)
+                url = url[..pathIndex];
+
+            if (url.EndsWith(".git", StringComparison.OrdinalIgnoreCase))
+                url = url[..^4];
+
+            return url;
+        }
 
         static bool IsPackageInstalled(string nameOrUrl) => FindInstalledPackageName(nameOrUrl) != null;
 

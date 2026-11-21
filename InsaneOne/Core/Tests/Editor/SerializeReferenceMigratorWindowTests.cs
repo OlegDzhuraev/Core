@@ -34,7 +34,7 @@ namespace InsaneOne.Core.Tests
 				"      data:\n" +
 				"        value: 7\n";
 
-			var result = SerializeReferenceMigratorWindow.PatchManagedReferenceType(yaml, 1000, "NewClass", "New.Namespace", "NewAssembly");
+			var result = SerializeReferenceMigrator.PatchManagedReferenceType(yaml, 1000, "NewClass", "New.Namespace", "NewAssembly");
 
 			StringAssert.Contains("rid: 1000", result);
 			StringAssert.Contains("type: {class: NewClass, ns: New.Namespace, asm: NewAssembly}", result);
@@ -51,7 +51,7 @@ namespace InsaneOne.Core.Tests
 		{
 			const string yaml = "    - rid: 1000\n      type: {class: OldClass, ns: Old, asm: OldAssembly}\n      data:\n        value: 5\n";
 
-			var result = SerializeReferenceMigratorWindow.PatchManagedReferenceType(yaml, 9999, "NewClass", "New", "NewAssembly");
+			var result = SerializeReferenceMigrator.PatchManagedReferenceType(yaml, 9999, "NewClass", "New", "NewAssembly");
 
 			Assert.AreEqual(yaml, result);
 		}
@@ -81,7 +81,7 @@ namespace InsaneOne.Core.Tests
 
 			// simulate a rename by rewriting the on-disk type to something that doesn't exist,
 			// using the same patch method the tool itself uses to apply a fix
-			var corrupted = SerializeReferenceMigratorWindow.PatchManagedReferenceType(
+			var corrupted = SerializeReferenceMigrator.PatchManagedReferenceType(
 				File.ReadAllText(AssetPath), referenceId, "RenamedGoneClass", "Renamed.Gone.Namespace", "Renamed.Gone.Assembly");
 
 			File.WriteAllText(AssetPath, corrupted);
@@ -97,11 +97,21 @@ namespace InsaneOne.Core.Tests
 			Assert.AreEqual(referenceId, missingTypes[0].referenceId);
 
 			// now migrate it back to the real type, as a user would via the tool's Apply button
-			var fixedText = SerializeReferenceMigratorWindow.PatchManagedReferenceType(
-				File.ReadAllText(AssetPath), referenceId, nameof(TestReferencedData), typeof(TestReferencedData).Namespace, typeof(TestReferencedData).Assembly.GetName().Name);
+			// (the AI bridge drives the exact same ApplyFixes API)
+			var fix = new SerializeReferenceMigrator.FixEntry
+			{
+				AssetPath = AssetPath,
+				ReferenceId = referenceId,
+				NewClassName = nameof(TestReferencedData),
+				NewNamespace = typeof(TestReferencedData).Namespace,
+				NewAssemblyName = typeof(TestReferencedData).Assembly.GetName().Name,
+			};
 
-			File.WriteAllText(AssetPath, fixedText);
-			AssetDatabase.ImportAsset(AssetPath, ImportAssetOptions.ForceUpdate);
+			var applyResult = SerializeReferenceMigrator.ApplyFixes(new[] { fix });
+
+			Assert.AreEqual(1, applyResult.AppliedCount);
+			Assert.AreEqual(0, applyResult.FailedCount);
+			Assert.IsEmpty(applyResult.Errors);
 
 			host = AssetDatabase.LoadAssetAtPath<TestHostAsset>(AssetPath);
 
