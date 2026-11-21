@@ -82,6 +82,7 @@ namespace InsaneOne.Core.Development
 					Asset = missing.Asset,
 					AssetPath = missing.AssetPath,
 					ReferenceId = missing.ReferenceId,
+					Holder = missing.Holder,
 					OldAssemblyName = missing.AssemblyName,
 					OldNamespace = missing.NamespaceName,
 					OldClassName = missing.ClassName,
@@ -169,7 +170,8 @@ namespace InsaneOne.Core.Development
 
 			box.Add(header);
 
-			var brokenTypeLabel = new Label($"Broken type: {entry.OldNamespace}.{entry.OldClassName}, {entry.OldAssemblyName} (rid {entry.ReferenceId})");
+			var holderSuffix = string.IsNullOrEmpty(entry.Holder) ? string.Empty : $", on {entry.Holder}";
+			var brokenTypeLabel = new Label($"Broken type: {entry.OldNamespace}.{entry.OldClassName}, {entry.OldAssemblyName} (rid {entry.ReferenceId}{holderSuffix})");
 			brokenTypeLabel.AddToClassList(BrokenTypeClass);
 			box.Add(brokenTypeLabel);
 
@@ -228,6 +230,7 @@ namespace InsaneOne.Core.Development
 			public Object Asset;
 			public string AssetPath;
 			public long ReferenceId;
+			public string Holder;
 
 			public string OldAssemblyName;
 			public string OldNamespace;

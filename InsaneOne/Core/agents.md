@@ -118,11 +118,15 @@ Flow for the agent: write a command with a unique `id` into `command.json`, then
 once processed, so it never re-runs. Supported commands:
 
 - `{"id":"1","command":"ping"}` — health check, replies with `editorVersion`.
-- `{"id":"2","command":"scan"}` — lists every broken SerializeReference type found in the
-  project: `entries: [{assetPath, referenceId, oldAssemblyName, oldNamespaceName, oldClassName}]`.
+- `{"id":"2","command":"scan"}` — lists every broken SerializeReference type found in the project
+  (ScriptableObject assets, prefab components and scene components):
+  `entries: [{assetPath, referenceId, oldAssemblyName, oldNamespaceName, oldClassName, holder}]`,
+  where `holder` is "ComponentName on 'GameObjectName'" for prefab/scene entries, empty for assets.
 - `{"id":"3","command":"apply","fixes":[{"assetPath":"Assets/X.asset","referenceId":1000,"className":"New","namespace":"New.Ns","assembly":"New.Asm"}]}`
   — remaps the listed references to their new types and returns `appliedCount`, `failedCount`,
   `errors`, and `entries` = the remaining broken references after a re-scan (use it to verify).
+  Scenes that are currently open in the editor are reported in `errors` instead of being patched
+  (close the scene first, otherwise the next scene save would overwrite the fix).
 
 `referenceId` values come from a previous scan result; assets must be text-serialized (Force
 Binary projects get an error in `errors`). The scan/apply logic itself lives in the headless

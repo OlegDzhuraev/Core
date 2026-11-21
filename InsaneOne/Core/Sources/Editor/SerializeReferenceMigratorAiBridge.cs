@@ -158,6 +158,7 @@ namespace InsaneOne.Core.Development
 			oldAssemblyName = missing.AssemblyName,
 			oldNamespaceName = missing.NamespaceName,
 			oldClassName = missing.ClassName,
+			holder = missing.Holder,
 		};
 
 		static void TryDeleteCommandFile()
@@ -230,5 +231,7 @@ namespace InsaneOne.Core.Development
 		public string oldAssemblyName;
 		public string oldNamespaceName;
 		public string oldClassName;
+		/// <summary> For broken references on prefab/scene components: "ComponentName on 'GameObjectName'". Empty for ScriptableObject assets. </summary>
+		public string holder;
 	}
 }

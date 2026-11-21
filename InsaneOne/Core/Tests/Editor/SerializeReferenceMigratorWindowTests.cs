@@ -1,7 +1,10 @@
 using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 using InsaneOne.Core.Development;
 using NUnit.Framework;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine.Serialization;
 using UnityEngine;
 
@@ -118,6 +121,92 @@ namespace InsaneOne.Core.Tests
 			Assert.False(SerializationUtility.HasManagedReferencesWithMissingTypes(host), "Migrated asset should no longer report a missing type.");
 			Assert.IsInstanceOf<TestReferencedData>(host.Data);
 			Assert.AreEqual(42, ((TestReferencedData) host.Data).Value, "Original field value must survive the rename round-trip.");
+		}
+
+		[Test]
+		public void ScanProject_FindsMissingTypeInPrefab()
+		{
+			if (EditorSettings.serializationMode is SerializationMode.ForceBinary)
+			{
+				Assert.Ignore("This test requires the project's Asset Serialization mode to be Force Text or Mixed.");
+				return;
+			}
+
+			if (!AssetDatabase.IsValidFolder(TestFolder))
+				AssetDatabase.CreateFolder("Assets", "_SerializeReferenceMigratorTests");
+
+			var prefabPath = TestFolder + "/TestPrefab.prefab";
+
+			var go = new GameObject("Prefab Mb Host");
+			go.AddComponent<TestReferencedMB>().Data = new TestReferencedData { Value = 11 };
+			PrefabUtility.SaveAsPrefabAsset(go, prefabPath);
+			Object.DestroyImmediate(go);
+
+			var prefabText = File.ReadAllText(prefabPath);
+			var ridMatch = Regex.Match(prefabText, @"rid:\s*(\d+)\s*\r?\n\s*type:\s*\{class: TestReferencedData");
+			Assert.IsTrue(ridMatch.Success, "Test prefab should contain a managed reference.");
+
+			var rid = long.Parse(ridMatch.Groups[1].Value);
+			var corrupted = SerializeReferenceMigrator.PatchManagedReferenceType(prefabText, rid, "RenamedGoneClass", "Renamed.Gone.Namespace", "Renamed.Gone.Assembly");
+
+			File.WriteAllText(prefabPath, corrupted);
+			AssetDatabase.ImportAsset(prefabPath, ImportAssetOptions.ForceUpdate);
+
+			var found = SerializeReferenceMigrator.ScanProject();
+
+			Assert.IsTrue(found.Any(e => e.AssetPath == prefabPath && e.ReferenceId == rid && e.ClassName == "RenamedGoneClass"),
+				"ScanProject should find the broken reference inside a prefab component.");
+		}
+
+		[Test]
+		public void ScanProject_FindsMissingTypeInSavedScene()
+		{
+			if (EditorSettings.serializationMode is SerializationMode.ForceBinary)
+			{
+				Assert.Ignore("This test requires the project's Asset Serialization mode to be Force Text or Mixed.");
+				return;
+			}
+
+			if (!AssetDatabase.IsValidFolder(TestFolder))
+				AssetDatabase.CreateFolder("Assets", "_SerializeReferenceMigratorTests");
+
+			var scenePath = TestFolder + "/TestScene.unity";
+			var previousScene = EditorSceneManager.GetActiveScene();
+			var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Additive);
+
+			GameObject hostGo = null;
+
+			try
+			{
+				EditorSceneManager.SetActiveScene(scene);
+
+				hostGo = new GameObject("Scene Mb Host");
+				var mb = hostGo.AddComponent<TestReferencedMB>();
+				mb.Data = new TestReferencedData { Value = 13 };
+
+				EditorSceneManager.SaveScene(scene, scenePath);
+
+				var rid = ManagedReferenceUtility.GetManagedReferenceIdForObject(mb, mb.Data);
+
+				var corrupted = SerializeReferenceMigrator.PatchManagedReferenceType(
+					File.ReadAllText(scenePath), rid, "RenamedGoneClass", "Renamed.Gone.Namespace", "Renamed.Gone.Assembly");
+
+				File.WriteAllText(scenePath, corrupted);
+				AssetDatabase.ImportAsset(scenePath, ImportAssetOptions.ForceUpdate);
+			}
+			finally
+			{
+				if (hostGo != null)
+					Object.DestroyImmediate(hostGo);
+
+				EditorSceneManager.SetActiveScene(previousScene); // restore the previous active scene, then close the test one
+				EditorSceneManager.CloseScene(scene, true);
+			}
+
+			var found = SerializeReferenceMigrator.ScanProject();
+
+			Assert.IsTrue(found.Any(e => e.AssetPath == scenePath && e.ClassName == "RenamedGoneClass"),
+				"ScanProject should find the broken reference inside a scene component.");
 		}
 	}
 }
