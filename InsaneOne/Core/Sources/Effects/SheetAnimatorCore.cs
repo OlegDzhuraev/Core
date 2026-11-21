@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using InsaneOne.Core.Utility;
 using UnityEngine;
 
 namespace InsaneOne.Core.Effects
@@ -72,7 +73,7 @@ namespace InsaneOne.Core.Effects
 				{
 					if (animationData.Frames == null || animationData.Frames.Length == 0 || animationData.FramesPerSpeed <= 0)
 					{
-						Debug.LogWarning($"[SheetAnimator] Can't play animation '{animationName}' — it has no frames or an invalid frames speed.");
+						CoreUnityLogger.I.Log($"[SheetAnimator] Can't play animation '{animationName}' — it has no frames or an invalid frames speed.", LogLevel.Warning);
 						return;
 					}
 

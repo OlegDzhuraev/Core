@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using InsaneOne.Core.Utility;
 using UnityEngine;
 
 namespace InsaneOne.Core.Goals
@@ -42,7 +43,7 @@ namespace InsaneOne.Core.Goals
 					continue;
 
 				if (!seenIds.Add(goal.Id))
-					Debug.LogWarning($"[{nameof(GoalsConfig)}] Duplicate goal id '{goal.Id}' - goal ids must be unique, both goals will share one progress entry!", this);
+					CoreUnityLogger.I.Log($"[{nameof(GoalsConfig)}] Duplicate goal id '{goal.Id}' - goal ids must be unique, both goals will share one progress entry!", LogLevel.Warning, this);
 			}
 		}
 #endif

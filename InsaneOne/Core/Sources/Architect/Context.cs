@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using InsaneOne.Core.Utility;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -23,13 +24,13 @@ namespace InsaneOne.Core.Architect
 		{
 			if (newContext == null)
 			{
-				Debug.LogWarning($"[Context<{typeof(T).Name}>] Can't initialize with a null context - Initialize call ignored.");
+				CoreUnityLogger.I.Log($"[Context<{typeof(T).Name}>] Can't initialize with a null context - Initialize call ignored.", LogLevel.Warning);
 				return;
 			}
 
 			if (context != null)
 			{
-				Debug.LogWarning($"[Context<{typeof(T).Name}>] Already initialized, ignoring repeated Initialize call - call Dispose() first if you need to reinitialize with a new context.");
+				CoreUnityLogger.I.Log($"[Context<{typeof(T).Name}>] Already initialized, ignoring repeated Initialize call - call Dispose() first if you need to reinitialize with a new context.", LogLevel.Warning);
 				return;
 			}
 
@@ -77,7 +78,7 @@ namespace InsaneOne.Core.Architect
 		{
 			if (receivers == null)
 			{
-				Debug.LogWarning($"[Context<{typeof(T).Name}>] Not initialized — call Initialize() first. Ignoring Reset() call.");
+				CoreUnityLogger.I.Log($"[Context<{typeof(T).Name}>] Not initialized — call Initialize() first. Ignoring Reset() call.", LogLevel.Warning);
 				return;
 			}
 
@@ -103,7 +104,7 @@ namespace InsaneOne.Core.Architect
 		{
 			if (receivers == null)
 			{
-				Debug.LogWarning($"[Context<{typeof(T).Name}>] Not initialized — call Initialize() first. Ignoring Add() call for '{sceneObject.name}'.");
+				CoreUnityLogger.I.Log($"[Context<{typeof(T).Name}>] Not initialized — call Initialize() first. Ignoring Add() call for '{sceneObject.name}'.", LogLevel.Warning);
 				return;
 			}
 

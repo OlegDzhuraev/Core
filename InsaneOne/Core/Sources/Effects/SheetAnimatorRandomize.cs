@@ -1,3 +1,4 @@
+using InsaneOne.Core.Utility;
 using UnityEngine;
 
 namespace InsaneOne.Core.Effects
@@ -20,7 +21,7 @@ namespace InsaneOne.Core.Effects
 		{
 			if (!animator || animator.Animations == null || animator.Animations.Length == 0)
 			{
-				Debug.LogWarning($"[{nameof(SheetAnimatorRandomize)}] No animator or no animations set on [{name}] - nothing to play.", this);
+				CoreUnityLogger.I.Log($"[{nameof(SheetAnimatorRandomize)}] No animator or no animations set on [{name}] - nothing to play.", LogLevel.Warning, this);
 				return;
 			}
 

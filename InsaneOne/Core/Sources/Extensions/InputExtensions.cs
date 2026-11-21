@@ -1,3 +1,4 @@
+using InsaneOne.Core.Utility;
 using UnityEngine;
 
 namespace InsaneOne.Core
@@ -14,7 +15,7 @@ namespace InsaneOne.Core
 			{
 				if (!loggedNoCameraWarning)
 				{
-					Debug.LogWarning($"[{nameof(MainCamera)}] No main camera found - can't get mouse world position!");
+					CoreUnityLogger.I.Log($"[{nameof(MainCamera)}] No main camera found - can't get mouse world position!", LogLevel.Warning);
 					loggedNoCameraWarning = true;
 				}
 

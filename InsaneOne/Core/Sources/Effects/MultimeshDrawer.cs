@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using InsaneOne.Core.Architect;
+using InsaneOne.Core.Utility;
 using UnityEngine;
 
 namespace InsaneOne.Core.Effects
@@ -74,7 +75,7 @@ namespace InsaneOne.Core.Effects
 		{
 			if (!drawerPartTemplate)
 			{
-				Debug.LogError($"[{nameof(MultimeshDrawer)}] No drawer part template assigned on '{name}' - assign a renderer template first.", this);
+				CoreUnityLogger.I.Log($"[{nameof(MultimeshDrawer)}] No drawer part template assigned on '{name}' - assign a renderer template first.", LogLevel.Error, this);
 				return;
 			}
 

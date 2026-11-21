@@ -1,4 +1,5 @@
 using System;
+using InsaneOne.Core.Utility;
 using UnityEngine;
 
 namespace InsaneOne.Core.Components
@@ -55,7 +56,7 @@ namespace InsaneOne.Core.Components
 
 			if (waypoints.Length == 0)
 			{
-				Debug.LogWarning($"[MoveByWaypoints] No waypoints assigned on '{name}' — component disabled.", this);
+				CoreUnityLogger.I.Log($"[MoveByWaypoints] No waypoints assigned on '{name}' — component disabled.", LogLevel.Warning, this);
 				enabled = false;
 				return;
 			}
@@ -134,7 +135,7 @@ namespace InsaneOne.Core.Components
 		{
 			if (waypoints.Length == 0)
 			{
-				Debug.LogWarning($"[MoveByWaypoints] Can't restart '{name}' — no waypoints assigned.", this);
+				CoreUnityLogger.I.Log($"[MoveByWaypoints] Can't restart '{name}' — no waypoints assigned.", LogLevel.Warning, this);
 				return;
 			}
 

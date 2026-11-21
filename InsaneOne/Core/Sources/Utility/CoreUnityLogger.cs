@@ -11,7 +11,10 @@ namespace InsaneOne.Core.Utility
 		public static CoreUnityLogger I => instance ??= new CoreUnityLogger();
 		static CoreUnityLogger instance;
 
-		public void Log(string text, LogLevel logLevel = LogLevel.Info)
+		public void Log(string text, LogLevel logLevel = LogLevel.Info) => Log(text, logLevel, null);
+
+		/// <summary> Logs the message and highlights the context object when the log line is clicked in the Console. </summary>
+		public void Log(string text, LogLevel logLevel, UnityEngine.Object context)
 		{
 			if (CoreData.TryLoad(out var coreData) && coreData.SuppressLogs)
 				return;
@@ -22,15 +25,15 @@ namespace InsaneOne.Core.Utility
 			{
 				case LogLevel.Info:
 				case LogLevel.Verbose:
-					Debug.Log(text);
+					Debug.Log(text, context);
 					break;
 
 				case LogLevel.Warning:
-					Debug.LogWarning(text);
+					Debug.LogWarning(text, context);
 					break;
 
 				case LogLevel.Error:
-					Debug.LogError(text);
+					Debug.LogError(text, context);
 					break;
 
 				default:

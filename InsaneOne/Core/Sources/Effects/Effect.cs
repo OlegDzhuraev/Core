@@ -1,3 +1,4 @@
+using InsaneOne.Core.Utility;
 using UnityEngine;
 #if PERSEIDS_POOLING
 using InsaneOne.PerseidsPooling;
@@ -41,7 +42,7 @@ namespace InsaneOne.Core.Effects
 		{
 			if (!vfxPrefab)
 			{
-				Debug.LogWarning($"[{nameof(Effect)}] Can't create an effect from a null prefab!");
+				CoreUnityLogger.I.Log($"[{nameof(Effect)}] Can't create an effect from a null prefab!", LogLevel.Warning);
 				return null;
 			}
 

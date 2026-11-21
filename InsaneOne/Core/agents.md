@@ -87,6 +87,11 @@ assembly and don't grow its dependencies unnecessarily:
   disabled — follow the same pattern when adding a new static system.
 - Runtime components use the legacy `Input` class — consuming projects on the new Input
   System package need Active Input Handling set to "Both" (or "Input Manager (Old)").
+- Runtime logs go through `CoreUnityLogger` (`CoreUnityLogger.I.Log(msg, LogLevel.Warning)`),
+  which prefixes messages with `[InsaneOne.Core]` and respects the CoreData `SuppressLogs`
+  setting; pass a context object (`..., LogLevel.Warning, this`) to ping it from the Console.
+  Exceptions: `ServiceLocator` (must compile without Unity — uses `UnityEngine.Debug` inside
+  `#if UNITY_5_3_OR_NEWER`) and editor tooling under `Sources/Editor` / `Sources/LevelDesign/Editor`.
 - Optional features are compiled via `#if INSANE_<FEATURE>` scripting define symbols — that's
   how the entire `Teams` module is gated (`INSANE_TEAMS_EXTENSION`). When adding a new optional
   subsystem, follow the same pattern rather than a runtime flag.
