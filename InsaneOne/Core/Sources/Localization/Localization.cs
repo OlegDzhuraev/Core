@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using InsaneOne.Core.Utility;
 using UnityEngine;
-#if UNITY_ANDROID && !UNITY_EDITOR
+#if (UNITY_ANDROID || UNITY_WEBGL) && !UNITY_EDITOR
 using UnityEngine.Networking;
 #endif
 using ILogger = InsaneOne.Core.Utility.ILogger;
@@ -51,7 +51,7 @@ namespace InsaneOne.Core.Locales
 			CachedTexts.Clear();
 
 			loadedLocalizationTexts = ReadAllLines(path);
-			var languages = LanguagesRow.Split(SplitSymbol, StringSplitOptions.RemoveEmptyEntries);
+			var languages = LanguagesRow.Split(SplitSymbol, StringSplitOptions.None);
 
 			Languages = languages.TakeLast(languages.Length - 1).ToList();
 			
@@ -89,7 +89,7 @@ namespace InsaneOne.Core.Locales
 				if (str == "")
 					continue;
 
-				var elements = str.Split(SplitSymbol, StringSplitOptions.RemoveEmptyEntries);
+				var elements = str.Split(SplitSymbol, StringSplitOptions.None);
 
 				if (elements.Length is 0 || string.IsNullOrWhiteSpace(elements[0]))
 					continue;
@@ -98,7 +98,11 @@ namespace InsaneOne.Core.Locales
 					continue;
 
 				var translatedWord = elements.Length - 1 >= columnId ? elements[columnId] : elements[1]; // fallback to first language
-				CachedTexts.Add(elements[0], translatedWord);
+
+				if (string.IsNullOrWhiteSpace(translatedWord)) // empty cell for the chosen language - fallback to first language too
+					translatedWord = elements[1];
+
+				CachedTexts[elements[0]] = translatedWord;
 			}
 
 			IsLanguageSetAtLeastOnce = true;
@@ -136,6 +140,9 @@ namespace InsaneOne.Core.Locales
 			return false;
 		}
 
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+		static void ResetOnLoad() => Unload();
+
 		/// <summary> Call this on game closing. </summary>
 		public static void Unload()
 		{
@@ -146,9 +153,9 @@ namespace InsaneOne.Core.Locales
 			Language = DefaultLanguage;
 		}
 
-#if UNITY_ANDROID && !UNITY_EDITOR
-		/// <summary> On Android, Streaming Assets are packed inside the compressed APK/AAB, so plain System.IO calls
-		/// can't read them there - UnityWebRequest has to be used instead. </summary>
+#if (UNITY_ANDROID || UNITY_WEBGL) && !UNITY_EDITOR
+		/// <summary> On Android, Streaming Assets are packed inside the compressed APK/AAB, and on WebGL they are served
+		/// as a remote URL - in both cases plain System.IO can't read them, so UnityWebRequest has to be used instead. </summary>
 		static string[] ReadAllLines(string path)
 		{
 			using var request = UnityWebRequest.Get(path);

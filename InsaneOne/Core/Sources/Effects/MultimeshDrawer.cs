@@ -77,21 +77,18 @@ namespace InsaneOne.Core.Effects
 
 		void AddPartRecursive(Transform templatePart, Transform attachTo, MaterialUsageMode materialUsageMode = MaterialUsageMode.None)
 		{
-			for (int i = 0; i < templatePart.childCount; i++)
+			var partAttachTo = attachTo;
+			var meshFilter = templatePart.GetComponent<MeshFilter>();
+
+			if (!meshFilter)
 			{
-				var templatePartChild = templatePart.GetChild(i);
-
-				var meshFilter = templatePartChild.GetComponent<MeshFilter>();
-
-				if (!meshFilter)
-				{
-					var emptyPartGo = new GameObject(templatePart.name);
-					emptyPartGo.transform.SetParent(attachTo);
-					CloneLocalTransform(templatePartChild, emptyPartGo.transform);
-					AddPartRecursive(templatePartChild, emptyPartGo.transform, materialUsageMode);
-					continue;
-				}
-
+				var emptyPartGo = new GameObject(templatePart.name);
+				emptyPartGo.transform.SetParent(attachTo);
+				CloneLocalTransform(templatePart, emptyPartGo.transform);
+				partAttachTo = emptyPartGo.transform;
+			}
+			else
+			{
 				var mesh = meshFilter.sharedMesh;
 
 				var meshPartGo = Instantiate(drawerPartTemplate, attachTo);
@@ -107,7 +104,7 @@ namespace InsaneOne.Core.Effects
 
 				if (materialUsageMode != MaterialUsageMode.None)
 				{
-					var originalRenderer = templatePartChild.GetComponent<Renderer>();
+					var originalRenderer = templatePart.GetComponent<Renderer>();
 					if (originalRenderer)
 					{
 						var cloneMat = materialUsageMode == MaterialUsageMode.CloneMaterial;
@@ -115,11 +112,14 @@ namespace InsaneOne.Core.Effects
 					}
 				}
 
-				CloneLocalTransform(templatePartChild, meshPartGo.transform);
-				AddPartRecursive(templatePartChild, meshPartGo.transform, materialUsageMode);
+				CloneLocalTransform(templatePart, meshPartGo.transform);
+				partAttachTo = meshPartGo.transform;
 
 				drawerParts.Add(part);
 			}
+
+			for (int i = 0; i < templatePart.childCount; i++)
+				AddPartRecursive(templatePart.GetChild(i), partAttachTo, materialUsageMode);
 		}
 
 		static void CloneLocalTransform(Transform from, Transform to)

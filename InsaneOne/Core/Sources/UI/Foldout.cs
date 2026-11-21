@@ -30,6 +30,8 @@ namespace InsaneOne.Core.UI
 		[SerializeField] GameObject content;
 		[SerializeField] RectTransform openIconTransform;
 
+		ToggleViewModel subscribedToggleVm;
+
 		protected override void OnAwake()
 		{
 			toggle.ViewModelChanged += OnToggleViewModelChanged;
@@ -45,10 +47,17 @@ namespace InsaneOne.Core.UI
 		{
 			if (toggle)
 				toggle.ViewModelChanged -= OnToggleViewModelChanged;
+
+			if (subscribedToggleVm != null)
+				subscribedToggleVm.WasChanged -= OnToggleChanged;
 		}
 
 		void OnToggleViewModelChanged(ToggleViewModel toggleVm)
 		{
+			if (subscribedToggleVm != null)
+				subscribedToggleVm.WasChanged -= OnToggleChanged;
+
+			subscribedToggleVm = toggleVm;
 			toggleVm.WasChanged += OnToggleChanged;
 		}
 
@@ -56,6 +65,9 @@ namespace InsaneOne.Core.UI
 
 		void SetState(bool isOpened)
 		{
+			if (content)
+				content.SetActive(isOpened);
+
 			var angles = openIconTransform.localEulerAngles;
 			angles.z = isOpened ? OpenedRotationZ : ClosedRotationZ;
 			openIconTransform.localEulerAngles = angles;

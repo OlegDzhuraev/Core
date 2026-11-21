@@ -79,7 +79,7 @@ namespace InsaneOne.Core.Effects
 			{
 				lineRenderer.positionCount = 2;
 				lineRenderer.SetPosition(0, transform.position);
-				lineRenderer.SetPosition(1, transform.position + transform.forward * maxDistance);
+				lineRenderer.SetPosition(1, transform.position + rayDir * maxDistance);
 			}
 			else
 			{

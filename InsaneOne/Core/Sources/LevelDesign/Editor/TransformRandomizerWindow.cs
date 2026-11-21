@@ -136,15 +136,24 @@ namespace InsaneOne.Core.LevelDesign
 
 		void OnButtonClicked()
 		{
-			foreach (var obj in Selection.objects)
-				if (obj is GameObject go) // todo check it on scene
-					RandomizeNew(go);
+			var transforms = Selection.transforms;
+
+			if (transforms.Length == 0)
+				return;
+
+			Undo.RecordObjects(transforms, "Randomize Transforms");
+
+			foreach (var tr in transforms)
+			{
+				if (tr == null || PrefabUtility.IsPartOfPrefabAsset(tr))
+					continue;
+
+				RandomizeNew(tr);
+			}
 		}
 
-		void RandomizeNew(GameObject go)
+		void RandomizeNew(Transform tr)
 		{
-			var tr = go.transform;
-
 			var rotationAxes = (Axes)rotationAxesField.value;
 			var sizeAxes = (Axes)sizeAxesField.value;
 			var positionAxes = (Axes)positionAxesField.value;
@@ -173,7 +182,7 @@ namespace InsaneOne.Core.LevelDesign
 		static void ApplyNonZeroTo(ref float target, float value)
 		{
 			if (!Mathf.Approximately(value, 0))
-				target = value;
+				target *= value;
 		}
 
 		static Vector3 GetAxisValuedVector3(Axes axes)

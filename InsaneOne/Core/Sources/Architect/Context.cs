@@ -69,6 +69,12 @@ namespace InsaneOne.Core.Architect
 		/// <summary> Use when need to change context on the scene for actual context receivers. </summary>
 		public static void Reset(T newContext)
 		{
+			if (receivers == null)
+			{
+				Debug.LogWarning($"[Context<{typeof(T).Name}>] Not initialized — call Initialize() first. Ignoring Reset() call.");
+				return;
+			}
+
 			context = newContext;
 
 			for (var q = receivers.Count - 1; q >= 0; q--)
@@ -87,6 +93,15 @@ namespace InsaneOne.Core.Architect
 		}
 
 		/// <summary> Adds GameObject to context and applies context to all receivers on this GO. </summary>
-		public static void Add(GameObject sceneObject) => CollectReceivers(sceneObject);
+		public static void Add(GameObject sceneObject)
+		{
+			if (receivers == null)
+			{
+				Debug.LogWarning($"[Context<{typeof(T).Name}>] Not initialized — call Initialize() first. Ignoring Add() call for '{sceneObject.name}'.");
+				return;
+			}
+
+			CollectReceivers(sceneObject);
+		}
 	}
 }

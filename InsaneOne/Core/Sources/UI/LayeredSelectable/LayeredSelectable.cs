@@ -29,7 +29,7 @@ namespace InsaneOne.Core.UI
 		
 		ISelectionReceiver[] receivers;
 		
-		void Awake() => receivers = GetComponents<ISelectionReceiver>();
+		protected override void OnAwake() => receivers = GetComponents<ISelectionReceiver>();
 
 		public void Select() => SetSelected(true);
 

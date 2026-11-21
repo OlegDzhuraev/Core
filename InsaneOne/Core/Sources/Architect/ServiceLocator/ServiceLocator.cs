@@ -12,6 +12,11 @@ namespace InsaneOne.Core.Architect
 		/// <summary> Maps an alias type to the canonical type it was registered under, see <see cref="Alias{T,TAlias}"/>. </summary>
 		static readonly Dictionary<Type, Type> aliases = new ();
 
+#if UNITY_5_3_OR_NEWER
+		[UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
+		static void ResetOnLoad() => Reset();
+#endif
+
 		public static void Reset()
 		{
 			foreach (var (type, service) in services)
@@ -64,13 +69,28 @@ namespace InsaneOne.Core.Architect
 		public static bool Register<T>(T service, string group = "")
 		{
 			var type = typeof(T);
-			var isAdded = services.TryAdd(type, service);
-			AddToGroup(type, group);
 
-			if (isAdded && service is IInitService initService)
+			if (service == null)
+			{
+#if UNITY_5_3_OR_NEWER
+				UnityEngine.Debug.LogWarning($"[ServiceLocator] Ignored registration of a null service of type {type}.");
+#endif
+				return false;
+			}
+
+			if (services.ContainsKey(type))
+			{
+				AddToGroup(type, group);
+				return false;
+			}
+
+			if (service is IInitService initService)
 				initService.Init();
 
-			return isAdded;
+			services.Add(type, service);
+			AddToGroup(type, group);
+
+			return true;
 		}
 
 		static void AddToGroup(Type serviceType, string group)
@@ -128,7 +148,7 @@ namespace InsaneOne.Core.Architect
 		public static bool TryGet<T>(out T typedResult)
 		{
 			var isExist = TryGet(typeof(T), out var result);
-			typedResult = (T) result;
+			typedResult = isExist ? (T) result : default;
 			return isExist;
 		}
 

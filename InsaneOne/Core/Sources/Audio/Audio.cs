@@ -26,12 +26,23 @@ namespace InsaneOne.Core
 			Object.DontDestroyOnLoad(data.parent);
 		}
 
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+		static void ResetOnLoad() => data = null;
+
+		static void CheckInit()
+		{
+			if (data == null || !data.parent)
+				throw new InvalidOperationException("Audio system is not initialized! Call Audio.Init() first.");
+		}
+
 		/// <summary> Call this at first to initialize new layer. You can use enum instead of int to make code easier to read.</summary>
 		public static void AddLayer(int layer, AudioGroupData groupData, int capacity = 8)
 		{
+			CheckInit();
+
 			if (data.cachedSources.ContainsKey(layer) || data.layerDatas.ContainsKey(layer))
 			{
-				CoreUnityLogger.I.Log($"Audio Layer {layer} already initialized.");
+				CoreUnityLogger.I.Log($"Audio Layer {layer} is already initialized.");
 				return;
 			}
 
@@ -40,8 +51,7 @@ namespace InsaneOne.Core
 			data.cachedSources.Add(layer, collection);
 			data.layerDatas.Add(layer, groupData);
 
-			var soundsLeft = MaxSourcesInLayer - collection.Count;
-			capacity = Math.Min(capacity, soundsLeft);
+			capacity = Math.Min(capacity, MaxSourcesInLayer);
 
 			for (var q = 0; q < capacity; q++)
 				AddSourceToLayer(layer, groupData, collection);
@@ -78,6 +88,8 @@ namespace InsaneOne.Core
 		/// <summary> Removes layer. Destroys all cached audio sources in specified layer. After remove, you can re-create layer with new settings</summary>
 		public static void RemoveLayer(int layer)
 		{
+			CheckInit();
+
 			if (!data.cachedSources.TryGetValue(layer, out var list))
 				return;
 			
@@ -93,6 +105,8 @@ namespace InsaneOne.Core
 		public static AudioSource Play(int layer, AudioClip clip, Vector3 position = default, float volume = 1f,
 			float pitchRandom = 0f, bool loop = false)
 		{
+			CheckInit();
+
 			if (clip == null)
 			{
 				data.logger.Log("You passed empty clip in Play method — nothing will be played.", LogLevel.Warning);
@@ -102,8 +116,15 @@ namespace InsaneOne.Core
 			if (!TryGetFreeSource(layer, out var source))
 			{
 				var list = Audio.data.cachedSources[layer];
-				var data = Audio.data.layerDatas[layer];
-				source = AddSourceToLayer(layer, data, list);
+
+				if (list.Count >= MaxSourcesInLayer)
+				{
+					data.logger.Log($"No free sources in Audio Layer {layer} and max sources capacity ({MaxSourcesInLayer}) reached! Nothing will be played. Recommended to increase the layer capacity.", LogLevel.Warning);
+					return null;
+				}
+
+				var groupData = Audio.data.layerDatas[layer];
+				source = AddSourceToLayer(layer, groupData, list);
 
 				Audio.data.logger.Log($"No free sources in Audio Layer {layer}! Created new. Recommended to increase default capacity.", LogLevel.Warning);
 			}
@@ -124,9 +145,11 @@ namespace InsaneOne.Core
 		/// <returns>AudioSource, chosen to play. You can handle its changes manually by your code (stop after N seconds, for example, etc.). </returns>
 		public static AudioSource Play(int layer, AudioData audioData, Vector3 position = default)
 		{
-			if (audioData.GetClipsVariationsAmount() == 0)
+			CheckInit();
+
+			if (audioData == null || audioData.GetClipsVariationsAmount() == 0)
 			{
-				data.logger.Log("No audio clips set in the passed AudioData! Nothing will be played.", LogLevel.Warning);
+				data.logger.Log("Passed AudioData is null or has no audio clips set! Nothing will be played.", LogLevel.Warning);
 				return null;
 			}
 			
@@ -135,14 +158,27 @@ namespace InsaneOne.Core
 
 		/// <summary> Plays sound with parameters, specified in the AudioData stored inside the passed AudioDataAsset. </summary>
 		/// <returns>AudioSource, chosen to play. You can handle its changes manually by your code (stop after N seconds, for example, etc.). </returns>
-		public static AudioSource Play(int layer, AudioDataAsset audioDataAsset, Vector3 position = default) => Play(layer, audioDataAsset.Data, position);
+		public static AudioSource Play(int layer, AudioDataAsset audioDataAsset, Vector3 position = default)
+		{
+			CheckInit();
+
+			if (audioDataAsset == null || audioDataAsset.Data == null)
+			{
+				data.logger.Log("Passed AudioDataAsset is null or has no AudioData assigned! Nothing will be played.", LogLevel.Warning);
+				return null;
+			}
+
+			return Play(layer, audioDataAsset.Data, position);
+		}
 
 		public static bool TryGetFreeSource(int layer, out AudioSource audioSource)
 		{
 			audioSource = default;
-			
+
+			CheckInit();
+
 			if (!data.cachedSources.TryGetValue(layer, out var sources))
-				throw new NullReferenceException($"No audio sources in layer {layer}!");
+				throw new InvalidOperationException($"Audio layer {layer} is not initialized! Call Audio.AddLayer first.");
 
 			foreach (var source in sources)
 			{
@@ -158,6 +194,8 @@ namespace InsaneOne.Core
 
 		public static void StopAll(int layer)
 		{
+			CheckInit();
+
 			if (!data.cachedSources.TryGetValue(layer, out var sources))
 				return;
 
@@ -168,6 +206,8 @@ namespace InsaneOne.Core
 		/// <summary> Is any source in this layer playing sound. </summary>
 		public static bool IsPlaying(int layer)
 		{
+			CheckInit();
+
 			if (!data.cachedSources.TryGetValue(layer, out var sources))
 				return false;
 
@@ -180,7 +220,7 @@ namespace InsaneOne.Core
 
 		public static void SetLogMixerValue(AudioMixer mixer, string exposedParam, float linearValue)
 		{
-			mixer?.SetFloat(exposedParam, Mathf.Log(linearValue) * 20);
+			mixer?.SetFloat(exposedParam, Mathf.Log10(Mathf.Max(linearValue, 0.0001f)) * 20f);
 		}
 	}
 }

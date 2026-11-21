@@ -158,6 +158,8 @@ namespace InsaneOne.Core.Goals
 			if (data?.Entries == null)
 				return;
 
+			completedIds.Clear();
+
 			foreach (var entry in data.Entries)
 			{
 				if (!config.TryGetGoal(entry.Id, out var definition))

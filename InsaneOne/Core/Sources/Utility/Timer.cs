@@ -71,18 +71,18 @@ namespace InsaneOne.Core
 		/// <summary> Get timer reload percents (starting from 0 to 1). </summary>
 		public float GetReloadPercents()
 		{
-#if UNITY_5_3_OR_NEWER
-			Debug.Assert(fullTime != 0);
-#endif
+			if (fullTime <= 0)
+				return 1;
+
 			return (fullTime - TimeLeft) / fullTime;
 		}
 
 		/// <summary> Returns timer progress in percents (starting from 1 to 0). </summary>
 		public float GetProgressLeft()
 		{
-#if UNITY_5_3_OR_NEWER
-			Debug.Assert(fullTime != 0);
-#endif
+			if (fullTime <= 0)
+				return 0;
+
 			return TimeLeft / fullTime;
 		}
 

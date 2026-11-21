@@ -35,6 +35,8 @@ namespace InsaneOne.Core.UI
 		[SerializeField] Button cancelButton;
 		[SerializeField] bool pauseOnShow = true;
 
+		bool pausedByThis;
+
 		void Start()
 		{
 			panel.WasShown += OnShown;
@@ -54,6 +56,9 @@ namespace InsaneOne.Core.UI
 		// TODO InsaneOne: OnEnable/OnDisable?
 		void OnDestroy()
 		{
+			if (pausedByThis)
+				PauseUtility.Unpause(this);
+
 			if (panel)
 			{
 				panel.WasShown -= OnShown;
@@ -69,26 +74,32 @@ namespace InsaneOne.Core.UI
 		
 		void OnApplyClick()
 		{
-			ViewModel.ApplyAction?.Invoke();
+			ViewModel?.ApplyAction?.Invoke();
 			Hide();
 		}
 
 		void OnCancelClick()
 		{
-			ViewModel.CancelAction?.Invoke();
+			ViewModel?.CancelAction?.Invoke();
 			Hide();
 		}
 		
 		void OnShown()
 		{
 			if (pauseOnShow)
+			{
 				PauseUtility.Pause(this);
+				pausedByThis = true;
+			}
 		}
 		
 		void OnHidden()
 		{
-			if (pauseOnShow)
+			if (pausedByThis)
+			{
 				PauseUtility.Unpause(this);
+				pausedByThis = false;
+			}
 		}
 	}
 

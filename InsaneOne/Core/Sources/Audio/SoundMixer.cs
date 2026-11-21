@@ -19,6 +19,9 @@ namespace InsaneOne.Core
 		
 		public SoundMixer(params AudioSource[] sourcesToMix)
 		{
+			if (sourcesToMix == null || sourcesToMix.Length < 2)
+				throw new ArgumentException("SoundMixer requires at least two audio sources to mix.", nameof(sourcesToMix));
+
 			mixedSources = sourcesToMix;
 			
 			maxDist = 1f / mixedSources.Length;

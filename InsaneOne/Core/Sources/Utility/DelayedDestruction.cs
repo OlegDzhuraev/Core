@@ -12,7 +12,7 @@ namespace InsaneOne.Core
 		void Update()
 		{
 
-			secondsToDestruction -= Time.deltaTime;
+			secondsToDestruction -= Time.unscaledDeltaTime;
 
 			if (secondsToDestruction > 0)
 				return;

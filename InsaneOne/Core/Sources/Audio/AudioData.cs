@@ -18,8 +18,8 @@ namespace InsaneOne.Core
 
 		public float GetRandomPitch() => 1f + Random.Range(-pitchRandom, pitchRandom);
 		
-		public AudioClip GetRandomClip() => clipVariations.Random();
-		public AudioClip GetClipById(int id) => clipVariations[id];
-		public int GetClipsVariationsAmount() => clipVariations.Length;
+		public AudioClip GetRandomClip() => clipVariations != null && clipVariations.Length > 0 ? clipVariations.Random() : null;
+		public AudioClip GetClipById(int id) => clipVariations != null && id >= 0 && id < clipVariations.Length ? clipVariations[id] : null;
+		public int GetClipsVariationsAmount() => clipVariations?.Length ?? 0;
 	}
 }

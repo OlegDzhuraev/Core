@@ -6,10 +6,10 @@ namespace InsaneOne.Core.Goals
 		public readonly GoalDefinition Definition;
 		public readonly int Current;
 
-		public string Id => Definition.Id;
-		public string Title => Definition.Title;
-		public int Required => Definition.RequiredAmount;
-		public bool IsCompleted => Current >= Required;
+		public string Id => Definition != null ? Definition.Id : string.Empty;
+		public string Title => Definition != null ? Definition.Title : string.Empty;
+		public int Required => Definition != null ? Definition.RequiredAmount : 0;
+		public bool IsCompleted => Definition != null && Current >= Required;
 
 		/// <summary> Progress from 0 to 1. </summary>
 		public float Progress01 => Required != 0 ? (float) Current / Required : 0f;

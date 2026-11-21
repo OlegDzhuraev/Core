@@ -53,6 +53,13 @@ namespace InsaneOne.Core.Components
 		{
 			sqrMinDist = (float) Math.Pow(minDist, 2);
 
+			if (waypoints.Length == 0)
+			{
+				Debug.LogWarning($"[MoveByWaypoints] No waypoints assigned on '{name}' — component disabled.", this);
+				enabled = false;
+				return;
+			}
+
 			if (!activateOnStart)
 			{
 				enabled = false;
@@ -125,7 +132,14 @@ namespace InsaneOne.Core.Components
 
 		public void Restart()
 		{
+			if (waypoints.Length == 0)
+			{
+				Debug.LogWarning($"[MoveByWaypoints] Can't restart '{name}' — no waypoints assigned.", this);
+				return;
+			}
+
 			currentWaypointId = 0;
+			enabled = true;
 
 			if (startFromStartPoint)
 				transform.position = waypoints[currentWaypointId].position;

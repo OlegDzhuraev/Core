@@ -7,7 +7,8 @@ namespace InsaneOne.Core.Utility
 	{
 		public static Vector3 SnapToGrid(Vector3 position, float gridSize = 1f)
 		{
-			Debug.Assert(gridSize != 0);
+			if (gridSize == 0)
+				return position;
 
 			var x = SnapValueTo(position.x, gridSize);
 			var y = SnapValueTo(position.y, gridSize);

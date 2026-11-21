@@ -70,6 +70,12 @@ namespace InsaneOne.Core.Effects
 
 				if (animationData.Name == animationName)
 				{
+					if (animationData.Frames == null || animationData.Frames.Length == 0 || animationData.FramesPerSpeed <= 0)
+					{
+						Debug.LogWarning($"[SheetAnimator] Can't play animation '{animationName}' — it has no frames or an invalid frames speed.");
+						return;
+					}
+
 					activeAnimation = animationData;
 					frame = 0;
 					frameProgress = 0;
@@ -93,7 +99,7 @@ namespace InsaneOne.Core.Effects
 				if (Animations[i].Name == data.Name)
 				{
 					Animations[i] = data;
-					break;
+					return;
 				}
 			}
 
@@ -102,6 +108,9 @@ namespace InsaneOne.Core.Effects
 
 		public void Stop()
 		{
+			activeAnimation = null;
+			frame = 0;
+			frameProgress = 0;
 			SetSprite(defaultSprite);
 			loop = false;
 		}
